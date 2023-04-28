@@ -19,3 +19,12 @@
 
 # Go workspace file
 go.work
+
+.idea
+.vscode
+log/*
+uploads/*
+
+front/node_modules/*
+front/package-lock.json
+front/yarn.lock

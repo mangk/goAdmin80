@@ -1,0 +1,72 @@
+system:
+  env: debug # debug | test | release
+  host: 127.0.0.1
+  port: 8888
+  db-type: mysql
+  oss-type: local
+  use-multipoint: false
+  use-redis: false
+  iplimit-count: 15000
+  iplimit-time: 3600
+  router-prefix: "sys"
+  front-router-prefix: "_" # 默认为 _
+jwt:
+  signing-key: 273628f7-9fb4-4e73-8f8d-ca954710d01d
+  expires-time: 7d
+  buffer-time: 1d
+  issuer: qmPlus
+local:
+  path: uploads/file
+  store-path: uploads/file
+mysql:
+  path:
+  port:
+  config: charset=utf8mb4&parseTime=True&loc=Local
+  db-name:
+  username:
+  password:
+  prefix:
+  singular: false
+  engine:
+  max-idle-conns: 10
+  max-open-conns: 100
+  log-mode: error
+  log-zap: false
+redis:
+  db:
+  addr:
+  password:
+
+captcha:
+  key-long: 4
+  img-width: 240
+  img-height: 80
+  open-captcha: 0
+  open-captcha-timeout: 3600
+
+zap:
+  level: info
+  prefix: ''
+  format: console
+  director: log
+  encode-level: LowercaseColorLevelEncoder
+  stacktrace-key: stacktrace
+  max-age: 0
+  show-line: true
+  log-in-console: true
+
+cors:
+  mode: strict-whitelist
+  whitelist:
+    - allow-origin: example1.com
+      allow-methods: POST, GET
+      allow-headers: Content-Type,AccessToken,X-CSRF-Token, Authorization, Token,X-Token,X-User-Id
+      expose-headers: Content-Length, Access-Control-Allow-Origin, Access-Control-Allow-Headers,
+        Content-Type
+      allow-credentials: true
+    - allow-origin: example2.com
+      allow-methods: GET, POST
+      allow-headers: content-type
+      expose-headers: Content-Length, Access-Control-Allow-Origin, Access-Control-Allow-Headers,
+        Content-Type
+      allow-credentials: true
