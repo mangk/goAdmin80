@@ -60,7 +60,6 @@ type Field struct {
 	Column           string        // 字段名
 	Type             string        // 字段类型
 	ElOption         ElOption      // 对应前端 Element 类型 TODO 实现这里的功能，通过模版渲染switch来完成 表单，搜索，列表内容的输出
-	SearchType       uint8         // 搜索字段类型
 	Translate        func() string // 字段翻译函数 TODO 功能实现
 	SortAble         bool          // 是否排序字段 TODO 排序功能实现
 	Hide             bool          // 是否对外展示
@@ -285,7 +284,11 @@ func (e *Engine) tmp(ctx *gin.Context) {
 		"editBtnHide":   e.opt.HideEditBtn,
 	}
 
-	//ctx.HTML(200, "convert.vue", data) 这里结合 new.go 文件中注释的模版部分，可以用来编辑 debug 模版页面
+	/**
+	这里结合 new.go 文件中注释的模版部分，可以用来编辑 debug 模版页面
+	*/
+	ctx.HTML(200, "convert.vue", data)
+	return
 	var buf bytes.Buffer
 	t, _ := template.New("convert").Delims("{[{", "}]}").Funcs(template.FuncMap{
 		"formatElement": formatElement,
@@ -372,6 +375,11 @@ func (e *Engine) page(ctx *gin.Context) {
 	}
 	if count > 0 {
 		query = query.Select(e.selectColumns()).Limit(req.PageSize).Offset((req.Page - 1) * req.PageSize)
+		if req.Sort != "" {
+			query = query.Order(req.Sort)
+		} else {
+			query = query.Order(fmt.Sprintf("%s desc", e.opt.PK))
+		}
 		data, err = model.Find(query)
 		if err != nil {
 			response.FailWithDetailed(err.Error(), "数据库查询错误", ctx)

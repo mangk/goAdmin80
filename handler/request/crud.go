@@ -2,6 +2,7 @@ package request
 
 type CRUDRequest struct {
 	Query    []CRUDCondition `json:"query,omitempty"`
+	Sort     string          `json:"sort,omitempty"`
 	Page     int             `json:"page,omitempty"`
 	PageSize int             `json:"pageSize,omitempty"`
 	Id       string          `json:"id,omitempty"`

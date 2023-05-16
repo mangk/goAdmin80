@@ -31,11 +31,11 @@
           </template>
         </el-popover>
       </div>
-      <el-table :data="tableData.list" @sort-change="sortChange" @selection-change="_selectionChange">
+      <el-table :data="tableData.list" @sort-change="_sortChange" @selection-change="_selectionChange">
         <el-table-column type="selection" width="55"/>
         {[{ range .field }]}
         <el-table-column align="left" label="{[{.Name}]}" min-width="150" prop="{[{.Column}]}"
-                         :sortable="{[{.SortAble}]}"/>
+                         :sortable="{[{ if .SortAble }]}'custom'{[{ else }]}false{[{end}]}"/>
         {[{ end }]}
         <el-table-column align="left" fixed="right" label="操作" width="120">
           <template #default="scope">
@@ -104,6 +104,7 @@ export default {
       selected: [],
       // 数据筛选
       search: {},
+      sort: "",
       dialog: {
         // 对话框标题
         title: "",
@@ -149,13 +150,17 @@ export default {
         data.query = []
       }
 
+      if (this.sort) {
+        data.sort = this.sort
+      }
+
       this.$http({
         method: 'post',
         url: this._ap + '/p',
         data
       }).then(res => {
         this.tableData = res.data
-      })
+      });
     },
     __getDetail(id) {
       let data = {id: id}
@@ -166,9 +171,6 @@ export default {
       }).then(res => {
         this.dialog.form = res.data
       })
-    },
-    _searchReset() {
-
     },
     _create(key) {
       this.dialog.title = "创建"
@@ -276,6 +278,16 @@ export default {
     _selectionChange(val) {
       this.selected = val
     },
+    _sortChange({prop, order}) {
+      if (order === "ascending") {
+        this.sort = prop + " asc"
+      } else if (order === "descending") {
+        this.sort = prop + " desc"
+      } else {
+        this.sort = ""
+      }
+      this.__list(true)
+    }
   },
   mounted() {
     this.__list()
