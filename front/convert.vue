@@ -128,26 +128,26 @@ export default {
         pageSize: this.tableData.pageSize,
         query: []
       }
-      if (search) {
-        for (const formKey in this.search) {
-          let d = this.search[formKey]
-          if (d.length != 0) {
-            if (Array.isArray(d)) {
-              if (d[0] instanceof Date) {
-                d[0] = this.$dayjs(d[0]).format("YYYY-MM-DD HH:mm:ss")
-                d[1] = this.$dayjs(d[1]).format("YYYY-MM-DD HH:mm:ss")
-                data.query.push({c: formKey, v: d.join(',')})
-              } else {
-                data.query.push({c: formKey, v: d.join(',')})
-              }
-            } else {
-              data.query.push({c: formKey, v: d})
-            }
-          }
-        }
-      } else {
+      if (!search) {
         this.search = {}
         data.query = []
+      }
+
+      for (const formKey in this.search) {
+        let d = this.search[formKey]
+        if (d.length != 0) {
+          if (Array.isArray(d)) {
+            if (d[0] instanceof Date) {
+              d[0] = this.$dayjs(d[0]).format("YYYY-MM-DD HH:mm:ss")
+              d[1] = this.$dayjs(d[1]).format("YYYY-MM-DD HH:mm:ss")
+              data.query.push({c: formKey, v: d.join(',')})
+            } else {
+              data.query.push({c: formKey, v: d.join(',')})
+            }
+          } else {
+            data.query.push({c: formKey, v: d})
+          }
+        }
       }
 
       if (this.sort) {
