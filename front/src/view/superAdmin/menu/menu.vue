@@ -32,7 +32,11 @@
         </el-table-column>
         <el-table-column align="left" label="父节点" min-width="90" prop="parentId"/>
         <el-table-column align="left" label="排序" min-width="70" prop="sort"/>
-        <el-table-column align="left" label="文件路径" min-width="360" prop="component"/>
+        <el-table-column align="left" label="模版路径" min-width="360" prop="SSRPath">
+          <template #default="scope">
+            <span>{{ scope.row.meta.SSRPath }}</span>
+          </template>
+        </el-table-column>
         <el-table-column align="left" fixed="right" label="操作" width="300">
           <template #default="scope">
             <el-button
@@ -164,7 +168,7 @@
           </el-select>
         </el-form-item>
 
-        <el-form-item label="模版地址" prop="component" style="width:60%">
+        <el-form-item label="模版地址" style="width:60%">
           <el-input v-model="form.meta.SSRPath" autocomplete="off" placeholder="可以访问的后端接口"
                     @blur="fmtComponent"/>
           <span style="font-size:12px;margin-right:12px;">该地址返回的vue模版源代码会被渲染到页面</span>
@@ -188,9 +192,6 @@ import Icon from "@/view/superAdmin/menu/icon.vue";
 
 const rules = reactive({
   path: [{required: true, message: '请输入菜单name', trigger: 'blur'}],
-  component: [
-    {required: true, message: '请输入文件路径', trigger: 'blur'}
-  ],
   'meta.title': [
     {required: true, message: '请输入菜单展示名称', trigger: 'blur'}
   ]
@@ -252,9 +253,6 @@ const deleteMenu = (id) => {
     type: 'warning'
   })
       .then(async () => {
-        console.log(112233)
-        console.log(id)
-        console.log(445566)
         const res = await deleteBaseMenu({id})
         if (res.code === 0) {
           ElMessage({
@@ -286,7 +284,7 @@ const initForm = () => {
     name: '',
     hidden: false,
     parentId: 0,
-    component: '',
+    component: 'view/systemTools/convert/index.vue',
     meta: {
       title: '',
       icon: '',
