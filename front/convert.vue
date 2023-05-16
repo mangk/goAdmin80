@@ -225,11 +225,11 @@ export default {
     _changePageSize(val) {
       this.tableData.page = 1
       this.tableData.pageSize = val
-      this.__list()
+      this.__list(true)
     },
     _changeCurrentPage(val) {
       this.tableData.page = val
-      this.__list()
+      this.__list(true)
     },
     _dialogClose() {
       this.dialog.formVisible = false

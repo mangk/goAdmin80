@@ -124,10 +124,10 @@ func SysInit(path string) *core.Core {
 	/*
 		这里结合 engine.go tmp 方法中的注释部分可以用来编辑 debug 模版页面
 	*/
-	root.Delims("{[{", "}]}").SetFuncMap(template.FuncMap{
-		"formatElement": formatElement,
-	})
-	root.LoadHTMLFiles("/Users/mangk/Data/Code/goAdmin80/front/convert.vue")
+	//root.Delims("{[{", "}]}").SetFuncMap(template.FuncMap{
+	//	"formatElement": formatElement,
+	//})
+	//root.LoadHTMLFiles("/Users/mangk/Data/Code/goAdmin80/front/convert.vue")
 
 	return c
 }

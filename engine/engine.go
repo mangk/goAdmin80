@@ -287,8 +287,8 @@ func (e *Engine) tmp(ctx *gin.Context) {
 	/**
 	这里结合 new.go 文件中注释的模版部分，可以用来编辑 debug 模版页面
 	*/
-	ctx.HTML(200, "convert.vue", data)
-	return
+	//ctx.HTML(200, "convert.vue", data)
+	//return
 	var buf bytes.Buffer
 	t, _ := template.New("convert").Delims("{[{", "}]}").Funcs(template.FuncMap{
 		"formatElement": formatElement,
