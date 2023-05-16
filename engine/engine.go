@@ -18,6 +18,7 @@ import (
 	"time"
 )
 
+// 数据筛选自动sql条件
 const (
 	EQ  uint8 = iota + 1 // =
 	Li                   // LIKE
@@ -31,23 +32,99 @@ const (
 	Tse                  // > AND <=
 	Ese                  // >= AND <=
 	Fs                   // FIND_IN_SET
-
-	requestKey = "_goAdmin80Request_"
 )
 
+// Element 组件
+const (
+	EtInput uint8 = iota + 1 // input
+	EtDatePicker
+	EtDateRangePicker
+	EtDateTimePicker
+	EtDateTimeRangePicker
+	EtSelect
+	EtCascader
+)
+
+const requestKey = "_goAdmin80Request_"
+
+type ElOption struct {
+	Type       uint8  // 对应 Element 组件类型
+	SearchType uint8  // 后台搜索的条件类型
+	Options    string // 筛选框 item
+	Props      string // 筛选框属性设置
+}
+
+// 字段
 type Field struct {
 	Name             string        // 展示名
 	Column           string        // 字段名
 	Type             string        // 字段类型
-	ElType           string        // 对应前端 Element 类型
-	SortAble         bool          // 是否排序字段
-	SearchAble       uint8         // 搜索字段类型
+	ElOption         ElOption      // 对应前端 Element 类型 TODO 实现这里的功能，通过模版渲染switch来完成 表单，搜索，列表内容的输出
+	SearchType       uint8         // 搜索字段类型
 	Translate        func() string // 字段翻译函数 TODO 功能实现
+	SortAble         bool          // 是否排序字段 TODO 排序功能实现
 	Hide             bool          // 是否对外展示
 	EditAble         bool          // 是否可更新
 	DefaultValueFunc func() string // 数据创建时的默认值
 }
 
+func formatElement(field Field) (html interface{}) {
+	if field.ElOption.SearchType == 0 {
+		return
+	}
+	switch field.ElOption.Type {
+	case EtInput:
+		return template.HTML(`
+        <el-form-item label="` + field.Name + `">
+          <el-input v-model="search.` + field.Column + `" placeholder="` + field.Name + `" clearable/>
+        </el-form-item>
+`)
+	case EtDatePicker, EtDateRangePicker, EtDateTimePicker, EtDateTimeRangePicker:
+		t := ""
+		switch field.ElOption.Type {
+		case EtDatePicker:
+			t = "date"
+		case EtDateRangePicker:
+			t = "daterange"
+		case EtDateTimePicker:
+			t = "datetime"
+		case EtDateTimeRangePicker:
+			t = "datetimerange"
+		}
+		return template.HTML(`
+        <el-form-item label="` + field.Name + `">
+			<el-date-picker v-model="search.` + field.Column + `" type="` + t + `" placeholder="` + field.Name + `" range-separator="～" start-placeholder="开始时间" end-placeholder="结束时间" clearable/>
+        </el-form-item>
+`)
+	case EtSelect:
+		if field.ElOption.Options != "" {
+			return template.HTML(`
+        <el-form-item label="` + field.Name + `">
+			<el-select v-model="search.` + field.Column + `" placeholder="` + field.Name + `" clearable>
+				<el-option v-for="item in ` + field.ElOption.Options + `" :key="item.v" :label="item.k" :value="item.v" />
+			</el-select>
+        </el-form-item>
+`)
+		}
+		return template.HTML(`
+        <el-form-item label="` + field.Name + `">
+			<el-select v-model="search.` + field.Column + `" placeholder="` + field.Name + `" clearable>
+				<el-option v-for="item in [{k:1,v:1},{k:2,v:2}]" :key="item.v" :label="item.k" :value="item.v" />
+			</el-select>
+        </el-form-item>
+`)
+	case EtCascader:
+		return template.HTML(`
+        <el-form-item label="` + field.Name + `">
+			<el-cascader v-model="search.` + field.Column + `" :options="` + field.ElOption.Options + `" :props="` + field.ElOption.Props + `" clearable />
+        </el-form-item>
+`)
+	}
+	return
+
+}
+
+// 实体
 type Engine struct {
 	ap         string // absolute path
 	opt        Options
@@ -57,6 +134,7 @@ type Engine struct {
 	userFunc   map[string]gin.HandlerFunc
 }
 
+// 选项参数
 type Options struct {
 	DbName        string // 指定数据库连接
 	TableName     string // 指定表名
@@ -198,7 +276,6 @@ func (e *Engine) register(relativePath, method string, handlerFunc ...gin.Handle
 }
 
 func (e *Engine) tmp(ctx *gin.Context) {
-	var buf bytes.Buffer
 	data := map[string]interface{}{
 		"pk":            e.opt.PK,
 		"field":         e.field,
@@ -208,7 +285,11 @@ func (e *Engine) tmp(ctx *gin.Context) {
 		"editBtnHide":   e.opt.HideEditBtn,
 	}
 
-	t, _ := template.New("convert").Delims("{[{", "}]}").Parse(front.Convert)
+	//ctx.HTML(200, "convert.vue", data) 这里结合 new.go 文件中注释的模版部分，可以用来编辑 debug 模版页面
+	var buf bytes.Buffer
+	t, _ := template.New("convert").Delims("{[{", "}]}").Funcs(template.FuncMap{
+		"formatElement": formatElement,
+	}).Parse(front.Convert)
 	_ = t.Execute(&buf, data)
 	ctx.String(200, "%s", buf.String())
 }
@@ -226,7 +307,7 @@ func (e *Engine) page(ctx *gin.Context) {
 	for _, condition := range req.Query {
 		for _, field := range e.field {
 			if condition.Column == field.Column {
-				switch field.SearchAble {
+				switch field.ElOption.SearchType {
 				case EQ:
 					query = query.Where(fmt.Sprintf("%s = ?", condition.Column), condition.Value)
 				case Li:
@@ -242,13 +323,37 @@ func (e *Engine) page(ctx *gin.Context) {
 				case Le:
 					query = query.Where(fmt.Sprintf("%s <= ?", condition.Column), condition.Value)
 				case Tst:
-					query = query.Where(fmt.Sprintf("%s > ?", condition.Column), condition.Value).Where(fmt.Sprintf("%s < ?", condition.Column), condition.Value)
+					val := strings.Split(condition.Value, ",")
+					if len(val) == 2 {
+						query = query.Where(fmt.Sprintf("%s > ?", condition.Column), val[0]).Where(fmt.Sprintf("%s < ?", condition.Column), val[1])
+					} else {
+						response.FailWithDetailed(err.Error(), "范围查询参数提交错误", ctx)
+						return
+					}
 				case Est:
-					query = query.Where(fmt.Sprintf("%s >= ?", condition.Column), condition.Value).Where(fmt.Sprintf("%s < ?", condition.Column), condition.Value)
+					val := strings.Split(condition.Value, ",")
+					if len(val) == 2 {
+						query = query.Where(fmt.Sprintf("%s >= ?", condition.Column), val[0]).Where(fmt.Sprintf("%s < ?", condition.Column), val[1])
+					} else {
+						response.FailWithDetailed(err.Error(), "范围查询参数提交错误", ctx)
+						return
+					}
 				case Tse:
-					query = query.Where(fmt.Sprintf("%s > ?", condition.Column), condition.Value).Where(fmt.Sprintf("%s <= ?", condition.Column), condition.Value)
+					val := strings.Split(condition.Value, ",")
+					if len(val) == 2 {
+						query = query.Where(fmt.Sprintf("%s > ?", condition.Column), val[0]).Where(fmt.Sprintf("%s <= ?", condition.Column), val[1])
+					} else {
+						response.FailWithDetailed(err.Error(), "范围查询参数提交错误", ctx)
+						return
+					}
 				case Ese:
-					query = query.Where(fmt.Sprintf("%s >= ?", condition.Column), condition.Value).Where(fmt.Sprintf("%s <= ?", condition.Column), condition.Value)
+					val := strings.Split(condition.Value, ",")
+					if len(val) == 2 {
+						query = query.Where(fmt.Sprintf("%s >= ?", condition.Column), val[0]).Where(fmt.Sprintf("%s <= ?", condition.Column), val[1])
+					} else {
+						response.FailWithDetailed(err.Error(), "范围查询参数提交错误", ctx)
+						return
+					}
 				case Fs:
 				default:
 				}
@@ -332,6 +437,7 @@ func (e *Engine) updateById(ctx *gin.Context) {
 	err = core.DB(e.opt.DbName).Table(e.opt.TableName).Where(fmt.Sprintf("%s = ?", e.opt.PK), req.Ids[0]).Updates(update).Error
 	if err != nil {
 		response.FailWithDetailed(err.Error(), "数据更新错误", ctx)
+		return
 	}
 
 	response.OkWithDetailed(req.Ids[0], "ok", ctx)

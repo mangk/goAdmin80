@@ -3,10 +3,8 @@
     <!--    搜索-->
     <div class="gva-search-box">
       <el-form ref="searchForm" :inline="true" :model="searchInfo">
-        {[{ range .field }]}
-        <el-form-item label="{[{.Name}]}" v-show="{[{.SearchAble}]}">
-          <el-input v-model="search.{[{.Column}]}" placeholder="{[{.Name}]}" v-show="{[{.SearchAble}]}"/>
-        </el-form-item>
+        {[{ range $f := .field }]}
+        {[{ formatElement $f }]}
         {[{ end }]}
         <el-form-item>
           <el-button type="primary" icon="search" @click="__list(true)">查询</el-button>
@@ -131,8 +129,19 @@ export default {
       }
       if (search) {
         for (const formKey in this.search) {
-          if (this.search[formKey] !== "") {
-            data.query.push({c: formKey, v: this.search[formKey]})
+          let d = this.search[formKey]
+          if (d.length != 0) {
+            if (Array.isArray(d)) {
+              if (d[0] instanceof Date) {
+                d[0] = this.$dayjs(d[0]).format("YYYY-MM-DD HH:mm:ss")
+                d[1] = this.$dayjs(d[1]).format("YYYY-MM-DD HH:mm:ss")
+                data.query.push({c: formKey, v: d.join(',')})
+              } else {
+                data.query.push({c: formKey, v: d.join(',')})
+              }
+            } else {
+              data.query.push({c: formKey, v: d})
+            }
           }
         }
       } else {
