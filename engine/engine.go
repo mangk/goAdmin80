@@ -20,29 +20,29 @@ import (
 
 // 数据筛选自动sql条件
 const (
-	EQ  uint8 = iota + 1 // =
-	Li                   // LIKE
-	In                   // IN
-	Gt                   // >
-	Lt                   // <
-	Ge                   // >=
-	Le                   // <=
-	Tst                  // > AND <
-	Est                  // >= AND <
-	Tse                  // > AND <=
-	Ese                  // >= AND <=
-	Fs                   // FIND_IN_SET
+	WhereEQ   uint8 = iota + 1 // =
+	WhereLike                  // LIKE
+	WhereIn                    // IN
+	WhereGt                    // >
+	WhereLt                    // <
+	WhereGe                    // >=
+	WhereLe                    // <=
+	WhereTst                   // > AND <
+	WhereEst                   // >= AND <
+	WhereTse                   // > AND <=
+	WhereEse                   // >= AND <=
+	WhereFs                    // FIND_IN_SET
 )
 
 // Element 组件
 const (
-	EtInput uint8 = iota + 1 // input
-	EtDatePicker
-	EtDateRangePicker
-	EtDateTimePicker
-	EtDateTimeRangePicker
-	EtSelect
-	EtCascader
+	ElementComponentInput uint8 = iota + 1 // input
+	ElementComponentDatePicker
+	ElementComponentDateRangePicker
+	ElementComponentDateTimePicker
+	ElementComponentDateTimeRangePicker
+	ElementComponentSelect
+	ElementComponentCascader
 )
 
 const requestKey = "_goAdmin80Request_"
@@ -67,81 +67,34 @@ type Field struct {
 	DefaultValueFunc func() string // 数据创建时的默认值
 }
 
-func formatElement(field Field) (html interface{}) {
-	if field.ElOption.SearchType == 0 {
-		return
-	}
-	switch field.ElOption.Type {
-	case EtInput:
-		return template.HTML(`
-        <el-form-item label="` + field.Name + `">
-          <el-input v-model="search.` + field.Column + `" placeholder="` + field.Name + `" clearable/>
-        </el-form-item>
-`)
-	case EtDatePicker, EtDateRangePicker, EtDateTimePicker, EtDateTimeRangePicker:
-		t := ""
-		switch field.ElOption.Type {
-		case EtDatePicker:
-			t = "date"
-		case EtDateRangePicker:
-			t = "daterange"
-		case EtDateTimePicker:
-			t = "datetime"
-		case EtDateTimeRangePicker:
-			t = "datetimerange"
-		}
-		return template.HTML(`
-        <el-form-item label="` + field.Name + `">
-			<el-date-picker v-model="search.` + field.Column + `" type="` + t + `" placeholder="` + field.Name + `" range-separator="～" start-placeholder="开始时间" end-placeholder="结束时间" clearable/>
-        </el-form-item>
-`)
-	case EtSelect:
-		if field.ElOption.Options != "" {
-			return template.HTML(`
-        <el-form-item label="` + field.Name + `">
-			<el-select v-model="search.` + field.Column + `" placeholder="` + field.Name + `" clearable>
-				<el-option v-for="item in ` + field.ElOption.Options + `" :key="item.v" :label="item.k" :value="item.v" />
-			</el-select>
-        </el-form-item>
-`)
-		}
-		return template.HTML(`
-        <el-form-item label="` + field.Name + `">
-			<el-select v-model="search.` + field.Column + `" placeholder="` + field.Name + `" clearable>
-				<el-option v-for="item in [{k:1,v:1},{k:2,v:2}]" :key="item.v" :label="item.k" :value="item.v" />
-			</el-select>
-        </el-form-item>
-`)
-	case EtCascader:
-		return template.HTML(`
-        <el-form-item label="` + field.Name + `">
-			<el-cascader v-model="search.` + field.Column + `" :options="` + field.ElOption.Options + `" :props="` + field.ElOption.Props + `" clearable />
-        </el-form-item>
-`)
-	}
-	return
-
-}
-
 // 实体
 type Engine struct {
-	ap         string // absolute path
-	opt        Options
 	mutex      sync.Mutex
-	field      []Field
-	middleware []gin.HandlerFunc
-	userFunc   map[string]gin.HandlerFunc
+	ap         string                     // absolute path
+	opt        Options                    // 配置选项
+	field      []Field                    // 字段
+	middleware []gin.HandlerFunc          // 应用的中间件
+	userFunc   map[string]gin.HandlerFunc // 用户自己注册的方法
 }
 
 // 选项参数
 type Options struct {
-	DbName        string // 指定数据库连接
-	TableName     string // 指定表名
-	PK            string // 指定主键字段
-	SoftDelete    string // 指定软删除字段
-	HideCreateBtn bool   // 隐藏创建按钮
-	HideDeleteBtn bool   // 隐藏删除按钮
-	HideEditBtn   bool   // 隐藏编辑按钮
+	DbName           string // 指定数据库连接
+	TableName        string // 指定表名
+	PK               string // 指定主键字段
+	SoftDelete       string // 指定软删除字段
+	HideCreateBtn    bool   // 隐藏创建按钮
+	HideDeleteBtn    bool   // 隐藏删除按钮
+	HideEditBtn      bool   // 隐藏编辑按钮
+	CustomDataOrigin DataOrigin
+}
+
+type DataOrigin interface {
+	Page(req request.CRUDRequest) (data []map[string]interface{}, count int64, err error)
+	GetById(req request.CRUDRequest) (data map[string]interface{}, err error)
+	UpdateById(req request.CRUDRequest) (id interface{}, err error)
+	Create(req request.CRUDRequest) (id interface{}, err error)
+	Delete(req request.CRUDRequest) (id interface{}, err error)
 }
 
 func NewEngine(absolutePath string, opt Options) *Engine {
@@ -303,88 +256,93 @@ func (e *Engine) page(ctx *gin.Context) {
 	var count int64
 	var data interface{}
 	var err error
-	query := core.DB(e.opt.DbName).Table(e.opt.TableName)
 
-	// 构建查询条件
-	// TODO 这里循环次数增加会导致where条件增加，是否加一个限制
-	for _, condition := range req.Query {
-		for _, field := range e.field {
-			if condition.Column == field.Column {
-				switch field.ElOption.SearchType {
-				case EQ:
-					query = query.Where(fmt.Sprintf("%s = ?", condition.Column), condition.Value)
-				case Li:
-					query = query.Where(fmt.Sprintf("%s like ?", condition.Column), "%"+condition.Value+"%")
-				case In:
-					query = query.Where(fmt.Sprintf("%s in ?", condition.Column), strings.Split(condition.Value, ",")) // TODO 这里要不要限制 in 的数据量大小
-				case Gt:
-					query = query.Where(fmt.Sprintf("%s > ?", condition.Column), condition.Value)
-				case Lt:
-					query = query.Where(fmt.Sprintf("%s < ?", condition.Column), condition.Value)
-				case Ge:
-					query = query.Where(fmt.Sprintf("%s >= ?", condition.Column), condition.Value)
-				case Le:
-					query = query.Where(fmt.Sprintf("%s <= ?", condition.Column), condition.Value)
-				case Tst:
-					val := strings.Split(condition.Value, ",")
-					if len(val) == 2 {
-						query = query.Where(fmt.Sprintf("%s > ?", condition.Column), val[0]).Where(fmt.Sprintf("%s < ?", condition.Column), val[1])
-					} else {
-						response.FailWithDetailed(err.Error(), "范围查询参数提交错误", ctx)
-						return
+	if e.opt.CustomDataOrigin != nil {
+		data, count, err = e.opt.CustomDataOrigin.Page(req)
+	} else {
+		query := core.DB(e.opt.DbName).Table(e.opt.TableName)
+		for _, condition := range req.Query {
+			for _, field := range e.field {
+				if condition.Column == field.Column {
+					switch field.ElOption.SearchType {
+					case WhereEQ:
+						query = query.Where(fmt.Sprintf("%s = ?", condition.Column), condition.Value)
+					case WhereLike:
+						query = query.Where(fmt.Sprintf("%s like ?", condition.Column), "%"+condition.Value+"%")
+					case WhereIn:
+						query = query.Where(fmt.Sprintf("%s in ?", condition.Column), strings.Split(condition.Value, ",")) // TODO 这里要不要限制 in 的数据量大小
+					case WhereGt:
+						query = query.Where(fmt.Sprintf("%s > ?", condition.Column), condition.Value)
+					case WhereLt:
+						query = query.Where(fmt.Sprintf("%s < ?", condition.Column), condition.Value)
+					case WhereGe:
+						query = query.Where(fmt.Sprintf("%s >= ?", condition.Column), condition.Value)
+					case WhereLe:
+						query = query.Where(fmt.Sprintf("%s <= ?", condition.Column), condition.Value)
+					case WhereTst:
+						val := strings.Split(condition.Value, ",")
+						if len(val) == 2 {
+							query = query.Where(fmt.Sprintf("%s > ?", condition.Column), val[0]).Where(fmt.Sprintf("%s < ?", condition.Column), val[1])
+						} else {
+							response.FailWithDetailed(err.Error(), "范围查询参数提交错误", ctx)
+							return
+						}
+					case WhereEst:
+						val := strings.Split(condition.Value, ",")
+						if len(val) == 2 {
+							query = query.Where(fmt.Sprintf("%s >= ?", condition.Column), val[0]).Where(fmt.Sprintf("%s < ?", condition.Column), val[1])
+						} else {
+							response.FailWithDetailed(err.Error(), "范围查询参数提交错误", ctx)
+							return
+						}
+					case WhereTse:
+						val := strings.Split(condition.Value, ",")
+						if len(val) == 2 {
+							query = query.Where(fmt.Sprintf("%s > ?", condition.Column), val[0]).Where(fmt.Sprintf("%s <= ?", condition.Column), val[1])
+						} else {
+							response.FailWithDetailed(err.Error(), "范围查询参数提交错误", ctx)
+							return
+						}
+					case WhereEse:
+						val := strings.Split(condition.Value, ",")
+						if len(val) == 2 {
+							query = query.Where(fmt.Sprintf("%s >= ?", condition.Column), val[0]).Where(fmt.Sprintf("%s <= ?", condition.Column), val[1])
+						} else {
+							response.FailWithDetailed(err.Error(), "范围查询参数提交错误", ctx)
+							return
+						}
+					case WhereFs:
+					default:
 					}
-				case Est:
-					val := strings.Split(condition.Value, ",")
-					if len(val) == 2 {
-						query = query.Where(fmt.Sprintf("%s >= ?", condition.Column), val[0]).Where(fmt.Sprintf("%s < ?", condition.Column), val[1])
-					} else {
-						response.FailWithDetailed(err.Error(), "范围查询参数提交错误", ctx)
-						return
-					}
-				case Tse:
-					val := strings.Split(condition.Value, ",")
-					if len(val) == 2 {
-						query = query.Where(fmt.Sprintf("%s > ?", condition.Column), val[0]).Where(fmt.Sprintf("%s <= ?", condition.Column), val[1])
-					} else {
-						response.FailWithDetailed(err.Error(), "范围查询参数提交错误", ctx)
-						return
-					}
-				case Ese:
-					val := strings.Split(condition.Value, ",")
-					if len(val) == 2 {
-						query = query.Where(fmt.Sprintf("%s >= ?", condition.Column), val[0]).Where(fmt.Sprintf("%s <= ?", condition.Column), val[1])
-					} else {
-						response.FailWithDetailed(err.Error(), "范围查询参数提交错误", ctx)
-						return
-					}
-				case Fs:
-				default:
 				}
 			}
 		}
-	}
-
-	if e.opt.SoftDelete != "" {
-		query = query.Where(fmt.Sprintf("%s IS NULL", e.opt.SoftDelete))
-	}
-
-	err = query.Count(&count).Error
-	if err != nil {
-		response.FailWithDetailed(err.Error(), "数据库查询错误", ctx)
-		return
-	}
-	if count > 0 {
-		query = query.Select(e.selectColumns()).Limit(req.PageSize).Offset((req.Page - 1) * req.PageSize)
-		if req.Sort != "" {
-			query = query.Order(req.Sort)
-		} else {
-			query = query.Order(fmt.Sprintf("%s desc", e.opt.PK))
+		if e.opt.SoftDelete != "" {
+			query = query.Where(fmt.Sprintf("%s IS NULL", e.opt.SoftDelete))
 		}
-		data, err = model.Find(query)
+		err = query.Count(&count).Error
 		if err != nil {
 			response.FailWithDetailed(err.Error(), "数据库查询错误", ctx)
 			return
 		}
+		if count > 0 {
+			query = query.Select(e.selectColumns()).Limit(req.PageSize).Offset((req.Page - 1) * req.PageSize)
+			if req.Sort != "" {
+				query = query.Order(req.Sort)
+			} else {
+				query = query.Order(fmt.Sprintf("%s desc", e.opt.PK))
+			}
+			data, err = model.Find(query)
+			if err != nil {
+				response.FailWithDetailed(err.Error(), "数据库查询错误", ctx)
+				return
+			}
+		}
+	}
+
+	if err != nil {
+		response.FailWithDetailed(err.Error(), "查询错误", ctx)
+		return
 	}
 
 	response.OkWithDetailed(response.CRUDResponse{
@@ -398,18 +356,30 @@ func (e *Engine) page(ctx *gin.Context) {
 
 func (e *Engine) getById(ctx *gin.Context) {
 	req := ctx.MustGet(requestKey).(request.CRUDRequest)
-	if len(req.Ids) == 0 {
-		response.FailWithMessage("未提交数据查询 ID", ctx)
-		return
-	}
 
-	data, err := e.queryById(req.Ids[0])
-	if err != nil {
-		response.FailWithDetailed(err.Error(), "数据查询错误", ctx)
-		return
+	var data map[string]interface{}
+	var err error
+
+	if e.opt.CustomDataOrigin != nil {
+		data, err = e.opt.CustomDataOrigin.GetById(req)
+	} else {
+		if len(req.Ids) == 0 {
+			response.FailWithMessage("未提交数据查询 ID", ctx)
+			return
+		}
+
+		data, err = e.queryById(req.Ids[0])
+		if err != nil {
+			response.FailWithDetailed(err.Error(), "数据查询错误", ctx)
+			return
+		}
+		if data == nil {
+			response.FailWithMessage("未找到数据", ctx)
+			return
+		}
 	}
-	if data == nil {
-		response.FailWithMessage("未找到数据", ctx)
+	if err != nil {
+		response.FailWithDetailed(err.Error(), "查询错误", ctx)
 		return
 	}
 
@@ -418,88 +388,124 @@ func (e *Engine) getById(ctx *gin.Context) {
 
 func (e *Engine) updateById(ctx *gin.Context) {
 	req := ctx.MustGet(requestKey).(request.CRUDRequest)
-	if len(req.Ids) == 0 {
-		response.FailWithMessage("未提交数据查询 ID", ctx)
-		return
-	}
 
-	data, err := e.queryById(req.Ids[0])
-	if err != nil {
-		response.FailWithDetailed(err.Error(), "数据查询错误", ctx)
-		return
-	}
-	if data == nil {
-		response.FailWithMessage("未找到数据", ctx)
-		return
-	}
+	var id interface{}
+	var err error
 
-	update := make(map[string]interface{})
-	for _, condition := range req.Query {
-		for _, field := range e.field {
-			if condition.Column == field.Column && field.EditAble && condition.Value != "" {
-				update[condition.Column] = condition.Value
+	if e.opt.CustomDataOrigin != nil {
+		id, err = e.opt.CustomDataOrigin.UpdateById(req)
+	} else {
+		if len(req.Ids) == 0 {
+			response.FailWithMessage("未提交数据查询 ID", ctx)
+			return
+		}
+
+		data, err := e.queryById(req.Ids[0])
+		if err != nil {
+			response.FailWithDetailed(err.Error(), "数据查询错误", ctx)
+			return
+		}
+		if data == nil {
+			response.FailWithMessage("未找到数据", ctx)
+			return
+		}
+
+		update := make(map[string]interface{})
+		for _, condition := range req.Query {
+			for _, field := range e.field {
+				if condition.Column == field.Column && field.EditAble && condition.Value != "" {
+					update[condition.Column] = condition.Value
+				}
 			}
 		}
-	}
 
-	err = core.DB(e.opt.DbName).Table(e.opt.TableName).Where(fmt.Sprintf("%s = ?", e.opt.PK), req.Ids[0]).Updates(update).Error
+		err = core.DB(e.opt.DbName).Table(e.opt.TableName).Where(fmt.Sprintf("%s = ?", e.opt.PK), req.Ids[0]).Updates(update).Error
+		if err != nil {
+			response.FailWithDetailed(err.Error(), "数据更新错误", ctx)
+			return
+		}
+		id = req.Ids[0]
+	}
 	if err != nil {
 		response.FailWithDetailed(err.Error(), "数据更新错误", ctx)
 		return
 	}
 
-	response.OkWithDetailed(req.Ids[0], "ok", ctx)
+	response.OkWithDetailed(id, "ok", ctx)
 }
 
 func (e *Engine) create(ctx *gin.Context) {
 	req := ctx.MustGet(requestKey).(request.CRUDRequest)
 
-	create := make(map[string]interface{})
-	for _, condition := range req.Query {
-		for _, field := range e.field {
-			if condition.Column == field.Column {
-				var v interface{}
-				if condition.Value == "" {
-					if field.DefaultValueFunc == nil {
-						goto WITHOUT_DEFAULT
+	var id interface{}
+	var err error
+	if e.opt.CustomDataOrigin != nil {
+		id, err = e.opt.CustomDataOrigin.Create(req)
+	} else {
+		create := make(map[string]interface{})
+		for _, condition := range req.Query {
+			for _, field := range e.field {
+				if condition.Column == field.Column {
+					var v interface{}
+					if condition.Value == "" {
+						if field.DefaultValueFunc == nil {
+							goto WITHOUT_DEFAULT
+						}
+						v = field.DefaultValueFunc()
+					} else {
+						v = condition.Value
 					}
-					v = field.DefaultValueFunc()
-				} else {
-					v = condition.Value
+					create[condition.Column] = v
 				}
-				create[condition.Column] = v
+			WITHOUT_DEFAULT:
 			}
-		WITHOUT_DEFAULT:
+		}
+		err := core.DB(e.opt.DbName).Table(e.opt.TableName).Create(create).Error
+		if err != nil {
+			response.FailWithDetailed(err.Error(), "数据创建错误", ctx)
+			return
 		}
 	}
-	err := core.DB(e.opt.DbName).Table(e.opt.TableName).Create(create).Error
 	if err != nil {
 		response.FailWithDetailed(err.Error(), "数据创建错误", ctx)
 		return
 	}
 
-	response.OkWithDetailed("req.Ids[0]", "ok", ctx)
+	response.OkWithDetailed(id, "ok", ctx)
 }
 
 func (e *Engine) delete(ctx *gin.Context) {
 	req := ctx.MustGet(requestKey).(request.CRUDRequest)
-	if len(req.Ids) == 0 {
-		response.FailWithMessage("未提交数据查询 ID", ctx)
-		return
-	}
 
-	query := core.DB(e.opt.DbName).Table(e.opt.TableName).Where(fmt.Sprintf("%s in ?", e.opt.PK), req.Ids)
+	var id interface{}
 	var err error
-	if e.opt.SoftDelete != "" {
-		err = query.Updates(map[string]interface{}{e.opt.SoftDelete: time.Now().Format("2006-01-02 15:05:05")}).Error
+	if e.opt.CustomDataOrigin != nil {
+		id, err = e.opt.CustomDataOrigin.Create(req)
 	} else {
-		err = query.Delete(nil).Error
+		if len(req.Ids) == 0 {
+			response.FailWithMessage("未提交数据查询 ID", ctx)
+			return
+		}
+
+		query := core.DB(e.opt.DbName).Table(e.opt.TableName).Where(fmt.Sprintf("%s in ?", e.opt.PK), req.Ids)
+		var err error
+		if e.opt.SoftDelete != "" {
+			err = query.Updates(map[string]interface{}{e.opt.SoftDelete: time.Now().Format("2006-01-02 15:05:05")}).Error
+		} else {
+			err = query.Delete(nil).Error
+		}
+		if err != nil {
+			response.FailWithDetailed(err.Error(), "数据删除错误", ctx)
+			return
+		}
+		id = req.Ids
 	}
 	if err != nil {
 		response.FailWithDetailed(err.Error(), "数据删除错误", ctx)
+		return
 	}
 
-	response.OkWithDetailed(req.Ids, "ok", ctx)
+	response.OkWithDetailed(id, "ok", ctx)
 }
 
 func (e *Engine) PageRequestVerifyMiddleware() gin.HandlerFunc {
@@ -562,4 +568,60 @@ func (e *Engine) queryById(id string) (map[string]interface{}, error) {
 		return nil, nil
 	}
 	return data[0], nil
+}
+
+func formatElement(field Field) (html interface{}) {
+	if field.ElOption.SearchType == 0 {
+		return
+	}
+	switch field.ElOption.Type {
+	case ElementComponentInput:
+		return template.HTML(`
+        <el-form-item label="` + field.Name + `">
+          <el-input v-model="search.` + field.Column + `" placeholder="` + field.Name + `" clearable/>
+        </el-form-item>
+`)
+	case ElementComponentDatePicker, ElementComponentDateRangePicker, ElementComponentDateTimePicker, ElementComponentDateTimeRangePicker:
+		t := ""
+		switch field.ElOption.Type {
+		case ElementComponentDatePicker:
+			t = "date"
+		case ElementComponentDateRangePicker:
+			t = "daterange"
+		case ElementComponentDateTimePicker:
+			t = "datetime"
+		case ElementComponentDateTimeRangePicker:
+			t = "datetimerange"
+		}
+		return template.HTML(`
+        <el-form-item label="` + field.Name + `">
+			<el-date-picker v-model="search.` + field.Column + `" type="` + t + `" placeholder="` + field.Name + `" range-separator="～" start-placeholder="开始时间" end-placeholder="结束时间" clearable/>
+        </el-form-item>
+`)
+	case ElementComponentSelect:
+		if field.ElOption.Options != "" {
+			return template.HTML(`
+        <el-form-item label="` + field.Name + `">
+			<el-select v-model="search.` + field.Column + `" placeholder="` + field.Name + `" clearable>
+				<el-option v-for="item in ` + field.ElOption.Options + `" :key="item.v" :label="item.k" :value="item.v" />
+			</el-select>
+        </el-form-item>
+`)
+		}
+		return template.HTML(`
+        <el-form-item label="` + field.Name + `">
+			<el-select v-model="search.` + field.Column + `" placeholder="` + field.Name + `" clearable>
+				<el-option v-for="item in [{k:1,v:1},{k:2,v:2}]" :key="item.v" :label="item.k" :value="item.v" />
+			</el-select>
+        </el-form-item>
+`)
+	case ElementComponentCascader:
+		return template.HTML(`
+        <el-form-item label="` + field.Name + `">
+			<el-cascader v-model="search.` + field.Column + `" :options="` + field.ElOption.Options + `" :props="` + field.ElOption.Props + `" clearable />
+        </el-form-item>
+`)
+	}
+	return
+
 }
