@@ -163,7 +163,7 @@ export default {
       });
     },
     __getDetail(id) {
-      let data = {id: id}
+      let data = {id: id.toString()}
       this.$http({
         method: "post",
         url: this._ap + '/r',
@@ -182,7 +182,7 @@ export default {
       this.dialog.title = "编辑"
       this.dialog.formVisible = true
       this.dialog.disabled = false
-      this.__getDetail(row[this._pk])
+      this.__getDetail(row[this._pk].toString())
     },
     _detail(row) {
       this.dialog.title = "查看详情"
