@@ -45,7 +45,7 @@ func (s SysMenu) systemMenu() (treeMpa []SysMenu) {
 			Hidden:        false,
 			Component:     "view/dashboard/index.vue",
 			Sort:          1,
-			Meta:          Meta{Title: "仪表盘", Icon: "odometer"},
+			Meta:          Meta{CloseTab: true, Title: "仪表盘", Icon: "odometer"},
 			SysAuthoritys: nil,
 		}, {
 			MODEL:         MODEL{ID: -2},
@@ -55,7 +55,7 @@ func (s SysMenu) systemMenu() (treeMpa []SysMenu) {
 			Hidden:        false,
 			Component:     "view/file/index.vue",
 			Sort:          2,
-			Meta:          Meta{Title: "文件管理", Icon: "files"},
+			Meta:          Meta{CloseTab: true, Title: "文件管理", Icon: "files"},
 			SysAuthoritys: nil,
 		}, {
 			MODEL:         MODEL{ID: -3},
@@ -65,7 +65,7 @@ func (s SysMenu) systemMenu() (treeMpa []SysMenu) {
 			Hidden:        false,
 			Component:     "view/superAdmin/index.vue",
 			Sort:          3,
-			Meta:          Meta{Title: "系统管理", Icon: "setting"},
+			Meta:          Meta{CloseTab: true, Title: "系统管理", Icon: "setting"},
 			SysAuthoritys: nil,
 		}, {
 			MODEL:         MODEL{ID: -4},
@@ -76,7 +76,7 @@ func (s SysMenu) systemMenu() (treeMpa []SysMenu) {
 			Component:     "view/file/upload/upload.vue",
 			Sort:          1,
 			Children:      nil,
-			Meta:          Meta{Title: "媒体库（上传下载）", Icon: "upload"},
+			Meta:          Meta{CloseTab: true, Title: "媒体库（上传下载）", Icon: "upload"},
 			SysAuthoritys: nil,
 		}, {
 			MODEL:         MODEL{ID: -5},
@@ -87,7 +87,7 @@ func (s SysMenu) systemMenu() (treeMpa []SysMenu) {
 			Component:     "view/file/breakpoint/breakpoint.vue",
 			Sort:          2,
 			Children:      nil,
-			Meta:          Meta{Title: "断点续传", Icon: "upload-filled"},
+			Meta:          Meta{CloseTab: true, Title: "断点续传", Icon: "upload-filled"},
 			SysAuthoritys: nil,
 		}, {
 			MODEL:         MODEL{ID: -6},
@@ -97,7 +97,7 @@ func (s SysMenu) systemMenu() (treeMpa []SysMenu) {
 			Hidden:        false,
 			Component:     "view/superAdmin/authority/authority.vue",
 			Sort:          0,
-			Meta:          Meta{Title: "角色管理", Icon: "star"},
+			Meta:          Meta{CloseTab: true, Title: "角色管理", Icon: "star"},
 			SysAuthoritys: nil,
 		}, {
 			MODEL:         MODEL{ID: -7},
@@ -107,7 +107,7 @@ func (s SysMenu) systemMenu() (treeMpa []SysMenu) {
 			Hidden:        false,
 			Component:     "view/superAdmin/menu/menu.vue",
 			Sort:          0,
-			Meta:          Meta{Title: "菜单管理", Icon: "menu"},
+			Meta:          Meta{CloseTab: true, Title: "菜单管理", Icon: "menu"},
 			SysAuthoritys: nil,
 		}, {
 			MODEL:         MODEL{ID: -8},
@@ -118,7 +118,7 @@ func (s SysMenu) systemMenu() (treeMpa []SysMenu) {
 			Component:     "view/superAdmin/api/api.vue",
 			Sort:          0,
 			Children:      nil,
-			Meta:          Meta{Title: "api管理", Icon: "link"},
+			Meta:          Meta{CloseTab: true, Title: "api管理", Icon: "link"},
 			SysAuthoritys: nil,
 		}, {
 			MODEL:         MODEL{ID: -9},
@@ -129,7 +129,7 @@ func (s SysMenu) systemMenu() (treeMpa []SysMenu) {
 			Component:     "view/superAdmin/user/user.vue",
 			Sort:          0,
 			Children:      nil,
-			Meta:          Meta{Title: "用户管理", Icon: "user"},
+			Meta:          Meta{CloseTab: true, Title: "用户管理", Icon: "user"},
 			SysAuthoritys: nil,
 		}, {
 			MODEL:         MODEL{ID: -10},
@@ -140,7 +140,7 @@ func (s SysMenu) systemMenu() (treeMpa []SysMenu) {
 			Component:     "view/superAdmin/operation/sysOperationRecord.vue",
 			Sort:          0,
 			Children:      nil,
-			Meta:          Meta{Title: "操作历史", Icon: "clock"},
+			Meta:          Meta{CloseTab: true, Title: "操作历史", Icon: "clock"},
 			SysAuthoritys: nil,
 		}, {
 			MODEL:         MODEL{ID: -11},
@@ -151,7 +151,7 @@ func (s SysMenu) systemMenu() (treeMpa []SysMenu) {
 			Component:     "view/systemTools/formCreate/index.vue",
 			Sort:          0,
 			Children:      nil,
-			Meta:          Meta{Title: "表单生成器", Icon: "magic-stick"},
+			Meta:          Meta{CloseTab: true, Title: "表单生成器", Icon: "magic-stick"},
 			SysAuthoritys: nil,
 		},
 		{
@@ -165,7 +165,7 @@ func (s SysMenu) systemMenu() (treeMpa []SysMenu) {
 			Sort:          0,
 			Children:      nil,
 			SysAuthoritys: nil,
-			Meta:          Meta{Title: "个人信息", Icon: "message", CloseTab: true},
+			Meta:          Meta{CloseTab: true, Title: "个人信息", Icon: "message"},
 		},
 		//{
 		//	MODEL:         MODEL{ID: -13},
@@ -176,7 +176,7 @@ func (s SysMenu) systemMenu() (treeMpa []SysMenu) {
 		//	Component:     "view/systemTools/convert/index.vue",
 		//	Sort:          0,
 		//	Children:      nil,
-		//	Meta:          Meta{Title: "内容转换器", Icon: "magic-stick"},
+		//	Meta:          Meta{CloseTab: true, Title: "内容转换器", Icon: "magic-stick"},
 		//	SysAuthoritys: nil,
 		//},
 	}
