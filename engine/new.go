@@ -117,7 +117,7 @@ func SysInit(path string) *core.Core {
 	root.StaticFS(core.Config().System.FrontRouterPrefix+"/assets", http.FS(fe))
 	root.GET(core.Config().System.FrontRouterPrefix+"/", func(ctx *gin.Context) {
 		ctx.Header("Content-Type", "text/html; charset=utf-8")
-		ctx.String(200, "%s", front.Index)
+		ctx.String(200, "%s", front.FrontIndex)
 	})
 	/*
 		这里结合 engine.go tmp 方法中的注释部分可以用来编辑 debug 模版页面
