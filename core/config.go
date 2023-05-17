@@ -24,10 +24,6 @@ func (c *Core) initConfig(path ...string) {
 		panic(fmt.Errorf("解析 %s.yaml 配置文件错误:	\n", configPath, err))
 	}
 
-	if c.config.System.FrontRouterPrefix == "" {
-		c.config.System.FrontRouterPrefix = "_"
-	}
-
 	// TODO 这里是否做后台可以更改配置的功能
 	//v.WatchConfig()
 	//

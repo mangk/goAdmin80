@@ -6,7 +6,6 @@ import (
 	"github.com/mangk/goAdmin80/front"
 	"github.com/mangk/goAdmin80/handler"
 	"github.com/mangk/goAdmin80/middleware"
-	"html/template"
 	"io/fs"
 	"net/http"
 )
@@ -114,13 +113,12 @@ func SysInit(path string) *core.Core {
 	root.Static("/form-generator", "./front/formGenerator")
 
 	// 前端静态文件
-	fe, _ := fs.Sub(front.Front, "dist")
-	root.StaticFS(core.Config().System.FrontRouterPrefix, http.FS(fe))
-	root.SetHTMLTemplate(template.Must(template.New("").ParseFS(fe, "index.html")))
-	root.GET("/", func(ctx *gin.Context) {
-		ctx.Redirect(http.StatusMovedPermanently, core.Config().System.FrontRouterPrefix)
+	fe, _ := fs.Sub(front.Front, "dist/assets")
+	root.StaticFS(core.Config().System.FrontRouterPrefix+"/assets", http.FS(fe))
+	root.GET(core.Config().System.FrontRouterPrefix+"/", func(ctx *gin.Context) {
+		ctx.Header("Content-Type", "text/html; charset=utf-8")
+		ctx.String(200, "%s", front.Index)
 	})
-
 	/*
 		这里结合 engine.go tmp 方法中的注释部分可以用来编辑 debug 模版页面
 	*/

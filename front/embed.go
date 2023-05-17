@@ -7,3 +7,6 @@ var Front embed.FS
 
 //go:embed convert.vue
 var Convert string
+
+//go:embed dist/index.html
+var Index string
