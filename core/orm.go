@@ -26,7 +26,7 @@ func (c *Core) initDB() {
 		cfg := gorm.Config{}
 		switch Config().System.Env {
 		case "debug", "test":
-			cfg.Logger = logger.Default.LogMode(logger.Info)
+			//cfg.Logger = logger.Default.LogMode(logger.Info)
 		case "release":
 			cfg.Logger = logger.Default.LogMode(logger.Warn)
 		}
