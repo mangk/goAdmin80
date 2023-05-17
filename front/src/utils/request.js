@@ -6,7 +6,7 @@ import {ElMessage, ElMessageBox} from 'element-plus'
 
 const service = axios.create({
     baseURL: '/_sys',
-    timeout: 5000
+    timeout: 30000
 })
 let acitveAxios = 0
 let timer

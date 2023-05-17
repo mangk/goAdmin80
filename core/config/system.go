@@ -1,15 +1,15 @@
 package config
 
 type System struct {
-	Env               string `mapstructure:"env" json:"env" yaml:"env"`                                  // 环境值
-	Host              string `mapstructure:"host" json:"host" yaml:"host"`                               // 监听地址
-	Port              int    `mapstructure:"port" json:"port" yaml:"port"`                               // 端口值
-	DbType            string `mapstructure:"db-type" json:"db-type" yaml:"db-type"`                      // 数据库类型:mysql(默认)|sqlite|sqlserver|postgresql
-	OssType           string `mapstructure:"oss-type" json:"oss-type" yaml:"oss-type"`                   // Oss类型
-	UseMultipoint     bool   `mapstructure:"use-multipoint" json:"use-multipoint" yaml:"use-multipoint"` // 多点登录拦截
-	UseRedis          bool   `mapstructure:"use-redis" json:"use-redis" yaml:"use-redis"`                // 使用redis
-	LimitCountIP      int    `mapstructure:"iplimit-count" json:"iplimit-count" yaml:"iplimit-count"`
-	LimitTimeIP       int    `mapstructure:"iplimit-time" json:"iplimit-time" yaml:"iplimit-time"`
-	RouterPrefix      string `mapstructure:"router-prefix" json:"router-prefix" yaml:"router-prefix"`
-	FrontRouterPrefix string `mapstructure:"front-router-prefix" json:"front-router-prefix" yaml:"front-router-prefix"`
+	Env               string `json:"env" yaml:"env"`                     // 环境值
+	Host              string `json:"host" yaml:"host"`                   // 监听地址
+	Port              int    `json:"port" yaml:"port"`                   // 端口值
+	DbType            string `json:"dbType" yaml:"dbType"`               // 数据库类型:mysql(默认)|sqlite|sqlserver|postgresql
+	OssType           string `json:"ossType" yaml:"ossType"`             // Oss类型
+	UseMultipoint     bool   `json:"useMultipoint" yaml:"useMultipoint"` // 多点登录拦截
+	UseRedis          bool   `json:"useRedis" yaml:"useRedis"`           // 使用redis
+	LimitCountIP      int    `json:"ipLimitCount" yaml:"ipLimitCount"`
+	LimitTimeIP       int    `json:"ipLimitTime" yaml:"ipLimitTime"`
+	RouterPrefix      string `json:"routerPrefix" yaml:"routerPrefix"`
+	FrontRouterPrefix string `json:"frontRouterPrefix" yaml:"frontRouterPrefix"`
 }

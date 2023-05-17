@@ -5,7 +5,7 @@ import router from '@/router/index'
 import {ElMessage, ElMessageBox} from 'element-plus'
 
 const http = axios.create({
-    timeout: 5000
+    timeout: 30000
 })
 let acitveAxios = 0
 let timer

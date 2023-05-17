@@ -43,7 +43,7 @@ func New(path string) *Core {
 	_core.initLog()
 
 	// 初始化数据库服务
-	_core.initMysql()
+	_core.initDB()
 
 	// 初始化缓存服务
 	_core.initRedis()
