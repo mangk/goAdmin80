@@ -59,9 +59,9 @@ type Field struct {
 	Name             string        // 展示名
 	Column           string        // 字段名
 	Type             string        // 字段类型
-	ElOption         ElOption      // 对应前端 Element 类型 TODO 实现这里的功能，通过模版渲染switch来完成 表单，搜索，列表内容的输出
+	ElOption         ElOption      // 对应前端 Element 类型 TODO 实现这里的功能，通过模版渲染switch来完成 表单，列表内容的输出
 	Translate        func() string // 字段翻译函数 TODO 功能实现
-	SortAble         bool          // 是否排序字段 TODO 排序功能实现
+	SortAble         bool          // 是否排序字段
 	Hide             bool          // 是否对外展示
 	EditAble         bool          // 是否可更新
 	DefaultValueFunc func() string // 数据创建时的默认值
@@ -145,15 +145,15 @@ func (e *Engine) Register() {
 		} else {
 			switch st[0] {
 			case "p":
-				f = []gin.HandlerFunc{e.PageRequestVerifyMiddleware(), e.page}
+				f = []gin.HandlerFunc{e.RequestVerifyMiddleware(), e.page}
 			case "r":
-				f = []gin.HandlerFunc{e.PageRequestVerifyMiddleware(), e.getById}
+				f = []gin.HandlerFunc{e.RequestVerifyMiddleware(), e.getById}
 			case "c":
-				f = []gin.HandlerFunc{e.PageRequestVerifyMiddleware(), e.create}
+				f = []gin.HandlerFunc{e.RequestVerifyMiddleware(), e.create}
 			case "u":
-				f = []gin.HandlerFunc{e.PageRequestVerifyMiddleware(), e.updateById}
+				f = []gin.HandlerFunc{e.RequestVerifyMiddleware(), e.updateById}
 			case "d":
-				f = []gin.HandlerFunc{e.PageRequestVerifyMiddleware(), e.delete}
+				f = []gin.HandlerFunc{e.RequestVerifyMiddleware(), e.delete}
 			}
 		}
 		e.register(st[0], st[1], f...)
@@ -270,7 +270,7 @@ func (e *Engine) page(ctx *gin.Context) {
 					case WhereLike:
 						query = query.Where(fmt.Sprintf("%s like ?", condition.Column), "%"+condition.Value+"%")
 					case WhereIn:
-						query = query.Where(fmt.Sprintf("%s in ?", condition.Column), strings.Split(condition.Value, ",")) // TODO 这里要不要限制 in 的数据量大小
+						query = query.Where(fmt.Sprintf("%s in ?", condition.Column), strings.Split(condition.Value, ","))
 					case WhereGt:
 						query = query.Where(fmt.Sprintf("%s > ?", condition.Column), condition.Value)
 					case WhereLt:
@@ -508,7 +508,7 @@ func (e *Engine) delete(ctx *gin.Context) {
 	response.OkWithDetailed(id, "ok", ctx)
 }
 
-func (e *Engine) PageRequestVerifyMiddleware() gin.HandlerFunc {
+func (e *Engine) RequestVerifyMiddleware() gin.HandlerFunc {
 	return func(ctx *gin.Context) {
 		req := request.CRUDRequest{}
 		if err := ctx.ShouldBindJSON(&req); err != nil {
