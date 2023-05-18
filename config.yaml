@@ -8,7 +8,6 @@ system:
   useRedis: false
   ipLimitCount: 15000
   ipLimitTime: 3600
-  routerPrefix: "_sys"
   frontRouterPrefix: "_/"
 jwt:
   signingKey: 273628f7-9fb4-4e73-8f8d-ca954710d01d

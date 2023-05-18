@@ -10,6 +10,5 @@ type System struct {
 	UseRedis          bool   `json:"useRedis" yaml:"useRedis"`           // 使用redis
 	LimitCountIP      int    `json:"ipLimitCount" yaml:"ipLimitCount"`
 	LimitTimeIP       int    `json:"ipLimitTime" yaml:"ipLimitTime"`
-	RouterPrefix      string `json:"routerPrefix" yaml:"routerPrefix"`
 	FrontRouterPrefix string `json:"frontRouterPrefix" yaml:"frontRouterPrefix"`
 }
