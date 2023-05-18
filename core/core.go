@@ -43,9 +43,6 @@ func New(path string) *Core {
 	// 初始化日志
 	_core.initLog()
 
-	_core.log.Info("info 日志记录", zap.String("time", "djlfkasj"))
-	_core.log.Error("error 日志记录", zap.String("time", "djlfkasj"))
-
 	// 初始化数据库服务
 	_core.initDB()
 
@@ -100,12 +97,11 @@ func ginLogger(logger *zap.Logger) gin.HandlerFunc {
 		clientIP := c.ClientIP()
 		method := c.Request.Method
 		path := c.Request.URL.Path
-		logger.Info("HTTP request",
+		logger.With(zap.Namespace("_gin")).Info("",
 			zap.Int("status", status),
 			zap.String("method", method),
 			zap.String("path", path),
 			zap.String("clientIP", clientIP),
-			zap.String("cost", fmt.Sprintf("%.3fms", float64(latency.Nanoseconds())/float64(time.Millisecond))),
-		)
+			zap.String("cost", fmt.Sprintf("%.3fms", float64(latency.Nanoseconds())/float64(time.Millisecond))))
 	}
 }
