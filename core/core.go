@@ -10,6 +10,8 @@ import (
 	"github.com/spf13/viper"
 	"go.uber.org/zap"
 	"gorm.io/gorm"
+	"io"
+	"time"
 )
 
 var _core *Core
@@ -60,9 +62,10 @@ func New(path string) *Core {
 	default:
 		gin.SetMode(gin.ReleaseMode)
 	}
+	gin.DefaultWriter = io.Discard
 	_core.gin = gin.New()
+	_core.gin.Use(ginLogger(_core.log), gin.Recovery())
 	_core.gin.Delims("{[{", "}]}")
-	_core.gin.Use(gin.Logger(), gin.Recovery())
 
 	return _core
 }
@@ -80,4 +83,29 @@ func (c *Core) ListenAndServe() {
 		c.log.Error(fmt.Sprintf("Project START error: %+v", err))
 	}
 	c.log.Info("Project EXIT!")
+}
+
+func ginLogger(logger *zap.Logger) gin.HandlerFunc {
+	return func(c *gin.Context) {
+		start := time.Now()
+
+		// 处理请求
+		c.Next()
+
+		// 记录日志
+		end := time.Now()
+		latency := end.Sub(start)
+
+		status := c.Writer.Status()
+		clientIP := c.ClientIP()
+		method := c.Request.Method
+		path := c.Request.URL.Path
+		logger.Info("HTTP request",
+			zap.Int("status", status),
+			zap.String("method", method),
+			zap.String("path", path),
+			zap.String("clientIP", clientIP),
+			zap.String("cost", fmt.Sprintf("%.3fms", float64(latency.Nanoseconds())/float64(time.Millisecond))),
+		)
+	}
 }

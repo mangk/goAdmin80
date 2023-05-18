@@ -21,13 +21,13 @@ func SysInit(path string) *core.Core {
 		core.Log().Info("use middleware cors")
 	}
 
-	core.Log().Info("----------系统初始化 start----------")
+	// ----------系统初始化 start----------
 	sysGroup := root.Group("_sys")
 
-	core.Log().Info("----------注册系统本地上传静态文件----------")
+	// ----------注册系统本地上传静态文件----------
 	sysGroup.StaticFS(core.Config().Local.StorePath, http.Dir(core.Config().Local.StorePath))
 
-	core.Log().Info("----------注册系统默认 api----------")
+	// ----------注册系统默认 api----------
 	{
 		{
 			sysGroup.POST("login", handler.UserLogin)
@@ -113,9 +113,9 @@ func SysInit(path string) *core.Core {
 		}
 	}
 
-	core.Log().Info("----------注册表单编辑器静态文件接口----------")
+	// ----------注册表单编辑器静态文件接口----------
 	root.Static("/form-generator", "./front/formGenerator") // TODO 这里还需不需要
-	core.Log().Info("----------注册系统默认静态文件接口----------")
+	// ----------注册系统默认静态文件接口----------
 	assets, _ := fs.Sub(front.Front, "dist/assets")
 	root.StaticFS(strings.TrimRight(core.Config().System.FrontRouterPrefix, "/")+"/assets", http.FS(assets))
 	root.GET(strings.TrimRight(core.Config().System.FrontRouterPrefix, "/")+"/", func(ctx *gin.Context) {
@@ -124,7 +124,7 @@ func SysInit(path string) *core.Core {
 		ctx.String(200, "%s", index)
 	})
 
-	core.Log().Info("----------系统初始化 end----------")
+	// ----------系统初始化 end----------
 	/*
 		这里结合 engine.go tmp 方法中的注释部分可以用来编辑 debug 模版页面
 	*/
