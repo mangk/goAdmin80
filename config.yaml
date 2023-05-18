@@ -62,15 +62,14 @@ captcha:
   openCaptcha: 0
   openCaptchaTimeout: 3600
 zap:
-  level: info
-  prefix: ''
-  format: console
-  director: log
-  encodeLevel: LowercaseColorLevelEncoder
-  stacktraceKey: stacktrace
-  maxAge: 0
-  showLine: true
-  logInConsole: true
+  prefix:
+  maxAge: 30
+  level: debug
+  format: json
+  encodeLevel: 0
+  output: # 可以设置多个日志输出位置
+    - log # 日志输出到可执行文件目录下的 log 文件夹
+    - console # 日志会输出到stdout
 cors:
   mode: strict-whitelist
   whitelist:

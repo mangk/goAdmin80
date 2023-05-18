@@ -6,37 +6,30 @@ import (
 )
 
 type Zap struct {
-	Level         string `json:"level" yaml:"level"`                 // 级别
-	Prefix        string `json:"prefix" yaml:"prefix"`               // 日志前缀
-	Format        string `json:"format" yaml:"format"`               // 输出
-	Director      string `json:"director"  yaml:"director"`          // 日志文件夹
-	EncodeLevel   string `json:"encodeLevel" yaml:"encodeLevel"`     // 编码级
-	StacktraceKey string `json:"stacktraceKey" yaml:"stacktraceKey"` // 栈名
-	MaxAge        int    `json:"maxAge" yaml:"maxAge"`               // 日志留存时间
-	ShowLine      bool   `json:"showLine" yaml:"showLine"`           // 显示行
-	LogInConsole  bool   `json:"logInConsole" yaml:"logInConsole"`   // 输出控制台
+	Prefix      string   `json:"prefix" yaml:"prefix"`           // 日志前缀
+	MaxAge      int      `json:"maxAge" yaml:"maxAge"`           // 日志留存时间
+	Level       string   `json:"level" yaml:"level"`             // 级别 debug/info/warn/error/dpanic/panic/fatal
+	Format      string   `json:"format" yaml:"format"`           // 输出形式 json/console
+	EncodeLevel uint8    `json:"encodeLevel" yaml:"encodeLevel"` // 编码形式
+	Output      []string `json:"output" yaml:"output"`           // 输出形式 console(stdout)/youDirName/TODO 对接日志接收器
 }
 
-// ZapEncodeLevel 根据 EncodeLevel 返回 zapcore.LevelEncoder
-// Author [SliverHorn](https://github.com/SliverHorn)
-func (z *Zap) ZapEncodeLevel() zapcore.LevelEncoder {
+func (z Zap) ZapEncodeLevel() zapcore.LevelEncoder {
 	switch {
-	case z.EncodeLevel == "LowercaseLevelEncoder": // 小写编码器(默认)
+	case z.EncodeLevel == 0: // 小写编码器(默认)
 		return zapcore.LowercaseLevelEncoder
-	case z.EncodeLevel == "LowercaseColorLevelEncoder": // 小写编码器带颜色
+	case z.EncodeLevel == 1: // 小写编码器带颜色
 		return zapcore.LowercaseColorLevelEncoder
-	case z.EncodeLevel == "CapitalLevelEncoder": // 大写编码器
+	case z.EncodeLevel == 2: // 大写编码器
 		return zapcore.CapitalLevelEncoder
-	case z.EncodeLevel == "CapitalColorLevelEncoder": // 大写编码器带颜色
+	case z.EncodeLevel == 3: // 大写编码器带颜色
 		return zapcore.CapitalColorLevelEncoder
 	default:
 		return zapcore.LowercaseLevelEncoder
 	}
 }
 
-// TransportLevel 根据字符串转化为 zapcore.Level
-// Author [SliverHorn](https://github.com/SliverHorn)
-func (z *Zap) TransportLevel() zapcore.Level {
+func (z Zap) TransportLevel() zapcore.Level {
 	z.Level = strings.ToLower(z.Level)
 	switch z.Level {
 	case "debug":

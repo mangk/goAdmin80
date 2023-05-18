@@ -10,7 +10,6 @@ import (
 	"github.com/spf13/viper"
 	"go.uber.org/zap"
 	"gorm.io/gorm"
-	"log"
 )
 
 var _core *Core
@@ -42,6 +41,9 @@ func New(path string) *Core {
 	// 初始化日志
 	_core.initLog()
 
+	_core.log.Info("info 日志记录", zap.String("time", "djlfkasj"))
+	_core.log.Error("error 日志记录", zap.String("time", "djlfkasj"))
+
 	// 初始化数据库服务
 	_core.initDB()
 
@@ -60,6 +62,7 @@ func New(path string) *Core {
 	}
 	_core.gin = gin.New()
 	_core.gin.Delims("{[{", "}]}")
+	_core.gin.Use(gin.Logger(), gin.Recovery())
 
 	return _core
 }
@@ -72,8 +75,9 @@ func HttpEngine() *gin.Engine {
 }
 
 func (c *Core) ListenAndServe() {
+	defer c.log.Sync()
 	if err := endless.ListenAndServe(fmt.Sprintf("%s:%d", Config().System.Host, Config().System.Port), c.gin); err != nil {
-		log.Fatalf("[Project start] error: %+v", err)
+		c.log.Error(fmt.Sprintf("Project START error: %+v", err))
 	}
-	log.Println("Project EXIT!")
+	c.log.Info("Project EXIT!")
 }

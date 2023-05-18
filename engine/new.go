@@ -16,8 +16,6 @@ func SysInit(path string) *core.Core {
 
 	root := core.HttpEngine()
 
-	root.Use(gin.Logger(), gin.Recovery())
-
 	if core.Config().System.Env != "release" {
 		root.Use(middleware.Cors()) // 直接放行全部跨域请求
 		core.Log().Info("use middleware cors")
