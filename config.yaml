@@ -1,4 +1,5 @@
 system:
+  name: goAdmin80
   env: debug # debug | test | release
   host: 127.0.0.1
   port: 8888
@@ -8,7 +9,7 @@ system:
   useRedis: false
   ipLimitCount: 15000
   ipLimitTime: 3600
-  frontRouterPrefix: "_/"
+  frontRouterPrefix:
 jwt:
   signingKey: 273628f7-9fb4-4e73-8f8d-ca954710d01d
   expiresTime: 7d

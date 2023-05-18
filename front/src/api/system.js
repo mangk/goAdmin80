@@ -40,3 +40,10 @@ export const getSystemState = () => {
     donNotShowLoading: true
   })
 }
+
+export const sysInfo = () =>{
+  return service({
+    url:'/info',
+    method: 'get',
+  })
+}

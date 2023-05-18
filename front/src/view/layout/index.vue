@@ -1,20 +1,20 @@
 <template>
   <el-container class="layout-cont">
     <el-container :class="[isSider?'openside':'hideside',isMobile ? 'mobile': '']">
-      <el-row :class="[isShadowBg?'shadowBg':'']" @click="changeShadow()" />
+      <el-row :class="[isShadowBg?'shadowBg':'']" @click="changeShadow()"/>
       <el-aside class="main-cont main-left gva-aside">
         <div class="tilte" :style="{background: backgroundColor}">
           <img alt class="logoimg" src="../../assets/goAdmin80.png">
-          <div v-if="isSider" class="tit-text" :style="{color:textColor}">{{ $GO_ADMIN_80.appName }}</div>
+          <div v-if="isSider" class="tit-text" :style="{color:textColor}">{{ sysInfoObj.name }}</div>
         </div>
-        <Aside class="aside" />
+        <Aside class="aside"/>
       </el-aside>
       <!-- 分块滑动功能 -->
       <el-main class="main-cont main-right">
         <transition :duration="{ enter: 800, leave: 100 }" mode="out-in" name="el-fade-in-linear">
           <div
-            :style="{width: `calc(100% - ${isMobile?'0px':isCollapse?'54px':'220px'})`}"
-            class="topfix"
+              :style="{width: `calc(100% - ${isMobile?'0px':isCollapse?'54px':'220px'})`}"
+              class="topfix"
           >
             <el-row>
               <el-col>
@@ -22,39 +22,40 @@
                   <el-row class="pd-0">
                     <el-col :xs="2" :lg="1" :md="1" :sm="1" :xl="1" style="z-index:100">
                       <div class="menu-total" @click="totalCollapse">
-                        <div v-if="isCollapse" class="gvaIcon gvaIcon-arrow-double-right" />
-                        <div v-else class="gvaIcon gvaIcon-arrow-double-left" />
+                        <div v-if="isCollapse" class="gvaIcon gvaIcon-arrow-double-right"/>
+                        <div v-else class="gvaIcon gvaIcon-arrow-double-left"/>
                       </div>
                     </el-col>
                     <el-col :xs="10" :lg="14" :md="14" :sm="9" :xl="14" :pull="1">
                       <!-- 修改为手机端不显示顶部标签 -->
                       <el-breadcrumb v-show="!isMobile" class="breadcrumb">
                         <el-breadcrumb-item
-                          v-for="item in matched.slice(1,matched.length)"
-                          :key="item.path"
-                        >{{ fmtTitle(item.meta.title,route) }}</el-breadcrumb-item>
+                            v-for="item in matched.slice(1,matched.length)"
+                            :key="item.path"
+                        >{{ fmtTitle(item.meta.title, route) }}
+                        </el-breadcrumb-item>
                       </el-breadcrumb>
                     </el-col>
                     <el-col :xs="12" :lg="9" :md="9" :sm="14" :xl="9">
                       <div class="right-box">
-                        <Search />
+                        <Search/>
                         <el-dropdown>
                           <div class="dp-flex justify-content-center align-items height-full width-full">
                             <span class="header-avatar" style="cursor: pointer">
-                              <CustomPic />
+                              <CustomPic/>
                               <span v-show="!isMobile" style="margin-left: 5px">{{ userStore.userInfo.nickName }}</span>
                               <el-icon>
-                                <arrow-down />
+                                <arrow-down/>
                               </el-icon>
                             </span>
                           </div>
                           <template #dropdown>
                             <el-dropdown-menu class="dropdown-group">
-<!--                                <el-dropdown-item>-->
-<!--                                  <el-tag  v-for="item in userStore.userInfo.authorities" :key="item.authorityId" class="ml-2" type="info">-->
-<!--                                    {{ item.authorityName }}-->
-<!--                                  </el-tag>-->
-<!--                                </el-dropdown-item>-->
+                              <!--                                <el-dropdown-item>-->
+                              <!--                                  <el-tag  v-for="item in userStore.userInfo.authorities" :key="item.authorityId" class="ml-2" type="info">-->
+                              <!--                                    {{ item.authorityName }}-->
+                              <!--                                  </el-tag>-->
+                              <!--                                </el-dropdown-item>-->
                               <el-dropdown-item icon="avatar">
                                 <div class="command-box" style="display: flex" @click="handleCommand">
                                   <div>指令菜单</div>
@@ -79,27 +80,27 @@
             <!-- 当前面包屑用路由自动生成可根据需求修改 -->
             <!--
             :to="{ path: item.path }" 暂时注释不用-->
-            <HistoryComponent ref="layoutHistoryComponent" />
+            <HistoryComponent ref="layoutHistoryComponent"/>
           </div>
         </transition>
         <router-view
-          v-if="reloadFlag"
-          v-slot="{ Component }"
-          v-loading="loadingFlag"
-          element-loading-text="正在加载中"
-          class="admin-box"
-          :key="$route.fullPath"
+            v-if="reloadFlag"
+            v-slot="{ Component }"
+            v-loading="loadingFlag"
+            element-loading-text="正在加载中"
+            class="admin-box"
+            :key="$route.fullPath"
         >
           <div>
             <transition mode="out-in" name="el-fade-in-linear">
               <keep-alive :include="routerStore.keepAliveRouters">
-                <component :is="Component" />
+                <component :is="Component"/>
               </keep-alive>
             </transition>
           </div>
         </router-view>
-        <BottomInfo />
-        <setting />
+        <BottomInfo/>
+        <setting/>
         <CommandMenu ref="command"/>
       </el-main>
     </el-container>
@@ -121,13 +122,15 @@ import BottomInfo from '@/view/layout/bottomInfo/bottomInfo.vue'
 import CustomPic from '@/components/customPic/index.vue'
 import CommandMenu from '@/components/commandMenu/index.vue'
 import Setting from './setting/index.vue'
-import { setUserAuthority } from '@/api/user'
-import { emitter } from '@/utils/bus.js'
-import { computed, ref, onMounted, nextTick } from 'vue'
-import { useRouter, useRoute } from 'vue-router'
-import { useRouterStore } from '@/pinia/modules/router'
-import { fmtTitle } from '@/utils/fmtRouterTitle'
-import { useUserStore } from '@/pinia/modules/user'
+import {setUserAuthority} from '@/api/user'
+import {emitter} from '@/utils/bus.js'
+import {computed, ref, onMounted, nextTick, reactive} from 'vue'
+import {useRouter, useRoute} from 'vue-router'
+import {useRouterStore} from '@/pinia/modules/router'
+import {fmtTitle} from '@/utils/fmtRouterTitle'
+import {useUserStore} from '@/pinia/modules/user'
+import config from "@/core/config";
+import {sysInfo} from "@/api/system";
 
 const router = useRouter()
 const route = useRoute()
@@ -141,7 +144,7 @@ const first = ref('')
 const dialogVisible = ref(false)
 const initPage = () => {
   // 判断当前用户的操作系统
-  if(window.localStorage.getItem('osType') === 'WIN') {
+  if (window.localStorage.getItem('osType') === 'WIN') {
     first.value = 'Ctrl'
   } else {
     first.value = '⌘'
@@ -156,7 +159,7 @@ const initPage = () => {
   }
   window.addEventListener('keydown', handleKeyDown);
 
-    const screenWidth = document.body.clientWidth
+  const screenWidth = document.body.clientWidth
   if (screenWidth < 1000) {
     isMobile.value = true
     isSider.value = false
@@ -173,6 +176,20 @@ const initPage = () => {
 }
 
 initPage()
+
+// 获取系统配置
+const sysInfoObj = reactive({
+  name: config.appName
+})
+const getSysInfo = () => {
+  sysInfo().then(async (data) => {
+    if (data.data.sysName !== "") {
+      sysInfoObj.name = data.data.sysName
+    }
+  })
+}
+getSysInfo()
+
 
 const command = ref()
 const handleCommand = () => {
@@ -227,7 +244,7 @@ const backgroundColor = computed(() => {
 
 const matched = computed(() => route.meta.matched)
 
-const changeUserAuth = async(id) => {
+const changeUserAuth = async (id) => {
   const res = await setUserAuthority({
     authorityId: id
   })
@@ -239,18 +256,18 @@ const changeUserAuth = async(id) => {
 
 const reloadFlag = ref(true)
 let reloadTimer = null
-const reload = async() => {
+const reload = async () => {
   if (reloadTimer) {
     window.clearTimeout(reloadTimer)
   }
-  reloadTimer = window.setTimeout(async() => {
+  reloadTimer = window.setTimeout(async () => {
     if (route.meta.keepAlive) {
       reloadFlag.value = false
       await nextTick()
       reloadFlag.value = true
     } else {
       const title = route.meta.title
-      router.push({ name: 'Reload', params: { title }})
+      router.push({name: 'Reload', params: {title}})
     }
   }, 400)
 }
@@ -264,7 +281,7 @@ const totalCollapse = () => {
 }
 
 const toPerson = () => {
-  router.push({ name: 'person' })
+  router.push({name: 'person'})
 }
 const changeShadow = () => {
   isShadowBg.value = !isShadowBg.value
@@ -275,20 +292,23 @@ const changeShadow = () => {
 
 <style lang="scss">
 @import '@/style/mobile.scss';
+
 .button {
   font-size: 12px;
   color: #666;
-  background:	rgb(250,250,250);
-  width: 25px!important;
+  background: rgb(250, 250, 250);
+  width: 25px !important;
   padding: 4px 8px !important;
   border: 1px solid #eaeaea;
   margin-right: 4px;
   border-radius: 4px;
 }
+
 :deep .el-overlay {
-  background-color: hsla(0,0%,100%,.9) !important;
+  background-color: hsla(0, 0%, 100%, .9) !important;
 }
-.command-box{
+
+.command-box {
 
 }
 </style>

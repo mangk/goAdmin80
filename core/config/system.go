@@ -11,4 +11,5 @@ type System struct {
 	LimitCountIP      int    `json:"ipLimitCount" yaml:"ipLimitCount"`
 	LimitTimeIP       int    `json:"ipLimitTime" yaml:"ipLimitTime"`
 	FrontRouterPrefix string `json:"frontRouterPrefix" yaml:"frontRouterPrefix"`
+	Name              string `json:"name" yaml:"name"`
 }

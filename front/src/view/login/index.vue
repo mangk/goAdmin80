@@ -8,7 +8,7 @@
               src="../../assets/goAdmin80.png"
               alt
           >
-          <p class="login_panel_form_title_p">{{ $GO_ADMIN_80.appName }}</p>
+          <p class="login_panel_form_title_p">{{ sysInfoObj.name }}</p>
         </div>
         <el-form
             ref="loginForm"
@@ -86,12 +86,14 @@ export default {
 
 <script setup>
 import {captcha} from '@/api/user'
+import {sysInfo} from "@/api/system";
 import {checkDB} from '@/api/initdb'
 import BottomInfo from '@/view/layout/bottomInfo/bottomInfo.vue'
-import {reactive, ref} from 'vue'
+import {getCurrentInstance, reactive, ref} from 'vue'
 import {ElMessage} from 'element-plus'
 import {useRouter} from 'vue-router'
 import {useUserStore} from '@/pinia/modules/user'
+import config from "@/core/config";
 
 const router = useRouter()
 // 验证函数
@@ -109,6 +111,19 @@ const checkPassword = (rule, value, callback) => {
     callback()
   }
 }
+
+// 获取系统配置
+const sysInfoObj = reactive({
+  name: config.appName
+})
+const getSysInfo = () => {
+  sysInfo().then(async (data) => {
+    if (data.data.sysName !== "") {
+      sysInfoObj.name = data.data.sysName
+    }
+  })
+}
+getSysInfo()
 
 // 获取验证码
 const loginVerify = () => {
