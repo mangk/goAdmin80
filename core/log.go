@@ -4,6 +4,7 @@ import (
 	rotatelogs "github.com/lestrrat-go/file-rotatelogs"
 	"go.uber.org/zap"
 	"go.uber.org/zap/zapcore"
+	"log"
 	"os"
 	"path"
 	"time"
@@ -66,6 +67,8 @@ func (c *Core) initLog() {
 
 	c.log = zap.New(zapcore.NewCore(encoder, zapcore.NewMultiWriteSyncer(writer...), level), opt...)
 	zap.ReplaceGlobals(c.log)
+
+	log.SetOutput(NewZapLoggerAdapter(c.log))
 }
 
 func getLogfileWriter(dirName string) *rotatelogs.RotateLogs {
@@ -79,4 +82,22 @@ func getLogfileWriter(dirName string) *rotatelogs.RotateLogs {
 		panic("设置日志输出错误:" + err.Error())
 	}
 	return fileWriter
+}
+
+type ZapLoggerAdapter struct {
+	logger *zap.Logger
+}
+
+// NewZapLoggerAdapter 创建一个Zap日志适配器
+func NewZapLoggerAdapter(logger *zap.Logger) *ZapLoggerAdapter {
+	return &ZapLoggerAdapter{
+		logger: logger,
+	}
+}
+
+// Write 实现io.Writer接口的Write方法，用于将日志消息写入Zap日志库
+func (a *ZapLoggerAdapter) Write(p []byte) (n int, err error) {
+	// 将日志消息写入Zap日志库
+	a.logger.WithOptions(zap.WithCaller(false)).With(zap.Namespace("_sys")).Info("", zap.String("log", string(p)))
+	return len(p), nil
 }

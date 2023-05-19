@@ -85,14 +85,11 @@ func (c *Core) ListenAndServe() {
 func ginLogger(logger *zap.Logger) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		start := time.Now()
-
 		// 处理请求
 		c.Next()
-
 		// 记录日志
 		end := time.Now()
 		latency := end.Sub(start)
-
 		status := c.Writer.Status()
 		clientIP := c.ClientIP()
 		method := c.Request.Method
