@@ -10,6 +10,7 @@ system:
   ipLimitCount: 15000
   ipLimitTime: 3600
   frontRouterPrefix:
+  fullHttpLog: true
 jwt:
   signingKey: 273628f7-9fb4-4e73-8f8d-ca954710d01d
   expiresTime: 7d

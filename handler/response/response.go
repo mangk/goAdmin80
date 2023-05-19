@@ -2,6 +2,8 @@ package response
 
 import (
 	"github.com/gin-gonic/gin"
+	"github.com/mangk/goAdmin80/core"
+	"go.uber.org/zap"
 	"net/http"
 )
 
@@ -18,11 +20,20 @@ const (
 
 func Result(httpCode, systemCode int, data interface{}, msg string, c *gin.Context) {
 	// 开始时间
-	c.JSON(httpCode, Response{
+	resp := Response{
 		systemCode,
 		data,
 		msg,
-	})
+	}
+	c.JSON(httpCode, resp)
+	if core.Config().System.FullHttpLog {
+		req, has := c.Get("__req__")
+		if !has {
+			core.Log().With(zap.Namespace("_httpLog")).Error("use full http log but no use FullHttpLog middleware")
+		}
+		uuid, _ := c.Get("__uuid__")
+		core.Log().WithOptions(zap.WithCaller(false)).With(zap.Namespace("_httpLog")).Info(uuid.(string), zap.String("method", c.Request.Method), zap.Any("req", req), zap.Any("resp", resp))
+	}
 }
 
 func Ok(c *gin.Context) {
@@ -42,7 +53,7 @@ func OkWithDetailed(data interface{}, message string, c *gin.Context) {
 }
 
 func Fail(c *gin.Context, httpCode ...int) {
-	hc := http.StatusOK // TODO 默认的 http code 是多少好呢
+	hc := http.StatusOK
 	if len(httpCode) == 1 {
 		hc = httpCode[0]
 	}
@@ -50,7 +61,7 @@ func Fail(c *gin.Context, httpCode ...int) {
 }
 
 func FailWithMessage(message string, c *gin.Context, httpCode ...int) {
-	hc := http.StatusOK // TODO 默认的 http code 是多少好呢
+	hc := http.StatusOK
 	if len(httpCode) == 1 {
 		hc = httpCode[0]
 	}
@@ -58,7 +69,7 @@ func FailWithMessage(message string, c *gin.Context, httpCode ...int) {
 }
 
 func FailWithDetailed(data interface{}, message string, c *gin.Context, httpCode ...int) {
-	hc := http.StatusOK // TODO 默认的 http code 是多少好呢
+	hc := http.StatusOK
 	if len(httpCode) == 1 {
 		hc = httpCode[0]
 	}
