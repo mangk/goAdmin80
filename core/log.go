@@ -104,5 +104,13 @@ func (a *ZapLoggerAdapter) Write(p []byte) (n int, err error) {
 
 func (a *ZapLoggerAdapter) Printf(message string, data ...interface{}) {
 	// TODO 通过 a.name 区分日志类型
-	_core.log.WithOptions(zap.WithCaller(false)).Info("", zap.Any(a.name, data))
+	_core.log.WithOptions(zap.WithCaller(false)).With(zap.Namespace(a.name)).Info("", zap.String("message", message), zap.Any("data", data))
+}
+
+func (a *ZapLoggerAdapter) Info(msg string, keysAndValues ...interface{}) {
+	a.logger.WithOptions(zap.WithCaller(false)).With(zap.Namespace(a.name)).Info("", zap.String("message", msg), zap.Any("data", keysAndValues))
+}
+
+func (a *ZapLoggerAdapter) Error(err error, msg string, keysAndValues ...interface{}) {
+	a.logger.WithOptions(zap.WithCaller(false)).With(zap.Namespace(a.name)).Error("", zap.String("message", msg), zap.Any("data", keysAndValues), zap.Error(err))
 }
