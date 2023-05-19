@@ -97,11 +97,11 @@ func ginLogger(logger *zap.Logger) gin.HandlerFunc {
 		clientIP := c.ClientIP()
 		method := c.Request.Method
 		path := c.Request.URL.Path
-		logger.With(zap.Namespace("_gin")).Info("",
+		logger.WithOptions(zap.WithCaller(false)).With(zap.Namespace("_gin")).Info("",
 			zap.Int("status", status),
 			zap.String("method", method),
-			zap.String("path", path),
 			zap.String("clientIP", clientIP),
-			zap.String("cost", fmt.Sprintf("%.3fms", float64(latency.Nanoseconds())/float64(time.Millisecond))))
+			zap.String("cost", fmt.Sprintf("%s", latency)),
+			zap.String("path", path))
 	}
 }

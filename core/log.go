@@ -18,7 +18,7 @@ func (c *Core) initLog() {
 		writer    []zapcore.WriteSyncer // 日志输出位置
 		encoder   zapcore.Encoder       // 日志格式化
 		encodeCfg zapcore.EncoderConfig // 日志格式化配置
-		level     zapcore.Level         // 日志登记
+		level     zapcore.Level         // 日志等级
 		opt       []zap.Option
 	)
 
@@ -37,6 +37,7 @@ func (c *Core) initLog() {
 		EncodeTime: func(t time.Time, encoder zapcore.PrimitiveArrayEncoder) {
 			encoder.AppendString(t.Format("2006-01-02 15:04:05.00000"))
 		},
+		EncodeCaller: zapcore.ShortCallerEncoder,
 	}
 
 	if Config().Zap.Format == "json" {
@@ -61,6 +62,7 @@ func (c *Core) initLog() {
 	if Config().Zap.Prefix != "" {
 		opt = append(opt, zap.Fields(zap.String("_prefix", Config().Zap.Prefix)))
 	}
+	opt = append(opt, zap.WithCaller(true))
 
 	c.log = zap.New(zapcore.NewCore(encoder, zapcore.NewMultiWriteSyncer(writer...), level), opt...)
 	zap.ReplaceGlobals(c.log)

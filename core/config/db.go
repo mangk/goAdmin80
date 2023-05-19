@@ -21,7 +21,6 @@ type DB struct {
 	MaxIdleConns int    `json:"maxIdleConns" yaml:"maxIdleConns"`      // 空闲中的最大连接数
 	MaxOpenConns int    `json:"maxOpenConns" yaml:"maxOpenConns"`      // 打开到数据库的最大连接数
 	LogMode      string `json:"logMode" yaml:"logMode"`                // 是否开启Gorm全局日志
-	LogZap       bool   `json:"logZap" yaml:"logZap"`                  // 是否通过zap写入日志文件
 }
 
 func (g *DB) Dialector() gorm.Dialector {
