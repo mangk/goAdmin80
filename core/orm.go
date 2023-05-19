@@ -27,12 +27,12 @@ func (c *Core) initDB() {
 		cfg := gorm.Config{
 			Logger: logger.New(NewWriter(), logger.Config{
 				SlowThreshold: 200 * time.Millisecond,
-				LogLevel:      logger.Info,
+				LogLevel:      logger.LogLevel(dbCfg.LogMode),
 				Colorful:      false,
 			}),
 			NamingStrategy: schema.NamingStrategy{
-				TablePrefix: dbCfg.Prefix,
-				//SingularTable: true, // TODO 这里是否通过配置项目支持
+				TablePrefix:   dbCfg.Prefix,
+				SingularTable: dbCfg.Singular,
 			},
 			DisableAutomaticPing: true,
 		}

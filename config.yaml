@@ -24,33 +24,29 @@ db:
   default:
     driver: mysql
     path:
-    port:
+    port: 3306
     config: charset=utf8mb4&parseTime=True&loc=Local
     dbname:
     username:
     password:
     prefix:
     singular: false
-    engine: ""
     maxIdleConns: 10
     maxOpenConns: 20
-    logMode: error
-    logZap: false
+    logMode: 4
   another:
-    driver: mssql
+    driver: mysql
     path:
-    port:
+    port: 3306
     config: charset=utf8mb4&parseTime=True&loc=Local
     dbname:
     username:
     password:
     prefix:
     singular: false
-    engine:
     maxIdleConns: 10
     maxOpenConns: 20
-    logMode: error
-    logZap: false
+    logMode: 4
 redis:
   db: 0
   addr: 127.0.0.1:6379
