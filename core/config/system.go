@@ -12,5 +12,4 @@ type System struct {
 	LimitTimeIP       int    `json:"ipLimitTime" yaml:"ipLimitTime"`
 	FrontRouterPrefix string `json:"frontRouterPrefix" yaml:"frontRouterPrefix"`
 	Name              string `json:"name" yaml:"name"`
-	FullHttpLog       bool   `json:"fullHttpLog" yaml:"fullHttpLog"`
 }

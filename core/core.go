@@ -1,18 +1,15 @@
 package core
 
 import (
-	"bytes"
 	"fmt"
 	"github.com/fvbock/endless"
 	"github.com/gin-gonic/gin"
 	"github.com/go-redis/redis/v8"
-	"github.com/google/uuid"
 	"github.com/mangk/goAdmin80/core/config"
 	"github.com/songzhibin97/gkit/cache/local_cache"
 	"github.com/spf13/viper"
 	"go.uber.org/zap"
 	"gorm.io/gorm"
-	"io"
 	"time"
 )
 
@@ -66,9 +63,6 @@ func New(path string) *Core {
 	gin.DefaultErrorWriter = adapter
 	_core.gin = gin.New()
 	_core.gin.Use(gin.Logger(), gin.Recovery())
-	if _core.config.System.FullHttpLog {
-		_core.gin.Use(FullHttpLog())
-	}
 
 	return _core
 }
@@ -106,19 +100,5 @@ func ginLogger(logger *zap.Logger) gin.HandlerFunc {
 			zap.String("clientIP", clientIP),
 			zap.String("cost", fmt.Sprintf("%s", latency)),
 			zap.String("path", path))
-	}
-}
-
-func FullHttpLog() gin.HandlerFunc {
-	return func(ctx *gin.Context) {
-		data, _ := ctx.GetRawData()
-		ctx.Set("__req__", map[string]interface{}{
-			"body":     string(data),
-			"rawQuery": ctx.Request.URL.RawQuery,
-			"path":     ctx.Request.URL.Path,
-		})
-		ctx.Set("__uuid__", uuid.New().String())
-		ctx.Request.Body = io.NopCloser(bytes.NewBuffer(data))
-		ctx.Next()
 	}
 }

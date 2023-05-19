@@ -26,11 +26,7 @@ func Result(httpCode, systemCode int, data interface{}, msg string, c *gin.Conte
 		msg,
 	}
 	c.JSON(httpCode, resp)
-	if core.Config().System.FullHttpLog {
-		req, has := c.Get("__req__")
-		if !has {
-			core.Log().With(zap.Namespace("_httpLog")).Error("use full http log but no use FullHttpLog middleware")
-		}
+	if req, has := c.Get("__req__"); has {
 		uuid, _ := c.Get("__uuid__")
 		core.Log().WithOptions(zap.WithCaller(false)).With(zap.Namespace("_httpLog")).Info(uuid.(string), zap.String("method", c.Request.Method), zap.Any("req", req), zap.Any("resp", resp))
 	}
