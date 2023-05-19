@@ -2,7 +2,6 @@ package core
 
 import (
 	"fmt"
-	"go.uber.org/zap"
 	"gorm.io/gorm"
 	"gorm.io/gorm/logger"
 	"gorm.io/gorm/schema"
@@ -25,7 +24,7 @@ func DB(name ...string) *gorm.DB {
 func (c *Core) initDB() {
 	for name, dbCfg := range c.config.DB {
 		cfg := gorm.Config{
-			Logger: logger.New(NewWriter(), logger.Config{
+			Logger: logger.New(NewZapLoggerAdapter(c.log, "_gorm"), logger.Config{
 				SlowThreshold: 200 * time.Millisecond,
 				LogLevel:      logger.LogLevel(dbCfg.LogMode),
 				Colorful:      false,
@@ -50,15 +49,4 @@ func (c *Core) initDB() {
 		conn.SetConnMaxLifetime(time.Hour)
 		c.dbList[name] = db
 	}
-}
-
-type Writer struct {
-}
-
-func NewWriter() *Writer {
-	return &Writer{}
-}
-
-func (w *Writer) Printf(message string, data ...interface{}) {
-	_core.log.WithOptions(zap.WithCaller(false)).Info("", zap.Any("_gorm", data))
 }

@@ -10,7 +10,6 @@ import (
 	"github.com/spf13/viper"
 	"go.uber.org/zap"
 	"gorm.io/gorm"
-	"io"
 	"time"
 )
 
@@ -59,9 +58,11 @@ func New(path string) *Core {
 	default:
 		gin.SetMode(gin.ReleaseMode)
 	}
-	gin.DefaultWriter = io.Discard
+	adapter := NewZapLoggerAdapter(_core.log, "_gin")
+	gin.DefaultWriter = adapter
+	gin.DefaultErrorWriter = adapter
 	_core.gin = gin.New()
-	_core.gin.Use(ginLogger(_core.log), gin.Recovery())
+	_core.gin.Use(gin.Logger(), gin.Recovery())
 	_core.gin.Delims("{[{", "}]}")
 
 	return _core

@@ -68,7 +68,7 @@ func (c *Core) initLog() {
 	c.log = zap.New(zapcore.NewCore(encoder, zapcore.NewMultiWriteSyncer(writer...), level), opt...)
 	zap.ReplaceGlobals(c.log)
 
-	log.SetOutput(NewZapLoggerAdapter(c.log))
+	log.SetOutput(NewZapLoggerAdapter(c.log, "_sys"))
 }
 
 func getLogfileWriter(dirName string) *rotatelogs.RotateLogs {
@@ -85,19 +85,24 @@ func getLogfileWriter(dirName string) *rotatelogs.RotateLogs {
 }
 
 type ZapLoggerAdapter struct {
+	name   string
 	logger *zap.Logger
 }
 
-// NewZapLoggerAdapter 创建一个Zap日志适配器
-func NewZapLoggerAdapter(logger *zap.Logger) *ZapLoggerAdapter {
+func NewZapLoggerAdapter(logger *zap.Logger, name string) *ZapLoggerAdapter {
 	return &ZapLoggerAdapter{
+		name:   name,
 		logger: logger,
 	}
 }
 
-// Write 实现io.Writer接口的Write方法，用于将日志消息写入Zap日志库
 func (a *ZapLoggerAdapter) Write(p []byte) (n int, err error) {
-	// 将日志消息写入Zap日志库
-	a.logger.WithOptions(zap.WithCaller(false)).With(zap.Namespace("_sys")).Info("", zap.String("log", string(p)))
+	// TODO 通过 a.name 区分日志类型
+	a.logger.WithOptions(zap.WithCaller(false)).With(zap.Namespace(a.name)).Info("", zap.String("log", string(p)))
 	return len(p), nil
+}
+
+func (a *ZapLoggerAdapter) Printf(message string, data ...interface{}) {
+	// TODO 通过 a.name 区分日志类型
+	_core.log.WithOptions(zap.WithCaller(false)).Info("", zap.Any(a.name, data))
 }
