@@ -45,10 +45,10 @@ const (
 )
 
 type ElOption struct {
-	Type       uint8  // 对应 Element 组件类型
-	SearchType uint8  // 后台搜索的条件类型
-	Options    string // 筛选框 item
-	Props      string // 筛选框属性设置
+	Type       uint8         // 对应 Element 组件类型
+	SearchType uint8         // 后台搜索的条件类型
+	Options    func() string // 筛选框 item
+	Props      string        // 筛选框属性设置
 }
 
 // 字段
@@ -558,31 +558,35 @@ func formatElement(field Field) (html interface{}) {
 		return template.HTML(`
         <el-form-item label="` + field.Name + `">
 			<el-date-picker v-model="search.` + field.Column + `" type="` + t + `" placeholder="` + field.Name + `" range-separator="～" start-placeholder="开始时间" end-placeholder="结束时间" clearable/>
-        </el-form-item>
-`)
+        </el-form-item>`)
 	case ElementComponentSelect:
-		if field.ElOption.Options != "" {
+		options := field.ElOption.Options
+		if options != nil {
 			return template.HTML(`
         <el-form-item label="` + field.Name + `">
-			<el-select v-model="search.` + field.Column + `" placeholder="` + field.Name + `" clearable>
-				<el-option v-for="item in ` + field.ElOption.Options + `" :key="item.v" :label="item.k" :value="item.v" />
+			<el-select v-model="search.` + field.Column + `" placeholder="` + field.Name + `" filterable clearable>
+				<el-option v-for="item in ` + options() + `" :key="item.v" :label="item.k" :value="item.v" />
 			</el-select>
-        </el-form-item>
-`)
+        </el-form-item>`)
 		}
 		return template.HTML(`
         <el-form-item label="` + field.Name + `">
-			<el-select v-model="search.` + field.Column + `" placeholder="` + field.Name + `" clearable>
-				<el-option v-for="item in [{k:1,v:1},{k:2,v:2}]" :key="item.v" :label="item.k" :value="item.v" />
+			<el-select v-model="search.` + field.Column + `" placeholder="` + field.Name + `" filterable clearable>
+				<el-option v-for="item in []" :key="item.v" :label="item.k" :value="item.v" />
 			</el-select>
-        </el-form-item>
-`)
+        </el-form-item>`)
 	case ElementComponentCascader:
+		options := field.ElOption.Options
+		if options != nil {
+			return template.HTML(`
+        <el-form-item label="` + field.Name + `">
+			<el-cascader v-model="search.` + field.Column + `" :options='` + options() + `' :props="` + field.ElOption.Props + `" clearable :show-all-levels="false" filterable />
+        </el-form-item>`)
+		}
 		return template.HTML(`
         <el-form-item label="` + field.Name + `">
-			<el-cascader v-model="search.` + field.Column + `" :options="` + field.ElOption.Options + `" :props="` + field.ElOption.Props + `" clearable />
-        </el-form-item>
-`)
+			<el-cascader v-model="search.` + field.Column + `" :options="[]" :props="` + field.ElOption.Props + `" clearable :show-all-levels="false" filterable />
+        </el-form-item>`)
 	}
 	return
 
