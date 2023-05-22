@@ -26,9 +26,9 @@ func Result(httpCode, systemCode int, data interface{}, msg string, c *gin.Conte
 		msg,
 	}
 	c.JSON(httpCode, resp)
-	if req, has := c.Get("__req__"); has {
-		uuid, _ := c.Get("__uuid__")
-		core.Log().WithOptions(zap.WithCaller(false)).With(zap.Namespace("_httpLog")).Info(uuid.(string), zap.String("method", c.Request.Method), zap.Any("req", req), zap.Any("resp", resp))
+	if trace, has := c.Get("_trace"); has {
+		req, _ := c.Get("__req__")
+		core.Log().WithOptions(zap.WithCaller(false)).With(zap.Namespace("_trace")).Info("", zap.String("method", c.Request.Method), zap.Any("req", req), zap.Any("resp", resp), zap.Any("id", trace))
 	}
 }
 
