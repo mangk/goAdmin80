@@ -53,15 +53,16 @@ type ElOption struct {
 
 // 字段
 type Field struct {
-	Name             string        // 展示名
-	Column           string        // 字段名
-	Type             string        // 字段类型
-	ElOption         ElOption      // 对应前端 Element 类型 TODO 实现这里的功能，通过模版渲染switch来完成 表单，列表内容的输出
-	Translate        func() string // 字段翻译函数 TODO 功能实现
-	SortAble         bool          // 是否排序字段
-	Hide             bool          // 是否对外展示
-	EditAble         bool          // 是否可更新
-	DefaultValueFunc func() string // 数据创建时的默认值
+	Name             string                              // 展示名
+	Column           string                              // 字段名
+	Type             string                              // 字段类型
+	ElOption         ElOption                            // 对应前端 Element 类型 TODO 实现这里的功能，通过模版渲染switch来完成 表单，列表内容的输出
+	TranslateFunc    func() map[string]string            // 字段翻译函数：返回用来翻译字段的map
+	FormatFunc       func(value interface{}) interface{} // 字段格式化函数
+	SortAble         bool                                // 是否排序字段
+	Hide             bool                                // 是否对外展示
+	EditAble         bool                                // 是否可更新
+	DefaultValueFunc func() string                       // 数据创建时的默认值
 }
 
 // 实体
@@ -251,7 +252,7 @@ func (e *Engine) page(ctx *gin.Context) {
 	req := ctx.MustGet(middleware.RK).(request.CRUDRequest)
 
 	var count int64
-	var data interface{}
+	var data []map[string]interface{}
 	var err error
 
 	if e.opt.CustomDataOrigin != nil {
@@ -330,6 +331,27 @@ func (e *Engine) page(ctx *gin.Context) {
 				query = query.Order(fmt.Sprintf("%s desc", e.opt.PK))
 			}
 			data, err = model.Find(query)
+			// 对每个字段的数据进行翻译
+			for _, field := range e.field {
+				var tMap map[string]string
+				if field.TranslateFunc != nil {
+					tMap = field.TranslateFunc()
+				}
+				for i := range data {
+					// 先翻译
+					if field.TranslateFunc != nil {
+						if val, ok := data[i][field.Column].(string); ok {
+							if v, ok := tMap[val]; ok {
+								data[i][field.Column] = v
+							}
+						}
+					}
+					// 再格式化
+					if field.FormatFunc != nil {
+						data[i][field.Column] = field.FormatFunc(data[i][field.Column])
+					}
+				}
+			}
 			if err != nil {
 				response.FailWithDetailed(err.Error(), "数据库查询错误", ctx)
 				return
