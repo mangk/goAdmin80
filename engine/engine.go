@@ -341,7 +341,7 @@ func (e *Engine) page(ctx *gin.Context) {
 					// 先翻译
 					if field.TranslateFunc != nil {
 						if val, ok := data[i][field.Column].(string); ok {
-							if v, ok := tMap[val]; ok {
+							if v, has := tMap[val]; has {
 								data[i][field.Column] = v
 							}
 						}
