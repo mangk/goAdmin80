@@ -81,6 +81,7 @@ type Options struct {
 	TableName        string // 指定表名
 	PK               string // 指定主键字段
 	SoftDelete       string // 指定软删除字段
+	OrderBy          string // 指定默认排序
 	HideCreateBtn    bool   // 隐藏创建按钮
 	HideDeleteBtn    bool   // 隐藏删除按钮
 	HideEditBtn      bool   // 隐藏编辑按钮
@@ -328,7 +329,11 @@ func (e *Engine) page(ctx *gin.Context) {
 			if req.Sort != "" {
 				query = query.Order(req.Sort)
 			} else {
-				query = query.Order(fmt.Sprintf("%s desc", e.opt.PK))
+				if e.opt.OrderBy != "" {
+					query = query.Order(e.opt.OrderBy)
+				} else {
+					query = query.Order(fmt.Sprintf("%s desc", e.opt.PK))
+				}
 			}
 			data, err = model.Find(query)
 			// 对每个字段的数据进行翻译

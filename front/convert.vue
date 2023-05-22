@@ -34,7 +34,7 @@
       <el-table :data="tableData.list" @sort-change="_sortChange" @selection-change="_selectionChange">
         <el-table-column type="selection" width="55"/>
         {[{ range .field }]}
-        <el-table-column align="left" label="{[{.Name}]}" min-width="150" prop="{[{.Column}]}"
+        <el-table-column align="left" label="{[{.Name}]}" min-width="160" prop="{[{.Column}]}"
                          :sortable="{[{ if .SortAble }]}'custom'{[{ else }]}false{[{end}]}"/>
         {[{ end }]}
         <el-table-column align="left" fixed="right" label="操作" width="120">
