@@ -3,10 +3,7 @@ system:
   env: debug # debug | test | release
   host: 127.0.0.1
   port: 8888
-  dbType: mysql
-  ossType: local
   useMultipoint: false
-  useRedis: false
   ipLimitCount: 15000
   ipLimitTime: 3600
   frontRouterPrefix:

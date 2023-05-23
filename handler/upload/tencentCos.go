@@ -27,18 +27,21 @@ func (*TencentCOS) UploadFile(file *multipart.FileHeader) (string, string, error
 	defer f.Close() // 创建文件 defer 关闭
 	fileKey := fmt.Sprintf("%d%s", time.Now().Unix(), file.Filename)
 
-	_, err := client.Object.Put(context.Background(), core.Config().TencentCOS.PathPrefix+"/"+fileKey, f, nil)
+	_, err := client.Object.Put(context.Background(), fileKey, f, nil)
 	if err != nil {
 		panic(err)
 	}
-	return core.Config().TencentCOS.BaseURL + "/" + core.Config().TencentCOS.PathPrefix + "/" + fileKey, fileKey, nil
+
+	if core.Config().TencentCOS.BaseURL != "" {
+		return core.Config().TencentCOS.BaseURL + "/" + fileKey, fileKey, nil
+	}
+	return client.BaseURL.BucketURL.Host + "/" + fileKey, fileKey, nil
 }
 
 // DeleteFile delete file form COS
 func (*TencentCOS) DeleteFile(key string) error {
 	client := NewClient()
-	name := core.Config().TencentCOS.PathPrefix + "/" + key
-	_, err := client.Object.Delete(context.Background(), name)
+	_, err := client.Object.Delete(context.Background(), key)
 	if err != nil {
 		core.Log().Error("function bucketManager.Delete() Filed", zap.Any("err", err.Error()))
 		return errors.New("function bucketManager.Delete() Filed, err:" + err.Error())

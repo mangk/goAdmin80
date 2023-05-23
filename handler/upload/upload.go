@@ -1,7 +1,6 @@
 package upload
 
 import (
-	"github.com/mangk/goAdmin80/core"
 	"mime/multipart"
 )
 
@@ -11,7 +10,7 @@ type OSS interface {
 }
 
 func NewOss(ossType ...string) OSS {
-	t := core.Config().System.OssType
+	t := "local"
 	if len(ossType) > 0 {
 		t = ossType[0]
 	}

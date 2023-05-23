@@ -15,12 +15,11 @@ type AliyunOSS struct {
 }
 
 type TencentCOS struct {
-	Bucket     string `json:"bucket" yaml:"bucket"`
-	Region     string `json:"region" yaml:"region"`
-	SecretID   string `json:"secretId" yaml:"secretId"`
-	SecretKey  string `json:"secretKey" yaml:"secretKey"`
-	BaseURL    string `json:"baseUrl" yaml:"baseUrl"`
-	PathPrefix string `json:"pathPrefix" yaml:"pathPrefix"`
+	Bucket    string `json:"bucket" yaml:"bucket"`       // 储存桶
+	Region    string `json:"region" yaml:"region"`       // 地域
+	SecretID  string `json:"secretId" yaml:"secretId"`   // id
+	SecretKey string `json:"secretKey" yaml:"secretKey"` // key
+	BaseURL   string `json:"baseUrl" yaml:"baseUrl"`     // 文件访问CND域名
 }
 
 type Qiniu struct {
