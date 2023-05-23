@@ -17,11 +17,15 @@ func SysInit(path string) *core.Core {
 	root := core.HttpEngine()
 	root.Use(middleware.CorsByRules())
 
+	// ----------注册系统本地上传静态文件----------
+	for _, cfg := range core.Config().File {
+		if cfg.Driver == "local" {
+			root.StaticFS(cfg.PrefixPath, http.Dir(cfg.StorePath))
+		}
+	}
+
 	// ----------系统初始化 start----------
 	sysGroup := root.Group("_sys")
-
-	// ----------注册系统本地上传静态文件----------
-	sysGroup.StaticFS(core.Config().Local.StorePath, http.Dir(core.Config().Local.StorePath))
 
 	// ----------注册系统默认 api----------
 	{

@@ -2,7 +2,9 @@ package upload
 
 import (
 	"errors"
+	"fmt"
 	"github.com/mangk/goAdmin80/core"
+	"github.com/mangk/goAdmin80/core/config"
 	"github.com/mangk/goAdmin80/utils"
 	"io"
 	"mime/multipart"
@@ -14,34 +16,33 @@ import (
 	"go.uber.org/zap"
 )
 
-type Local struct{}
+type Local struct {
+	cfg config.File
+}
 
-//@author: [piexlmax](https://github.com/piexlmax)
-//@author: [ccfish86](https://github.com/ccfish86)
-//@author: [SliverHorn](https://github.com/SliverHorn)
-//@object: *Local
-//@function: UploadFile
-//@description: 上传文件
-//@param: file *multipart.FileHeader
-//@return: string, string, error
-
-func (*Local) UploadFile(file *multipart.FileHeader) (string, string, error) {
+func (l *Local) UploadFile(file *multipart.FileHeader) (string, string, error) {
 	// 读取文件后缀
 	ext := path.Ext(file.Filename)
 	// 读取文件名并加密
 	name := strings.TrimSuffix(file.Filename, ext)
 	name = utils.MD5V([]byte(name))
 	// 拼接新文件名
-	filename := name + "_" + time.Now().Format("20060102150405") + ext
+	filename := fmt.Sprintf("%d_%s", time.Now().Unix(), file.Filename)
 	// 尝试创建此路径
-	mkdirErr := os.MkdirAll(core.Config().Local.StorePath, os.ModePerm)
+	mkdirErr := os.MkdirAll(l.cfg.StorePath, os.ModePerm)
 	if mkdirErr != nil {
 		core.Log().Error("function os.MkdirAll() Filed", zap.Any("err", mkdirErr.Error()))
 		return "", "", errors.New("function os.MkdirAll() Filed, err:" + mkdirErr.Error())
 	}
 	// 拼接路径和文件名
-	p := core.Config().Local.StorePath + "/" + filename
-	filepath := core.Config().Local.Path + "/" + filename
+	p := l.cfg.StorePath + "/" + filename
+
+	fileKeyBuild := make([]string, 0)
+	if l.cfg.PrefixPath != "" {
+		fileKeyBuild = append(fileKeyBuild, l.cfg.PrefixPath)
+	}
+	fileKeyBuild = append(fileKeyBuild, filename)
+	fileKey := strings.Join(fileKeyBuild, "/")
 
 	f, openError := file.Open() // 读取文件
 	if openError != nil {
@@ -63,21 +64,16 @@ func (*Local) UploadFile(file *multipart.FileHeader) (string, string, error) {
 		core.Log().Error("function io.Copy() Filed", zap.Any("err", copyErr.Error()))
 		return "", "", errors.New("function io.Copy() Filed, err:" + copyErr.Error())
 	}
-	return filepath, filename, nil
+
+	if l.cfg.CdnURL != "" {
+		return l.cfg.CdnURL + "/" + fileKey, filename, nil
+	}
+	return "/" + fileKey, filename, nil
 }
 
-//@author: [piexlmax](https://github.com/piexlmax)
-//@author: [ccfish86](https://github.com/ccfish86)
-//@author: [SliverHorn](https://github.com/SliverHorn)
-//@object: *Local
-//@function: DeleteFile
-//@description: 删除文件
-//@param: key string
-//@return: error
-
-func (*Local) DeleteFile(key string) error {
-	p := core.Config().Local.StorePath + "/" + key
-	if strings.Contains(p, core.Config().Local.StorePath) {
+func (l *Local) DeleteFile(key string) error {
+	p := l.cfg.StorePath + "/" + key
+	if strings.Contains(p, l.cfg.StorePath) {
 		if err := os.Remove(p); err != nil {
 			return errors.New("本地文件删除失败, err:" + err.Error())
 		}

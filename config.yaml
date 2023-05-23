@@ -12,10 +12,6 @@ jwt:
   expiresTime: 7d
   bufferTime: 1d
   issuer: qmPlus
-local:
-  path: uploads/file
-  storePath: uploads/file
-
 # 数据库
 db: # 最少提供 default 模块
   default:
@@ -53,6 +49,35 @@ redis:
     db: 1
     addr:
     password:
+file:
+  default:
+    driver: local # 类型 cos:腾讯云COS; oss:阿里云OSS; local:本地文件存储；
+    bucket:
+    region:
+    id:
+    key:
+    prefixPath: local
+    cdnUrl: local.cdn
+    storePath: uploads/file
+  t:
+    driver: cos
+    bucket: bucketName
+    region: location
+    id: id
+    key: key
+    prefixPath: tencent
+    cdnUrl: tencent.cdn
+    storePath:
+  a:
+    driver: oss
+    bucket: bucketName
+    region: location
+    id: id
+    key: key
+    prefixPath: ali
+    cdnUrl: ali.cdn
+    storePath:
+
 captcha:
   keyLong: 1
   imgWidth: 240

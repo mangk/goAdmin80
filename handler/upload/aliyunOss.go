@@ -2,18 +2,24 @@ package upload
 
 import (
 	"errors"
-	"github.com/mangk/goAdmin80/core"
-	"mime/multipart"
-	"time"
-
+	"fmt"
 	"github.com/aliyun/aliyun-oss-go-sdk/oss"
+	"github.com/mangk/goAdmin80/core"
+	"github.com/mangk/goAdmin80/core/config"
 	"go.uber.org/zap"
+	"mime/multipart"
+	"strings"
+	"time"
 )
 
-type AliyunOSS struct{}
+type AliyunOSS struct {
+	cfg config.File
+}
 
-func (*AliyunOSS) UploadFile(file *multipart.FileHeader) (string, string, error) {
-	bucket, err := NewBucket()
+func (a *AliyunOSS) UploadFile(file *multipart.FileHeader) (string, string, error) {
+	bucket, err := NewBucket(a.cfg)
+	c := bucket.GetConfig()
+	fmt.Println(c)
 	if err != nil {
 		core.Log().Error("function AliyunOSS.NewBucket() Failed", zap.Any("err", err.Error()))
 		return "", "", errors.New("function AliyunOSS.NewBucket() Failed, err:" + err.Error())
@@ -26,22 +32,28 @@ func (*AliyunOSS) UploadFile(file *multipart.FileHeader) (string, string, error)
 		return "", "", errors.New("function file.Open() Failed, err:" + openError.Error())
 	}
 	defer f.Close() // 创建文件 defer 关闭
-	// 上传阿里云路径 文件名格式 自己可以改 建议保证唯一性
-	// yunFileTmpPath := filepath.Join("uploads", time.Now().Format("2006-01-02")) + "/" + file.Filename
-	yunFileTmpPath := core.Config().AliyunOSS.BasePath + "/" + "uploads" + "/" + time.Now().Format("2006-01-02") + "/" + file.Filename
+	fileKeyBuild := make([]string, 0)
+	if a.cfg.PrefixPath != "" {
+		fileKeyBuild = append(fileKeyBuild, a.cfg.PrefixPath)
+	}
+	fileKeyBuild = append(fileKeyBuild, fmt.Sprintf("%d_%s", time.Now().Unix(), file.Filename))
+	fileKey := strings.Join(fileKeyBuild, "/")
 
 	// 上传文件流。
-	err = bucket.PutObject(yunFileTmpPath, f)
+	err = bucket.PutObject(fileKey, f)
 	if err != nil {
 		core.Log().Error("function formUploader.Put() Failed", zap.Any("err", err.Error()))
 		return "", "", errors.New("function formUploader.Put() Failed, err:" + err.Error())
 	}
 
-	return core.Config().AliyunOSS.BucketUrl + "/" + yunFileTmpPath, yunFileTmpPath, nil
+	if a.cfg.CdnURL != "" {
+		return a.cfg.CdnURL + "/" + fileKey, fileKey, nil
+	}
+	return bucket.BucketName + "." + bucket.Client.Config.Endpoint + "/" + fileKey, fileKey, nil
 }
 
-func (*AliyunOSS) DeleteFile(key string) error {
-	bucket, err := NewBucket()
+func (a *AliyunOSS) DeleteFile(key string) error {
+	bucket, err := NewBucket(a.cfg)
 	if err != nil {
 		core.Log().Error("function AliyunOSS.NewBucket() Failed", zap.Any("err", err.Error()))
 		return errors.New("function AliyunOSS.NewBucket() Failed, err:" + err.Error())
@@ -58,15 +70,15 @@ func (*AliyunOSS) DeleteFile(key string) error {
 	return nil
 }
 
-func NewBucket() (*oss.Bucket, error) {
+func NewBucket(cfg config.File) (*oss.Bucket, error) {
 	// 创建OSSClient实例。
-	client, err := oss.New(core.Config().AliyunOSS.Endpoint, core.Config().AliyunOSS.AccessKeyId, core.Config().AliyunOSS.AccessKeySecret)
+	client, err := oss.New(cfg.Region, cfg.ID, cfg.Key)
 	if err != nil {
 		return nil, err
 	}
 
 	// 获取存储空间。
-	bucket, err := client.Bucket(core.Config().AliyunOSS.BucketName)
+	bucket, err := client.Bucket(cfg.Bucket)
 	if err != nil {
 		return nil, err
 	}
