@@ -37,7 +37,6 @@ const props = defineProps({
   }
 })
 
-const path = ref('/_sys/')
 const noAvatar = ref(noAvatarPng)
 
 const userStore = useUserStore()
@@ -47,17 +46,17 @@ const avatar = computed(() => {
     if (userStore.userInfo.headerImg !== '' && userStore.userInfo.headerImg.slice(0, 4) === 'http') {
       return userStore.userInfo.headerImg
     }
-    return path.value + userStore.userInfo.headerImg
+    return userStore.userInfo.headerImg
   } else {
     if (props.picSrc !== '' && props.picSrc.slice(0, 4) === 'http') {
       return props.picSrc
     }
-    return path.value + props.picSrc
+    return props.picSrc
   }
 })
 const file = computed(() => {
   if (props.picSrc && props.picSrc.slice(0, 4) !== 'http') {
-    return path.value + props.picSrc
+    return props.picSrc
   }
   return props.picSrc
 })

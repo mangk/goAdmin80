@@ -31,7 +31,7 @@
         <div class="header-img-box-list">
           <el-image
             :key="key"
-            :src="(item.url && item.url.slice(0, 4) !== 'http')?path+item.url:item.url"
+            :src="(item.url && item.url.slice(0, 4) !== 'http')?item.url:item.url"
             @click="chooseImg(item.url,target,targetKey)"
           >
             <template #error>
@@ -99,7 +99,6 @@ defineProps({
 
 const drawer = ref(false)
 const picList = ref([])
-const path = ref( '/_sys/')
 
 const chooseImg = (url, target, targetKey) => {
   if (target && targetKey) {

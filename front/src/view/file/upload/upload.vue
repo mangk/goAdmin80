@@ -91,8 +91,6 @@ import WarningBar from '@/components/warningBar/warningBar.vue'
 import { ref } from 'vue'
 import { ElMessage, ElMessageBox } from 'element-plus'
 
-const path = ref('/_sys')
-
 const imageUrl = ref('')
 const imageCommon = ref('')
 
@@ -157,7 +155,7 @@ const downloadFile = (row) => {
     downloadImage(row.url, row.name)
   } else {
     debugger
-    downloadImage(path.value + '/' + row.url, row.name)
+    downloadImage( row.url, row.name)
   }
 }
 

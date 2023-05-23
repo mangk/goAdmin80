@@ -10,7 +10,7 @@
                 'background-image': `url(${
                   userStore.userInfo.headerImg &&
                   userStore.userInfo.headerImg.slice(0, 4) !== 'http'
-                    ? path + userStore.userInfo.headerImg
+                    ? userStore.userInfo.headerImg
                     : userStore.userInfo.headerImg
                 })`,
                 'background-repeat': 'no-repeat',
@@ -237,7 +237,6 @@ import { reactive, ref } from 'vue'
 import { ElMessage } from 'element-plus'
 import { useUserStore } from '@/pinia/modules/user'
 
-const path = ref('/_sys/')
 const activeName = ref('second')
 const rules = reactive({
   password: [
