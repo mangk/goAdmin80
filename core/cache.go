@@ -17,7 +17,8 @@ func Redis(driver ...string) *redis.Client {
 	if cache, ok := _core.redisList[d]; ok {
 		return cache
 	}
-	fmt.Printf("redis driver not found")
+	Log().Panic(fmt.Sprintf("[%s]redis不存在", driver))
+
 	return nil
 }
 
@@ -26,21 +27,18 @@ func Cache() local_cache.Cache {
 }
 
 func (c *Core) initRedis() {
-
-	redisCfg := Config().Redis
-	client := redis.NewClient(&redis.Options{
-		Addr:     redisCfg.Addr,
-		Password: redisCfg.Password, // no password set
-		DB:       redisCfg.DB,       // use default DB
-	})
-	pong, err := client.Ping(context.Background()).Result()
-	if err != nil {
-		fmt.Println(pong)
-		panic("Redis 初始化失败")
-		//global.GVA_LOG.Error("redis connect ping failed, err:", zap.Error(err))
+	for name, redisCfg := range c.config.Redis {
+		client := redis.NewClient(&redis.Options{
+			Addr:     redisCfg.Addr,
+			Password: redisCfg.Password, // no password set
+			DB:       redisCfg.DB,       // use default DB
+		})
+		_, err := client.Ping(context.Background()).Result()
+		if err != nil {
+			panic(fmt.Sprintf("[%s]Redis 初始化失败：%+v", name, err))
+		}
+		c.redisList[name] = client
 	}
-	//global.GVA_LOG.Info("redis connect ping response:", zap.String("pong", pong))
-	c.redisList["default"] = client
 }
 
 func (c *Core) initCache() {

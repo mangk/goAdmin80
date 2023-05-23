@@ -17,7 +17,7 @@ func DB(name ...string) *gorm.DB {
 	if db, ok := _core.dbList[d]; ok {
 		return db
 	}
-	panic(fmt.Sprintf("[%s]数据库不存在", name))
+	Log().Panic(fmt.Sprintf("[%s]数据库不存在", name))
 	return nil
 }
 
@@ -37,7 +37,7 @@ func (c *Core) initDB() {
 		}
 		db, err := gorm.Open(dbCfg.Dialector(), &cfg)
 		if err != nil {
-			panic(fmt.Sprintf("[%s]数据库初始化失败", name))
+			panic(fmt.Sprintf("[%s]数据库初始化失败：%+v", name, err))
 		}
 
 		conn, _ := db.DB()
