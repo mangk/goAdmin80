@@ -24,7 +24,7 @@ func Cors() gin.HandlerFunc {
 
 func CorsByRules() gin.HandlerFunc {
 	// 放行全部
-	if core.CROSConfig().Mode == "allowAll" {
+	if core.Config().Cors.Mode == "allowAll" {
 		return Cors()
 	}
 	return func(c *gin.Context) {
@@ -42,7 +42,7 @@ func CorsByRules() gin.HandlerFunc {
 		}
 
 		// 严格白名单模式且未通过检查，直接拒绝处理请求
-		if whitelist == nil && core.CROSConfig().Mode == "strictWhitelist" {
+		if whitelist == nil && core.Config().Cors.Mode == "strictWhitelist" {
 			c.AbortWithStatus(http.StatusForbidden)
 			return
 		}
@@ -53,7 +53,7 @@ func CorsByRules() gin.HandlerFunc {
 }
 
 func checkCors(currentOrigin string) *config.CORSWhitelist {
-	for _, whitelist := range core.CROSConfig().Whitelist {
+	for _, whitelist := range core.Config().Cors.Whitelist {
 		// 遍历配置中的跨域头，寻找匹配项
 		if currentOrigin == whitelist.AllowOrigin {
 			return &whitelist

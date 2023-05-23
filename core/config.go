@@ -40,7 +40,3 @@ func (c *Core) initConfig(path ...string) {
 func Config() config.Config {
 	return _core.config
 }
-
-func CROSConfig() config.CORS {
-	return _core.config.Cors
-}
