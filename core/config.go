@@ -9,7 +9,6 @@ import (
 func (c *Core) initConfig(path ...string) {
 	var configPath string
 	if len(path) == 0 {
-		// TODO 这里增加针对命令行参数配置文件路径的处理，并且优先级要高于代码中写死的配置
 		configPath = "./config.yaml"
 	} else {
 		configPath = path[0]
@@ -43,5 +42,5 @@ func Config() config.Config {
 }
 
 func CROSConfig() config.CORS {
-	return _core.cors
+	return _core.config.Cors
 }

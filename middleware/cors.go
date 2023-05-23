@@ -8,8 +8,8 @@ import (
 )
 
 func Cors() gin.HandlerFunc {
+	core.Log().Info("use middleware cors")
 	return func(c *gin.Context) {
-		method := c.Request.Method
 		origin := c.Request.Header.Get("Origin")
 		c.Header("Access-Control-Allow-Origin", origin)
 		c.Header("Access-Control-Allow-Headers", "Content-Type,AccessToken,X-CSRF-Token, Authorization, Token,X-Token,X-User-Id")
@@ -17,10 +17,6 @@ func Cors() gin.HandlerFunc {
 		c.Header("Access-Control-Expose-Headers", "Content-Length, Access-Control-Allow-Origin, Access-Control-Allow-Headers, Content-Type, New-Token, New-Expires-At")
 		c.Header("Access-Control-Allow-Credentials", "true")
 
-		// 放行所有OPTIONS方法
-		if method == "OPTIONS" {
-			c.AbortWithStatus(http.StatusNoContent)
-		}
 		// 处理请求
 		c.Next()
 	}
@@ -28,7 +24,7 @@ func Cors() gin.HandlerFunc {
 
 func CorsByRules() gin.HandlerFunc {
 	// 放行全部
-	if core.CROSConfig().Mode == "allow-all" {
+	if core.CROSConfig().Mode == "allowAll" {
 		return Cors()
 	}
 	return func(c *gin.Context) {
@@ -46,13 +42,9 @@ func CorsByRules() gin.HandlerFunc {
 		}
 
 		// 严格白名单模式且未通过检查，直接拒绝处理请求
-		if whitelist == nil && core.CROSConfig().Mode == "strict-whitelist" && !(c.Request.Method == "GET" && c.Request.URL.Path == "/health") {
+		if whitelist == nil && core.CROSConfig().Mode == "strictWhitelist" {
 			c.AbortWithStatus(http.StatusForbidden)
-		} else {
-			// 非严格白名单模式，无论是否通过检查均放行所有 OPTIONS 方法
-			if c.Request.Method == http.MethodOptions {
-				c.AbortWithStatus(http.StatusNoContent)
-			}
+			return
 		}
 
 		// 处理请求

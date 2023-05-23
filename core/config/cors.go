@@ -1,8 +1,8 @@
 package config
 
 type CORS struct {
-	Mode      string          `mapstructure:"mode" json:"mode" yaml:"mode"`
-	Whitelist []CORSWhitelist `mapstructure:"whitelist" json:"whitelist" yaml:"whitelist"`
+	Mode      string          `json:"mode" yaml:"mode"`
+	Whitelist []CORSWhitelist `json:"whitelist" yaml:"whitelist"`
 }
 
 type CORSWhitelist struct {

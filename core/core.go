@@ -25,9 +25,6 @@ type Core struct {
 	log       *zap.Logger
 
 	blackCache local_cache.Cache
-
-	// 跨域配置 TODO 这里是否有必要开放
-	cors config.CORS `mapstructure:"cors" json:"cors" yaml:"cors"`
 }
 
 func New(path string) *Core {

@@ -11,7 +11,7 @@ system:
   ipLimitTime: 3600
   frontRouterPrefix:
 jwt:
-  signingKey: 273628f7-9fb4-4e73-8f8d-ca954710d01d
+  signingKey: 273628f7-9fb4-4e73-8f8d-ca954710d01d # uuid
   expiresTime: 7d
   bufferTime: 1d
   issuer: qmPlus
@@ -20,7 +20,7 @@ local:
   storePath: uploads/file
 
 # 数据库
-db:
+db: # 最少提供 default 模块
   default:
     driver: mysql
     path:
@@ -67,7 +67,7 @@ zap:
     - log # 日志输出到可执行文件目录下的 log 文件夹
     - console # 日志会输出到stdout
 cors:
-  mode: strict-whitelist
+  mode: allowAll  # allowAll:允许所有跨域 | strictWhitelist:白名单模式
   whitelist:
     - allowOrigin: example1.com
       allowMethods: POST, GET

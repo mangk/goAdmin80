@@ -15,11 +15,7 @@ func SysInit(path string) *core.Core {
 	c := core.New(path)
 
 	root := core.HttpEngine()
-
-	if core.Config().System.Env != "release" {
-		root.Use(middleware.Cors()) // 直接放行全部跨域请求
-		core.Log().Info("use middleware cors")
-	}
+	root.Use(middleware.CorsByRules())
 
 	// ----------系统初始化 start----------
 	sysGroup := root.Group("_sys")

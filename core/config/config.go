@@ -13,4 +13,6 @@ type Config struct {
 	AliyunOSS  AliyunOSS  `son:"aliyunOss" yaml:"aliyunOss"`
 	TencentCOS TencentCOS `json:"tencentCos" yaml:"tencentCos"`
 	AwsS3      AwsS3      `json:"awsS3" yaml:"awsS3"`
+
+	Cors CORS `json:"cors" yaml:"cors"`
 }
