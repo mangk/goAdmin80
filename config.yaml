@@ -59,7 +59,7 @@ file:
     prefixPath: local
     cdnUrl: local.cdn
     storePath: uploads/file
-  t:
+  another:
     driver: cos
     bucket: bucketName
     region: location
@@ -68,16 +68,6 @@ file:
     prefixPath: tencent
     cdnUrl: tencent.cdn
     storePath:
-  a:
-    driver: oss
-    bucket: bucketName
-    region: location
-    id: id
-    key: key
-    prefixPath: ali
-    cdnUrl: ali.cdn
-    storePath:
-
 captcha:
   keyLong: 1
   imgWidth: 240
