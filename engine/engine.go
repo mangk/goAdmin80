@@ -89,7 +89,7 @@ type Options struct {
 }
 
 type DataOrigin interface {
-	Page(req request.CRUDRequest) (data []map[string]interface{}, count int64, err error)
+	Page(req request.CRUDRequest) (data []map[string]interface{}, count int64, pageSize int, err error)
 	GetById(req request.CRUDRequest) (data map[string]interface{}, err error)
 	UpdateById(req request.CRUDRequest) (id interface{}, err error)
 	Create(req request.CRUDRequest) (id interface{}, err error)
@@ -257,7 +257,7 @@ func (e *Engine) page(ctx *gin.Context) {
 	var err error
 
 	if e.opt.CustomDataOrigin != nil {
-		data, count, err = e.opt.CustomDataOrigin.Page(req)
+		data, count, req.PageSize, err = e.opt.CustomDataOrigin.Page(req)
 	} else {
 		query := core.DB(e.opt.DbName).Table(e.opt.TableName)
 		for _, condition := range req.Query {

@@ -163,7 +163,8 @@ export default {
       });
     },
     __getDetail(id) {
-      let data = {id: id.toString()}
+      console.log(id)
+      let data = {id: typeof (id) === 'string' ? id : id.toString()}
       this.$http({
         method: "post",
         url: this._ap + '/r',
