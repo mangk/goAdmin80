@@ -31,23 +31,30 @@
 
 
 .gva-search-box {
-    padding: 24px;
-    padding-bottom: 2px;
+    padding: 10px;
     background-color: #fff;
     border-radius: 2px;
-    margin-bottom: 12px;
+    margin-bottom: 10px;
 }
 
 .gva-form-box {
-    padding: 24px;
+    padding: 10px;
     background-color: #fff;
     border-radius: 2px;
+    margin-bottom: 10px;
 }
 
 .gva-table-box {
-    padding: 24px;
+    padding: 10px;
     background-color: #fff;
     border-radius: 2px;
+    margin-bottom: 10px;
+}
+
+.el-form-item {
+    margin-top: 6px !important;
+    margin-bottom: 6px !important;
+    margin-right: 24px !important;
 }
 
 .gva-pagination {
