@@ -612,7 +612,7 @@ func formatElement(field Field) (html interface{}) {
 		if options != nil {
 			return template.HTML(`
         <el-form-item label="` + field.Name + `">
-			<el-cascader v-model="search.` + field.Column + `" :options='` + options() + `' :props="` + field.ElOption.Props + `" clearable :show-all-levels="false" filterable />
+			<el-cascader v-model="search.` + field.Column + `" :options='` + options() + `' :props="` + field.ElOption.Props + `" clearable :show-all-levels="false" collapse-tags collapse-tags-tooltip filterable />
         </el-form-item>`)
 		}
 		return template.HTML(`
