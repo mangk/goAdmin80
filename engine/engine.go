@@ -53,16 +53,16 @@ type ElOption struct {
 
 // 字段
 type Field struct {
-	Name             string                              // 展示名
-	Column           string                              // 字段名
-	Type             string                              // 字段类型
-	ElOption         ElOption                            // 对应前端 Element 类型 TODO 实现这里的功能，通过模版渲染switch来完成 表单，列表内容的输出
-	TranslateFunc    func() map[string]string            // 字段翻译函数：返回用来翻译字段的map
-	FormatFunc       func(value interface{}) interface{} // 字段格式化函数
-	SortAble         bool                                // 是否排序字段
-	Hide             bool                                // 是否对外展示
-	EditAble         bool                                // 是否可更新
-	DefaultValueFunc func() string                       // 数据创建时的默认值
+	Name             string                                           // 展示名
+	Column           string                                           // 字段名
+	Type             string                                           // 字段类型
+	ElOption         ElOption                                         // 对应前端 Element 类型 TODO 实现这里的功能，通过模版渲染switch来完成 表单，列表内容的输出
+	TranslateFunc    func() map[string]string                         // 字段翻译函数：返回用来翻译字段的map
+	FormatFunc       func(value, originValue interface{}) interface{} // 字段格式化函数
+	SortAble         bool                                             // 是否排序字段
+	Hide             bool                                             // 是否对外展示
+	EditAble         bool                                             // 是否可更新
+	DefaultValueFunc func() string                                    // 数据创建时的默认值
 }
 
 // 实体
@@ -347,13 +347,18 @@ func (e *Engine) page(ctx *gin.Context) {
 					if field.TranslateFunc != nil {
 						if val, ok := data[i][field.Column].(string); ok {
 							if v, has := tMap[val]; has {
+								data[i][field.Column+"_origin"] = data[i][field.Column]
 								data[i][field.Column] = v
 							}
 						}
 					}
 					// 再格式化
 					if field.FormatFunc != nil {
-						data[i][field.Column] = field.FormatFunc(data[i][field.Column])
+						o, ok := data[i][field.Column+"_origin"]
+						if !ok {
+							o = ""
+						}
+						data[i][field.Column] = field.FormatFunc(data[i][field.Column], o)
 					}
 				}
 			}
