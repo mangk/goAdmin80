@@ -184,11 +184,12 @@ const sysInfoObj = reactive({
 })
 const getSysInfo = () => {
   sysInfo().then(async (data) => {
-    if (data.data.sysName !== "") {
-      sysInfoObj.name = data.data.sysName
-      if (data.data.hasOwnProperty("message")) {
-        ElMessage({showClose: true, message: data.data.message, type: "warning", duration: 0});
-      }
+    if (data.data.hasOwnProperty("sysName")) {
+      sysInfoObj.name = data.data.sysName;
+    }
+
+    if (data.data.hasOwnProperty("message")) {
+      ElMessage(data.data.message);
     }
   })
 }
