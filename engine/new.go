@@ -32,7 +32,6 @@ func SysInit(path string) *core.Core {
 		{
 			sysGroup.POST("login", handler.UserLogin)
 			sysGroup.POST("captcha", handler.Captcha)
-			sysGroup.GET("info", handler.SysInfo)
 		}
 		sysGroup.Use(middleware.JWTAuth()).Use(middleware.CasbinHandler()) // 增加鉴权
 		{

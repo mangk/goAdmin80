@@ -131,6 +131,7 @@ import {fmtTitle} from '@/utils/fmtRouterTitle'
 import {useUserStore} from '@/pinia/modules/user'
 import config from "@/core/config";
 import {sysInfo} from "@/api/system";
+import {ElMessage} from "element-plus";
 
 const router = useRouter()
 const route = useRoute()
@@ -185,6 +186,9 @@ const getSysInfo = () => {
   sysInfo().then(async (data) => {
     if (data.data.sysName !== "") {
       sysInfoObj.name = data.data.sysName
+      if (data.data.hasOwnProperty("message")) {
+        ElMessage({showClose: true, message: data.data.message, type: "warning", duration: 0});
+      }
     }
   })
 }

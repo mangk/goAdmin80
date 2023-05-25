@@ -1,4 +1,5 @@
 import service from '@/utils/request'
+import http from "@/utils/requestForConvert";
 // @Tags systrm
 // @Summary 获取配置文件内容
 // @Security ApiKeyAuth
@@ -42,7 +43,7 @@ export const getSystemState = () => {
 }
 
 export const sysInfo = () =>{
-  return service({
+  return http({
     url:'/info',
     method: 'get',
   })
