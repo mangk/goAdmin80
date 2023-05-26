@@ -597,7 +597,7 @@ func formatElement(field Field) (html interface{}) {
 			return template.HTML(`
         <el-form-item label="` + field.Name + `">
 			<el-select v-model="search.` + field.Column + `" placeholder="` + field.Name + `" filterable clearable>
-				<el-option v-for="item in ` + options() + `" :key="item.v" :label="item.k" :value="item.v" />
+				<el-option v-for='item in ` + options() + `' :key="item.k" :label="item.v" :value="item.k" />
 			</el-select>
         </el-form-item>`)
 		}
