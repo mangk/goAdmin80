@@ -16,16 +16,26 @@ import (
 	"strings"
 )
 
+func FileGetUploadLimit(ctx *gin.Context) {
+	uploadCfg := core.Config().File
+	resp := gin.H{}
+	for driverName, cfg := range uploadCfg {
+		resp[driverName] = gin.H{"name": cfg.Name, "limit": cfg.Limit * 1024, "driver": driverName}
+	}
+	response.OkWithData(resp, ctx)
+}
+
 func FileUpload(ctx *gin.Context) {
 	var file model.SysFileUploadAndDownload
 	noSave := ctx.DefaultQuery("noSave", "0")
+	driver := ctx.DefaultQuery("driver", "default")
 	_, header, err := ctx.Request.FormFile("file")
 	if err != nil {
 		core.Log().Error("接收文件失败!", zap.Error(err))
 		response.FailWithMessage("接收文件失败", ctx)
 		return
 	}
-	file, err = uploadFile(header, noSave) // 文件上传后拿到文件路径
+	file, err = uploadFile(header, noSave, driver) // 文件上传后拿到文件路径
 	if err != nil {
 		core.Log().Error("修改数据库链接失败!", zap.Error(err))
 		response.FailWithMessage("修改数据库链接失败", ctx)
@@ -183,8 +193,8 @@ func FileRemoveChunk(c *gin.Context) {
 	response.OkWithMessage("缓存切片删除成功", c)
 }
 
-func uploadFile(header *multipart.FileHeader, noSave string) (file model.SysFileUploadAndDownload, err error) {
-	oss := upload.NewOss()
+func uploadFile(header *multipart.FileHeader, noSave, driver string) (file model.SysFileUploadAndDownload, err error) {
+	oss := upload.NewOss(driver)
 	filePath, key, uploadErr := oss.UploadFile(header)
 	if uploadErr != nil {
 		panic(err)

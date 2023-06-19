@@ -77,6 +77,7 @@ func (s SysApi) systemApi() []SysApi {
 		{MODEL: MODEL{ID: -44}, Method: "GET", Path: "/_sys/fileUploadAndDownload/findFile", Description: "查询当前文件成功的切片", ApiGroup: "文件管理", Sys: true},
 		{MODEL: MODEL{ID: -45}, Method: "POST", Path: "/_sys/fileUploadAndDownload/breakpointContinueFinish", Description: "切片传输完成", ApiGroup: "文件管理", Sys: true},
 		{MODEL: MODEL{ID: -46}, Method: "POST", Path: "/_sys/fileUploadAndDownload/removeChunk", Description: "删除切片", ApiGroup: "文件管理", Sys: true},
+		{MODEL: MODEL{ID: -47}, Method: "GET", Path: "/_sys/fileUploadAndDownload/cfg", Description: "上传配置", ApiGroup: "文件管理", Sys: true},
 	}
 }
 

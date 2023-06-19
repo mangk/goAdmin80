@@ -253,6 +253,7 @@ INSERT INTO `casbin_rule` (`id`, `ptype`, `v0`, `v1`, `v2`, `v3`, `v4`, `v5`, `v
 (43, 'p', '1', '/_sys/login', 'POST', '', '', '', NULL, NULL),
 (44, 'p', '1', '/_sys/captcha', 'POST', '', '', '', NULL, NULL),
 (45, 'p', '1', '/_sys/user/setSelfInfo', 'PATCH', '', '', '', NULL, NULL);
+(46, 'p', '1', '/_sys/fileUploadAndDownload/cfg', 'GET', '', '', '', NULL, NULL);
 
 INSERT INTO `sys_authorities` (`created_at`, `updated_at`, `deleted_at`, `authority_id`, `authority_name`, `parent_id`, `default_router`) VALUES
 ('2023-05-04 02:37:16.923', '2023-06-19 10:32:09.056', NULL, 1, 'superAdmin', 0, 'dashboard');

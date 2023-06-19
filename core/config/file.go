@@ -1,14 +1,16 @@
 package config
 
 type File struct {
-	Driver     string `json:"driver" yaml:"driver"`         // 类型 cos:腾讯云COS; oss:阿里云OSS; local:本地文件存储；
-	Bucket     string `json:"bucket" yaml:"bucket"`         // 储存桶
-	Region     string `json:"region" yaml:"region"`         // 地域: 腾讯:region; 阿里:Endpoint;
-	ID         string `json:"id" yaml:"id"`                 // id
-	Key        string `json:"key" yaml:"key"`               // key
-	PrefixPath string `json:"prefixPath" yaml:"prefixPath"` // 文件访问前缀
-	StorePath  string `json:"storePath" yaml:"storePath"`   // 本地文件存储路径(类型为local时必填)
-	CdnURL     string `json:"cdnUrl" yaml:"cdnUrl"`         // 文件访问CND域名
+	Name       string  `json:"name" yaml:"name"`
+	Driver     string  `json:"driver" yaml:"driver"`         // 类型 cos:腾讯云COS; oss:阿里云OSS; local:本地文件存储；
+	Bucket     string  `json:"bucket" yaml:"bucket"`         // 储存桶
+	Region     string  `json:"region" yaml:"region"`         // 地域: 腾讯:region; 阿里:Endpoint;
+	ID         string  `json:"id" yaml:"id"`                 // id
+	Key        string  `json:"key" yaml:"key"`               // key
+	PrefixPath string  `json:"prefixPath" yaml:"prefixPath"` // 文件访问前缀
+	StorePath  string  `json:"storePath" yaml:"storePath"`   // 本地文件存储路径(类型为local时必填)
+	CdnURL     string  `json:"cdnUrl" yaml:"cdnUrl"`         // 文件访问CND域名
+	Limit      float64 `json:"limit" yaml:"limit"`
 }
 
 type Local struct {

@@ -1,24 +1,23 @@
-
 <template>
   <div>
     <el-upload
-      :action="`${path}/fileUploadAndDownload/upload`"
-      :headers="{ 'Authorization': 'Bearer '+userStore.token }"
-      :show-file-list="false"
-      :on-success="handleImageSuccess"
-      :before-upload="beforeImageUpload"
-      :multiple="false"
+        :action="`${path}/fileUploadAndDownload/upload?driver=${props.oss}`"
+        :headers="{ 'Authorization': 'Bearer '+userStore.token }"
+        :show-file-list="false"
+        :on-success="handleImageSuccess"
+        :before-upload="beforeImageUpload"
+        :multiple="false"
     >
-      <el-button type="primary">压缩上传</el-button>
+      <el-button type="primary">上传至{{ props.btnName }}</el-button>
     </el-upload>
   </div>
 </template>
 
 <script setup>
 import ImageCompress from '@/utils/image'
-import { ref } from 'vue'
-import { ElMessage } from 'element-plus'
-import { useUserStore } from '@/pinia/modules/user'
+import {ref} from 'vue'
+import {ElMessage} from 'element-plus'
+import {useUserStore} from '@/pinia/modules/user'
 
 const emit = defineEmits(['on-success'])
 const props = defineProps({
@@ -32,7 +31,15 @@ const props = defineProps({
   },
   maxWH: {
     type: Number,
-    default: 1920 // 图片长宽上限
+    default: 4096 // 图片长宽上限
+  },
+  btnName: {
+    type: String,
+    default: "上传"
+  },
+  oss: {
+    type: String,
+    default: ''
   }
 })
 
@@ -50,6 +57,8 @@ const beforeImageUpload = (file) => {
 
   const isRightSize = file.size / 1024 < props.fileSize
   if (!isRightSize) {
+    ElMessage.error(`上传头像图片大小应小于 ${props.fileSize}KB`)
+    return false
     // 压缩
     const compress = new ImageCompress(file, props.fileSize, props.maxWH)
     return compress.compress()
@@ -58,7 +67,7 @@ const beforeImageUpload = (file) => {
 }
 
 const handleImageSuccess = (res) => {
-  const { data } = res
+  const {data} = res
   if (data.file) {
     emit('on-success', data.file.url)
   }
@@ -70,9 +79,7 @@ const handleImageSuccess = (res) => {
 
 export default {
   name: 'UploadImage',
-  methods: {
-
-  }
+  methods: {}
 }
 </script>
 
@@ -85,9 +92,11 @@ export default {
   position: relative;
   overflow: hidden;
 }
+
 .image-uploader {
   border-color: #409eff;
 }
+
 .image-uploader-icon {
   font-size: 28px;
   color: #8c939d;
@@ -96,6 +105,7 @@ export default {
   line-height: 178px;
   text-align: center;
 }
+
 .image {
   width: 178px;
   height: 178px;

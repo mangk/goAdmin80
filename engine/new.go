@@ -109,6 +109,7 @@ func SysInit(path string) *core.Core {
 			fileUploadAndDownloadRouter.GET("findFile", handler.FileFind)                                      // 查询当前文件成功的切片
 			fileUploadAndDownloadRouter.POST("breakpointContinueFinish", handler.FileBreakpointContinueFinish) // 切片传输完成
 			fileUploadAndDownloadRouter.POST("removeChunk", handler.FileRemoveChunk)                           // 删除切片
+			fileUploadAndDownloadRouter.GET("cfg", handler.FileGetUploadLimit)                                 // 获取文件上传大小限制
 		}
 	}
 

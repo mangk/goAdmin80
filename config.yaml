@@ -51,6 +51,8 @@ redis:
     password:
 file:
   default:
+    name: 本地
+    limit: 1 # 上传文件大小限制 MB
     driver: local # 类型 cos:腾讯云COS; oss:阿里云OSS; local:本地文件存储；
     bucket:
     region:
@@ -60,6 +62,8 @@ file:
     cdnUrl: local.cdn
     storePath: uploads/file
   another:
+    name: 腾讯云
+    limit: 1 # 上传文件大小限制 MB
     driver: cos
     bucket: bucketName
     region: location
