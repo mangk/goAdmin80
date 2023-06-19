@@ -59,18 +59,15 @@ const beforeImageUpload = (file) => {
   if (!isRightSize) {
     ElMessage.error(`上传头像图片大小应小于 ${props.fileSize}KB`)
     return false
-    // 压缩
-    const compress = new ImageCompress(file, props.fileSize, props.maxWH)
-    return compress.compress()
   }
-  return isRightSize
+  // 压缩
+  const compress = new ImageCompress(file, props.fileSize, props.maxWH)
+  return compress.compress()
 }
 
 const handleImageSuccess = (res) => {
   const {data} = res
-  if (data.file) {
-    emit('on-success', data.file.url)
-  }
+  emit('on-success')
 }
 
 </script>

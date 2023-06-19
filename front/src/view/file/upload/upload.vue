@@ -117,7 +117,6 @@ const getUploadConfig = async () => {
   const cfg = await uploadLimit()
   if (cfg.code === 0) {
     uploadCfg.value = cfg.data
-    console.log(cfg)
   }
 }
 getUploadConfig()
