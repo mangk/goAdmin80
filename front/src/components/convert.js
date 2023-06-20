@@ -1,12 +1,21 @@
 import {loadModule} from 'vue3-sfc-loader';
 import * as Vue from 'vue'
 import {defineAsyncComponent, markRaw} from 'vue'
+import {useUserStore} from '@/pinia/modules/user'
 
 const myConvert = (url, name = "myConvert") => {
     const options = {
         moduleCache: {vue: Vue},
         getFile() {
-            return fetch(url).then(response => response.ok ? response.text() : Promise.reject(response));
+            const userStore = useUserStore()
+            return fetch(url, {
+                method:'GET',
+                headers: {
+                    // 'Content-Type': 'application/json',
+                    'Authorization': "Bearer " + userStore.token,
+                    'x-user-id': userStore.userInfo.ID,
+                }
+            }).then(response => response.ok ? response.text() : Promise.reject(response));
         },
         addStyle(styleString) {
             const style = document.createElement('style');
