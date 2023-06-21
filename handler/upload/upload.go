@@ -1,13 +1,16 @@
 package upload
 
 import (
+	"crypto/md5"
+	"encoding/hex"
 	"fmt"
 	"github.com/mangk/goAdmin80/core"
+	"io"
 	"mime/multipart"
 )
 
 type OSS interface {
-	UploadFile(file *multipart.FileHeader) (string, string, error)
+	UploadFile(file *multipart.FileHeader, keyPrefix ...string) (reqPath, fileKey, md5 string, err error)
 	DeleteFile(key string) error
 }
 
@@ -37,4 +40,11 @@ func NewOss(ossType ...string) OSS {
 	}
 	core.Log().Panic(fmt.Sprintf("[%s]未知的对象存储", t))
 	return nil
+}
+
+func fileMd5(file multipart.File) string {
+	hash := md5.New()
+	_, _ = io.Copy(hash, file)
+	file.Seek(0, 0)
+	return hex.EncodeToString(hash.Sum(nil))
 }

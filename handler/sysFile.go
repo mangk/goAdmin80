@@ -195,7 +195,7 @@ func FileRemoveChunk(c *gin.Context) {
 
 func uploadFile(header *multipart.FileHeader, noSave, driver string) (file model.SysFileUploadAndDownload, err error) {
 	oss := upload.NewOss(driver)
-	filePath, key, uploadErr := oss.UploadFile(header)
+	filePath, key, _, uploadErr := oss.UploadFile(header)
 	if uploadErr != nil {
 		panic(err)
 	}
