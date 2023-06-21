@@ -15,13 +15,18 @@ type SysJwtBlacklist struct {
 	Jwt string `gorm:"type:text;comment:jwt"`
 }
 
+const jwtPrefix = "jwtBlackList:"
+
 func (s SysJwtBlacklist) IsBlack(jwt string) bool {
-	// TODO 加上缓存
-	core.DB().Where("jwt = ?", jwt).First(&s)
-	if s.Jwt == "" {
-		return false
+	has, err := core.Redis().Get(context.Background(), jwtPrefix+jwt).Bool()
+	if err != nil && err.Error() != "redis: nil" {
+		core.DB().Where("jwt = ?", jwt).First(&s)
+		if s.Jwt == "" {
+			return false
+		}
+		return true
 	}
-	return true
+	return has
 }
 
 type Jwt struct {
@@ -104,7 +109,8 @@ func (j Jwt) JsonInBlacklist(jwtList SysJwtBlacklist) (err error) {
 	if err != nil {
 		return
 	}
-	core.Cache().SetDefault(jwtList.Jwt, struct{}{})
+	dr, err := utils.ParseDuration(core.Config().JWT.ExpiresTime)
+	core.Redis().Set(context.Background(), jwtPrefix+jwtList.Jwt, true, dr)
 	return
 }
 
