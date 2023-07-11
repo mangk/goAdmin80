@@ -124,8 +124,7 @@ func (s SysApi) Delete(ids []int) error {
 	for _, record := range records {
 		Casbin{}.ClearCasbin(1, record.Path, record.Method)
 	}
-	e := Casbin{}.Casbin()
-	err = e.InvalidateCache()
+	err = Casbin{}.Casbin().LoadPolicy()
 	if err != nil {
 		return err
 	}

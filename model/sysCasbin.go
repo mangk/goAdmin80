@@ -12,6 +12,7 @@ import (
 	"go.uber.org/zap"
 	"strconv"
 	"sync"
+	"time"
 
 	uuid "github.com/satori/go.uuid"
 )
@@ -50,7 +51,7 @@ func (c Casbin) UpdateCasbin(AuthorityID int, casbinInfos []CasbinInfo) error {
 	if !success {
 		return errors.New("存在相同api,添加失败,请联系管理员")
 	}
-	err := e.InvalidateCache()
+	err := e.LoadPolicy()
 	if err != nil {
 		return err
 	}
@@ -63,8 +64,7 @@ func (c Casbin) UpdateCasbinApi(oldPath string, newPath string, oldMethod string
 		"v1": newPath,
 		"v2": newMethod,
 	}).Error
-	e := c.Casbin()
-	err = e.InvalidateCache()
+	err = c.Casbin().LoadPolicy()
 	if err != nil {
 		return err
 	}
@@ -93,12 +93,12 @@ func (c Casbin) ClearCasbin(v int, p ...string) bool {
 }
 
 var (
-	cachedEnforcer *casbin.CachedEnforcer
+	cachedEnforcer *casbin.SyncedEnforcer
 	once           sync.Once
 )
 
 // 持久化到数据库  引入自定义规则
-func (c Casbin) Casbin() *casbin.CachedEnforcer {
+func (c Casbin) Casbin() *casbin.SyncedEnforcer {
 	once.Do(func() {
 		a, _ := gormadapter.NewAdapterByDB(core.DB())
 		text := `
@@ -119,12 +119,11 @@ func (c Casbin) Casbin() *casbin.CachedEnforcer {
 		`
 		m, err := model.NewModelFromString(text)
 		if err != nil {
-			zap.L().Error("字符串加载模型失败!", zap.Error(err))
+			core.Log().Error("字符串加载模型失败!", zap.Error(err))
 			return
 		}
-		cachedEnforcer, _ = casbin.NewCachedEnforcer(m, a)
-		cachedEnforcer.SetExpireTime(60 * 60)
-		_ = cachedEnforcer.LoadPolicy()
+		cachedEnforcer, _ = casbin.NewSyncedEnforcer(m, a)
+		cachedEnforcer.StartAutoLoadPolicy(time.Minute * 5)
 	})
 	return cachedEnforcer
 }
