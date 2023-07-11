@@ -17,8 +17,6 @@ import (
 	uuid "github.com/satori/go.uuid"
 )
 
-// TODO 整个casbin模块的使用似乎有问题
-
 type Casbin struct{}
 
 // 更新 casbin 权限
