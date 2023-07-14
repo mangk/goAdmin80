@@ -225,7 +225,7 @@ func (s SysMenu) GetAllTreeMenuByAuthorityId(authorityIds []int, tree bool) ([]S
 	menuIds := SysAuthorityMenu{}.GetMenuIdsByAuthorityIds(authorityIds)
 	// 查询菜单列表
 	menus := []SysMenu{}
-	core.DB().Where("id in ?", menuIds).Order("sort desc").Find(&menus)
+	core.DB().Where("id in ?", menuIds).Order("sort").Find(&menus)
 	for _, menu := range systemMenu {
 		for _, menuId := range menuIds {
 			if menu.ID == menuId {
