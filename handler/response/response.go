@@ -8,7 +8,7 @@ import (
 	"time"
 )
 
-type Response struct {
+type response struct {
 	Code int         `json:"code"`
 	Data interface{} `json:"data"`
 	Msg  string      `json:"msg"`
@@ -22,7 +22,7 @@ const (
 
 func Result(httpCode, systemCode int, data interface{}, msg string, c *gin.Context) {
 	// 开始时间
-	resp := Response{
+	resp := response{
 		Code: systemCode,
 		Data: data,
 		Msg:  msg,
