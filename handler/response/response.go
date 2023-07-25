@@ -5,12 +5,14 @@ import (
 	"github.com/mangk/goAdmin80/core"
 	"go.uber.org/zap"
 	"net/http"
+	"time"
 )
 
 type Response struct {
 	Code int         `json:"code"`
 	Data interface{} `json:"data"`
 	Msg  string      `json:"msg"`
+	T    int64       `json:"t"`
 }
 
 const (
@@ -21,9 +23,10 @@ const (
 func Result(httpCode, systemCode int, data interface{}, msg string, c *gin.Context) {
 	// 开始时间
 	resp := Response{
-		systemCode,
-		data,
-		msg,
+		Code: systemCode,
+		Data: data,
+		Msg:  msg,
+		T:    time.Now().Unix(),
 	}
 	c.JSON(httpCode, resp)
 	if trace, has := c.Get("_trace"); has {
@@ -33,7 +36,7 @@ func Result(httpCode, systemCode int, data interface{}, msg string, c *gin.Conte
 }
 
 func Ok(c *gin.Context) {
-	Result(http.StatusOK, SUCCESS, map[string]interface{}{}, "操作成功", c)
+	Result(http.StatusOK, SUCCESS, map[string]interface{}{}, "ok", c)
 }
 
 func OkWithMessage(message string, c *gin.Context) {
@@ -41,7 +44,7 @@ func OkWithMessage(message string, c *gin.Context) {
 }
 
 func OkWithData(data interface{}, c *gin.Context) {
-	Result(http.StatusOK, SUCCESS, data, "查询成功", c)
+	Result(http.StatusOK, SUCCESS, data, "ok", c)
 }
 
 func OkWithDetailed(data interface{}, message string, c *gin.Context) {
@@ -53,7 +56,7 @@ func Fail(c *gin.Context, httpCode ...int) {
 	if len(httpCode) == 1 {
 		hc = httpCode[0]
 	}
-	Result(hc, ERROR, map[string]interface{}{}, "操作失败", c)
+	Result(hc, ERROR, map[string]interface{}{}, "error", c)
 }
 
 func FailWithMessage(message string, c *gin.Context, httpCode ...int) {
