@@ -21,7 +21,7 @@ func FileGetUploadLimit(ctx *gin.Context) {
 	uploadCfg := config.FileCfg()
 	resp := gin.H{}
 	for name, cfg := range uploadCfg {
-		resp[name] = gin.H{"name": name, "limit": cfg.Limit * 1024, "driver": name}
+		resp[name] = gin.H{"name": cfg.Name, "limit": cfg.Limit * 1024, "driver": name}
 	}
 	response.OkWithData(resp, ctx)
 }

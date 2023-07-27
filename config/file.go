@@ -1,6 +1,7 @@
 package config
 
 type File struct {
+	Name       string  `json:"name" yaml:"name"`
 	Driver     string  `json:"driver" yaml:"driver"`         // 类型 cos:腾讯云COS; oss:阿里云OSS; local:本地文件存储；
 	Bucket     string  `json:"bucket" yaml:"bucket"`         // 储存桶
 	Region     string  `json:"region" yaml:"region"`         // 地域: 腾讯:region; 阿里:Endpoint;

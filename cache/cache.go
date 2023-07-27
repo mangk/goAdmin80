@@ -14,6 +14,7 @@ var _blackCache local_cache.Cache
 var _redisList map[string]*redis.Client
 
 func init() {
+	_redisList = make(map[string]*redis.Client)
 	core.ModuleAdd(c{})
 }
 
