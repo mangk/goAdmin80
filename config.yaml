@@ -1,4 +1,4 @@
-system:
+server:
   name: goAdmin80
   env: debug # debug | test | release
   host: 127.0.0.1
@@ -40,7 +40,7 @@ db: # 最少提供 default 模块
     maxIdleConns: 10
     maxOpenConns: 20
     logMode: 4
-redis:
+cache:
   default:
     db: 0
     addr: 127.0.0.1:6379
@@ -78,7 +78,7 @@ captcha:
   imgHeight: 80
   openCaptcha: 0
   openCaptchaTimeout: 3600
-zap:
+log:
   prefix:
   maxAge: 30
   level: debug
