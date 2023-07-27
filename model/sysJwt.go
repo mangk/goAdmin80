@@ -4,8 +4,8 @@ import (
 	"context"
 	"errors"
 	"github.com/golang-jwt/jwt/v4"
+	"github.com/mangk/goAdmin80/cache"
 	"github.com/mangk/goAdmin80/config"
-	"github.com/mangk/goAdmin80/core"
 	"github.com/mangk/goAdmin80/db"
 	"github.com/mangk/goAdmin80/log"
 	"github.com/mangk/goAdmin80/utils"
@@ -21,7 +21,7 @@ type SysJwtBlacklist struct {
 const jwtPrefix = "jwtBlackList:"
 
 func (s SysJwtBlacklist) IsBlack(jwt string) bool {
-	has, err := core.Redis().Get(context.Background(), jwtPrefix+jwt).Bool()
+	has, err := cache.Redis().Get(context.Background(), jwtPrefix+jwt).Bool()
 	if err != nil && err.Error() != "redis: nil" {
 		db.DB().Where("jwt = ?", jwt).First(&s)
 		if s.Jwt == "" {
@@ -113,7 +113,7 @@ func (j Jwt) JsonInBlacklist(jwtList SysJwtBlacklist) (err error) {
 		return
 	}
 	dr, err := utils.ParseDuration(config.JwtCfg().ExpiresTime)
-	core.Redis().Set(context.Background(), jwtPrefix+jwtList.Jwt, true, dr)
+	cache.Redis().Set(context.Background(), jwtPrefix+jwtList.Jwt, true, dr)
 	return
 }
 
@@ -128,7 +128,7 @@ func (j *Jwt) IsBlacklist(jwt string) bool {
 }
 
 func (j *Jwt) GetRedisJWT(userName string) (redisJWT string, err error) {
-	redisJWT, err = core.Redis().Get(context.Background(), userName).Result()
+	redisJWT, err = cache.Redis().Get(context.Background(), userName).Result()
 	return redisJWT, err
 }
 
@@ -139,7 +139,7 @@ func (j *Jwt) SetRedisJWT(jwt string, userName string) (err error) {
 		return err
 	}
 	timer := dr
-	err = core.Redis().Set(context.Background(), userName, jwt, timer).Err()
+	err = cache.Redis().Set(context.Background(), userName, jwt, timer).Err()
 	return err
 }
 
@@ -152,6 +152,6 @@ func LoadAll() {
 	}
 	for i := 0; i < len(data); i++ {
 		// TODO 这里设置的作用
-		core.Cache().SetDefault(data[i], struct{}{})
+		cache.Cache().SetDefault(data[i], struct{}{})
 	} // jwt黑名单 加入 BlackCache 中
 }

@@ -3,8 +3,8 @@ package handler
 import (
 	"context"
 	"github.com/gin-gonic/gin"
+	"github.com/mangk/goAdmin80/cache"
 	"github.com/mangk/goAdmin80/config"
-	"github.com/mangk/goAdmin80/core"
 	"github.com/mangk/goAdmin80/handler/response"
 	"github.com/mangk/goAdmin80/log"
 	"github.com/mojocn/base64Captcha"
@@ -19,9 +19,10 @@ func Captcha(ctx *gin.Context) {
 
 	// 判断验证码是否开启
 	key := ctx.ClientIP()
-	v, ok := core.Cache().Get(key)
+	v, ok := cache.Cache().Get(key)
+
 	if !ok {
-		core.Cache().Set(key, 1, time.Second*time.Duration(cfg.OpenCaptchaTimeOut))
+		cache.Cache().Set(key, 1, time.Second*time.Duration(cfg.OpenCaptchaTimeOut))
 	}
 
 	var oc bool
@@ -73,7 +74,7 @@ func (rs *RedisStore) UseWithCtx(ctx context.Context) base64Captcha.Store {
 }
 
 func (rs *RedisStore) Set(id string, value string) error {
-	err := core.Redis().Set(rs.Context, rs.PreKey+id, value, rs.Expiration).Err()
+	err := cache.Redis().Set(rs.Context, rs.PreKey+id, value, rs.Expiration).Err()
 	if err != nil {
 		log.Log().Error("RedisStoreSetError!", zap.Error(err))
 	}
@@ -81,13 +82,13 @@ func (rs *RedisStore) Set(id string, value string) error {
 }
 
 func (rs *RedisStore) Get(key string, clear bool) string {
-	val, err := core.Redis().Get(rs.Context, key).Result()
+	val, err := cache.Redis().Get(rs.Context, key).Result()
 	if err != nil {
 		log.Log().Error("RedisStoreGetError!", zap.Error(err))
 		return ""
 	}
 	if clear {
-		err := core.Redis().Del(rs.Context, key).Err()
+		err := cache.Redis().Del(rs.Context, key).Err()
 		if err != nil {
 			log.Log().Error("RedisStoreClearError!", zap.Error(err))
 			return ""

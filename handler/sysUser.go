@@ -3,8 +3,8 @@ package handler
 import (
 	"github.com/gin-gonic/gin"
 	"github.com/go-redis/redis/v8"
+	"github.com/mangk/goAdmin80/cache"
 	"github.com/mangk/goAdmin80/config"
-	"github.com/mangk/goAdmin80/core"
 	"github.com/mangk/goAdmin80/handler/request"
 	"github.com/mangk/goAdmin80/handler/response"
 	"github.com/mangk/goAdmin80/log"
@@ -39,9 +39,9 @@ func UserLogin(ctx *gin.Context) {
 	openCaptcha := config.CaptchaCfg().OpenCaptcha               // 是否开启防爆次数
 	openCaptchaTimeOut := config.CaptchaCfg().OpenCaptchaTimeOut // 缓存超时时间
 
-	v, ok := core.Cache().Get(key)
+	v, ok := cache.Cache().Get(key)
 	if !ok {
-		core.Cache().Set(key, 1, time.Second*time.Duration(openCaptchaTimeOut))
+		cache.Cache().Set(key, 1, time.Second*time.Duration(openCaptchaTimeOut))
 	}
 
 	var oc = openCaptcha == 0 || openCaptcha < interfaceToInt(v)
@@ -51,14 +51,14 @@ func UserLogin(ctx *gin.Context) {
 		if err != nil {
 			log.Log().Error("登陆失败! 用户名不存在或者密码错误!", zap.Error(err))
 			// 验证码次数+1
-			core.Cache().Increment(key, 1)
+			cache.Cache().Increment(key, 1)
 			response.FailWithMessage("用户名不存在或者密码错误", ctx)
 			return
 		}
 		if user.Enable != 1 {
 			log.Log().Error("登陆失败! 用户被禁止登录!")
 			// 验证码次数+1
-			core.Cache().Increment(key, 1)
+			cache.Cache().Increment(key, 1)
 			response.FailWithMessage("用户被禁止登录", ctx)
 			return
 		}
@@ -66,7 +66,7 @@ func UserLogin(ctx *gin.Context) {
 		return
 	}
 	// 验证码次数+1
-	core.Cache().Increment(key, 1)
+	cache.Cache().Increment(key, 1)
 	response.FailWithMessage("验证码错误", ctx)
 }
 

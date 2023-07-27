@@ -7,4 +7,5 @@ type Redis struct {
 }
 
 type Cache struct {
+	Redis
 }
