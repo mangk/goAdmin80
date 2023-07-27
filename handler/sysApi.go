@@ -2,9 +2,9 @@ package handler
 
 import (
 	"github.com/gin-gonic/gin"
-	"github.com/mangk/goAdmin80/core"
 	"github.com/mangk/goAdmin80/handler/request"
 	"github.com/mangk/goAdmin80/handler/response"
+	"github.com/mangk/goAdmin80/log"
 	"github.com/mangk/goAdmin80/model"
 	"github.com/mangk/goAdmin80/utils"
 	"go.uber.org/zap"
@@ -21,7 +21,7 @@ func ApiGetById(ctx *gin.Context) {
 	if api, err := (model.SysApi{}).GetById(id.ID); err == nil {
 		response.OkWithDetailed(api, "获取成功", ctx)
 	} else {
-		core.Log().Error("获取失败!", zap.Error(err))
+		log.Log().Error("获取失败!", zap.Error(err))
 		response.FailWithMessage("获取失败", ctx)
 	}
 }
@@ -38,7 +38,7 @@ func ApiCreate(ctx *gin.Context) {
 		return
 	}
 	if err := api.Create(); err != nil {
-		core.Log().Error("创建失败!", zap.Error(err))
+		log.Log().Error("创建失败!", zap.Error(err))
 		response.FailWithMessage("创建失败!"+err.Error(), ctx)
 		return
 	}
@@ -58,7 +58,7 @@ func ApiUpdate(ctx *gin.Context) {
 		return
 	}
 	if err := api.Update(); err != nil {
-		core.Log().Error("修改失败!", zap.Error(err))
+		log.Log().Error("修改失败!", zap.Error(err))
 		response.FailWithMessage("修改失败!"+err.Error(), ctx)
 		return
 	}
@@ -81,7 +81,7 @@ func ApiDeleteByIds(ctx *gin.Context) {
 	}
 
 	if err := (model.SysApi{}).Delete(ids.Ids); err != nil {
-		core.Log().Error("删除失败!", zap.Error(err))
+		log.Log().Error("删除失败!", zap.Error(err))
 		response.FailWithMessage("删除失败!"+err.Error(), ctx)
 		return
 	}
@@ -93,7 +93,7 @@ func ApiAll(ctx *gin.Context) {
 	records, err := model.SysApi{}.All()
 
 	if err != nil {
-		core.Log().Error("获取失败!", zap.Error(err))
+		log.Log().Error("获取失败!", zap.Error(err))
 		response.FailWithMessage("获取失败", ctx)
 		return
 	}
@@ -117,7 +117,7 @@ func ApiPage(ctx *gin.Context) {
 	}
 	list, total, err := model.SysApi{}.GetAPIInfoList(pageInfo.SysApi, pageInfo.PageInfo, pageInfo.OrderKey, pageInfo.Desc)
 	if err != nil {
-		core.Log().Error("获取失败!", zap.Error(err))
+		log.Log().Error("获取失败!", zap.Error(err))
 		response.FailWithMessage("获取失败", ctx)
 		return
 	}

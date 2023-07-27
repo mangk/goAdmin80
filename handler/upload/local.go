@@ -3,8 +3,8 @@ package upload
 import (
 	"errors"
 	"fmt"
-	"github.com/mangk/goAdmin80/core"
-	"github.com/mangk/goAdmin80/core/config"
+	"github.com/mangk/goAdmin80/config"
+	"github.com/mangk/goAdmin80/log"
 	"github.com/mangk/goAdmin80/utils"
 	"io"
 	"mime/multipart"
@@ -34,7 +34,7 @@ func (l *Local) UploadFile(file *multipart.FileHeader, keyPrefix ...string) (str
 	// 尝试创建此路径
 	mkdirErr := os.MkdirAll(l.cfg.StorePath, os.ModePerm)
 	if mkdirErr != nil {
-		core.Log().Error("function os.MkdirAll() Filed", zap.Any("err", mkdirErr.Error()))
+		log.Log().Error("function os.MkdirAll() Filed", zap.Any("err", mkdirErr.Error()))
 		return "", "", "", errors.New("function os.MkdirAll() Filed, err:" + mkdirErr.Error())
 	}
 	// 拼接路径和文件名
@@ -49,14 +49,14 @@ func (l *Local) UploadFile(file *multipart.FileHeader, keyPrefix ...string) (str
 
 	f, openError := file.Open() // 读取文件
 	if openError != nil {
-		core.Log().Error("function file.Open() Filed", zap.Any("err", openError.Error()))
+		log.Log().Error("function file.Open() Filed", zap.Any("err", openError.Error()))
 		return "", "", "", errors.New("function file.Open() Filed, err:" + openError.Error())
 	}
 	defer f.Close() // 创建文件 defer 关闭
 
 	out, createErr := os.Create(p)
 	if createErr != nil {
-		core.Log().Error("function os.Create() Filed", zap.Any("err", createErr.Error()))
+		log.Log().Error("function os.Create() Filed", zap.Any("err", createErr.Error()))
 
 		return "", "", "", errors.New("function os.Create() Filed, err:" + createErr.Error())
 	}
@@ -65,7 +65,7 @@ func (l *Local) UploadFile(file *multipart.FileHeader, keyPrefix ...string) (str
 	md5 := fileMd5(f)
 	_, copyErr := io.Copy(out, f) // 传输（拷贝）文件
 	if copyErr != nil {
-		core.Log().Error("function io.Copy() Filed", zap.Any("err", copyErr.Error()))
+		log.Log().Error("function io.Copy() Filed", zap.Any("err", copyErr.Error()))
 		return "", "", "", errors.New("function io.Copy() Filed, err:" + copyErr.Error())
 	}
 

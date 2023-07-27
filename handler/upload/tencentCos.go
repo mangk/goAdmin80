@@ -4,8 +4,8 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	"github.com/mangk/goAdmin80/core"
-	"github.com/mangk/goAdmin80/core/config"
+	"github.com/mangk/goAdmin80/config"
+	"github.com/mangk/goAdmin80/log"
 	"mime/multipart"
 	"net/http"
 	"net/url"
@@ -24,7 +24,7 @@ func (t *TencentCOS) UploadFile(file *multipart.FileHeader, keyPrefix ...string)
 	client := NewClient(t.cfg)
 	f, openError := file.Open()
 	if openError != nil {
-		core.Log().Error("function file.Open() Filed", zap.Any("err", openError.Error()))
+		log.Log().Error("function file.Open() Filed", zap.Any("err", openError.Error()))
 		return "", "", "", errors.New("function file.Open() Filed, err:" + openError.Error())
 	}
 	defer f.Close() // 创建文件 defer 关闭
@@ -54,7 +54,7 @@ func (t *TencentCOS) DeleteFile(key string) error {
 	client := NewClient(t.cfg)
 	_, err := client.Object.Delete(context.Background(), key)
 	if err != nil {
-		core.Log().Error("function bucketManager.Delete() Filed", zap.Any("err", err.Error()))
+		log.Log().Error("function bucketManager.Delete() Filed", zap.Any("err", err.Error()))
 		return errors.New("function bucketManager.Delete() Filed, err:" + err.Error())
 	}
 	return nil

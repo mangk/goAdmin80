@@ -2,7 +2,7 @@ package response
 
 import (
 	"github.com/gin-gonic/gin"
-	"github.com/mangk/goAdmin80/core"
+	"github.com/mangk/goAdmin80/log"
 	"go.uber.org/zap"
 	"net/http"
 	"time"
@@ -31,7 +31,7 @@ func Result(httpCode, systemCode int, data interface{}, msg string, c *gin.Conte
 	c.JSON(httpCode, resp)
 	if trace, has := c.Get("_trace"); has {
 		req, _ := c.Get("_req")
-		core.Log().WithOptions(zap.WithCaller(false)).With(zap.Namespace("_trace")).Info("", zap.String("_method", c.Request.Method), zap.Any("_req", req), zap.Any("_resp", resp), zap.Any("_id", trace))
+		log.Log().WithOptions(zap.WithCaller(false)).With(zap.Namespace("_trace")).Info("", zap.String("_method", c.Request.Method), zap.Any("_req", req), zap.Any("_resp", resp), zap.Any("_id", trace))
 	}
 }
 

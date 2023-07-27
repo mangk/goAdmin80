@@ -3,9 +3,11 @@ package handler
 import (
 	"github.com/gin-gonic/gin"
 	"github.com/go-redis/redis/v8"
-	"github.com/mangk/goAdmin80/core"
+	"github.com/mangk/goAdmin80/cache"
+	"github.com/mangk/goAdmin80/config"
 	"github.com/mangk/goAdmin80/handler/request"
 	"github.com/mangk/goAdmin80/handler/response"
+	"github.com/mangk/goAdmin80/log"
 	"github.com/mangk/goAdmin80/model"
 	"github.com/mangk/goAdmin80/utils"
 	"go.uber.org/zap"
@@ -34,12 +36,12 @@ func UserLogin(ctx *gin.Context) {
 	}
 
 	// 判断验证码是否开启
-	openCaptcha := core.Config().Captcha.OpenCaptcha               // 是否开启防爆次数
-	openCaptchaTimeOut := core.Config().Captcha.OpenCaptchaTimeOut // 缓存超时时间
+	openCaptcha := config.CaptchaCfg().OpenCaptcha               // 是否开启防爆次数
+	openCaptchaTimeOut := config.CaptchaCfg().OpenCaptchaTimeOut // 缓存超时时间
 
-	v, ok := core.Cache().Get(key)
+	v, ok := cache.Cache().Get(key)
 	if !ok {
-		core.Cache().Set(key, 1, time.Second*time.Duration(openCaptchaTimeOut))
+		cache.Cache().Set(key, 1, time.Second*time.Duration(openCaptchaTimeOut))
 	}
 
 	var oc = openCaptcha == 0 || openCaptcha < interfaceToInt(v)
@@ -47,16 +49,16 @@ func UserLogin(ctx *gin.Context) {
 	if !oc || store.UseWithCtx(ctx).Verify(login.CaptchaId, login.Captcha, true) {
 		user, err := model.SysUser{}.Login(login.Username, login.Password)
 		if err != nil {
-			core.Log().Error("登陆失败! 用户名不存在或者密码错误!", zap.Error(err))
+			log.Log().Error("登陆失败! 用户名不存在或者密码错误!", zap.Error(err))
 			// 验证码次数+1
-			core.Cache().Increment(key, 1)
+			cache.Cache().Increment(key, 1)
 			response.FailWithMessage("用户名不存在或者密码错误", ctx)
 			return
 		}
 		if user.Enable != 1 {
-			core.Log().Error("登陆失败! 用户被禁止登录!")
+			log.Log().Error("登陆失败! 用户被禁止登录!")
 			// 验证码次数+1
-			core.Cache().Increment(key, 1)
+			cache.Cache().Increment(key, 1)
 			response.FailWithMessage("用户被禁止登录", ctx)
 			return
 		}
@@ -64,7 +66,7 @@ func UserLogin(ctx *gin.Context) {
 		return
 	}
 	// 验证码次数+1
-	core.Cache().Increment(key, 1)
+	cache.Cache().Increment(key, 1)
 	response.FailWithMessage("验证码错误", ctx)
 }
 
@@ -81,7 +83,7 @@ func UserPage(ctx *gin.Context) {
 	}
 	list, total, err := model.SysUser{}.GetUserInfoList(pageInfo)
 	if err != nil {
-		core.Log().Error("获取失败!", zap.Error(err))
+		log.Log().Error("获取失败!", zap.Error(err))
 		response.FailWithMessage("获取失败", ctx)
 		return
 	}
@@ -97,7 +99,7 @@ func UserGetInfo(ctx *gin.Context) {
 	uuid := model.GetUserUuid(ctx)
 	ReqUser, err := model.SysUser{}.GetUserInfo(uuid)
 	if err != nil {
-		core.Log().Error("获取失败!", zap.Error(err))
+		log.Log().Error("获取失败!", zap.Error(err))
 		response.FailWithMessage("获取失败", ctx)
 		return
 	}
@@ -133,7 +135,7 @@ func UserRegister(ctx *gin.Context) {
 	user := &model.SysUser{Username: r.Username, NickName: r.NickName, Password: r.Password, HeaderImg: r.HeaderImg, AuthorityId: r.AuthorityId, Authorities: authorities, Enable: r.Enable, Phone: r.Phone, Email: r.Email}
 	userReturn, err := user.Register()
 	if err != nil {
-		core.Log().Error("注册失败!", zap.Error(err))
+		log.Log().Error("注册失败!", zap.Error(err))
 		response.FailWithDetailed(userReturn, "注册失败", ctx)
 		return
 	}
@@ -159,7 +161,7 @@ func UserChangePassword(ctx *gin.Context) {
 	u := &model.SysUser{MODEL: model.MODEL{ID: uid}, Password: req.Password}
 
 	if _, err := u.ChangePassword(req.NewPassword); err != nil {
-		core.Log().Error("修改失败!", zap.Error(err))
+		log.Log().Error("修改失败!", zap.Error(err))
 		response.FailWithMessage("修改失败，原密码与当前账户不符", ctx)
 		return
 	}
@@ -185,7 +187,7 @@ func UserSetAuthority(ctx *gin.Context) {
 	//u := &model.SysUser{MODEL: model.MODEL{ID: userID}, AuthorityId: sua.AuthorityId}
 	////userID, sua.AuthorityId
 	//if err := u.SetUserAuthority(); err != nil {
-	//	core.Log().Error("修改失败!", zap.Error(err))
+	//	log.Log().Error("修改失败!", zap.Error(err))
 	//	response.FailWithMessage(err.Error(), ctx)
 	//	return
 	//}
@@ -193,7 +195,7 @@ func UserSetAuthority(ctx *gin.Context) {
 	//j := &model.Jwt{SigningKey: []byte(core.Config().JWT.SigningKey)} // 唯一签名
 	//claims.AuthorityId = sua.AuthorityId
 	//if token, err := j.CreateToken(*claims); err != nil {
-	//	core.Log().Error("修改失败!", zap.Error(err))
+	//	log.Log().Error("修改失败!", zap.Error(err))
 	//	response.FailWithMessage(err.Error(), ctx)
 	//} else {
 	//	// TODO 关于这里需要注意一下，如果是改别人的权限，还设置 token 吗，这里是怎么配合前端生效的
@@ -220,7 +222,7 @@ func UserDelete(ctx *gin.Context) {
 		return
 	}
 	if err := (model.SysUser{}).DeleteUser(reqId.ID); err != nil {
-		core.Log().Error("删除失败!", zap.Error(err))
+		log.Log().Error("删除失败!", zap.Error(err))
 		response.FailWithMessage("删除失败", ctx)
 		return
 	}
@@ -250,7 +252,7 @@ func UserSetInfo(ctx *gin.Context) {
 	u := model.SysUser{MODEL: model.MODEL{ID: user.ID}}
 	if len(user.AuthorityIds) != 0 {
 		if err := u.SetUserAuthorities(user.AuthorityIds); err != nil {
-			core.Log().Error("设置失败!", zap.Error(err))
+			log.Log().Error("设置失败!", zap.Error(err))
 			response.FailWithMessage("设置失败", ctx)
 			return
 		}
@@ -267,7 +269,7 @@ func UserSetInfo(ctx *gin.Context) {
 		Enable:    user.Enable,
 	})
 	if err != nil {
-		core.Log().Error("设置失败!", zap.Error(err))
+		log.Log().Error("设置失败!", zap.Error(err))
 		response.FailWithMessage("设置失败", ctx)
 		return
 	}
@@ -305,7 +307,7 @@ func SetSelfInfo(ctx *gin.Context) {
 		Enable:    user.Enable,
 	})
 	if err != nil {
-		core.Log().Error("设置失败!", zap.Error(err))
+		log.Log().Error("设置失败!", zap.Error(err))
 		response.FailWithMessage("设置失败", ctx)
 		return
 	}
@@ -323,7 +325,7 @@ func UserSetAuthorities(ctx *gin.Context) {
 	}
 	u := model.SysUser{MODEL: model.MODEL{ID: sua.ID}}
 	if err := u.SetUserAuthorities(sua.AuthorityIds); err != nil {
-		core.Log().Error("修改失败!", zap.Error(err))
+		log.Log().Error("修改失败!", zap.Error(err))
 		response.FailWithMessage("修改失败", ctx)
 		return
 	}
@@ -339,7 +341,7 @@ func UserResetPassword(ctx *gin.Context) {
 	}
 	err = user.ResetPassword()
 	if err != nil {
-		core.Log().Error("重置失败!", zap.Error(err))
+		log.Log().Error("重置失败!", zap.Error(err))
 		response.FailWithMessage("重置失败"+err.Error(), ctx)
 		return
 	}
@@ -347,7 +349,7 @@ func UserResetPassword(ctx *gin.Context) {
 }
 
 func tokenNext(ctx *gin.Context, user model.SysUser) {
-	j := &model.Jwt{SigningKey: []byte(core.Config().JWT.SigningKey)} // 唯一签名
+	j := &model.Jwt{SigningKey: []byte(config.JwtCfg().SigningKey)} // 唯一签名
 	ids := []int{}
 	for _, authority := range user.Authorities {
 		ids = append(ids, authority.AuthorityId)
@@ -362,11 +364,11 @@ func tokenNext(ctx *gin.Context, user model.SysUser) {
 	})
 	token, err := j.CreateToken(claims)
 	if err != nil {
-		core.Log().Error("获取token失败!", zap.Error(err))
+		log.Log().Error("获取token失败!", zap.Error(err))
 		response.FailWithMessage("获取token失败", ctx)
 		return
 	}
-	if !core.Config().System.UseMultipoint {
+	if !config.ServerCfg().UseMultipoint {
 		response.OkWithDetailed(map[string]interface{}{
 			"user":      user,
 			"token":     token,
@@ -378,7 +380,7 @@ func tokenNext(ctx *gin.Context, user model.SysUser) {
 
 	if jwtStr, err := jwt.GetRedisJWT(user.Username); err == redis.Nil {
 		if err := jwt.SetRedisJWT(token, user.Username); err != nil {
-			core.Log().Error("设置登录状态失败!", zap.Error(err))
+			log.Log().Error("设置登录状态失败!", zap.Error(err))
 			response.FailWithMessage("设置登录状态失败", ctx)
 			return
 		}
@@ -389,7 +391,7 @@ func tokenNext(ctx *gin.Context, user model.SysUser) {
 		}, "登录成功", ctx)
 		return
 	} else if err != nil {
-		core.Log().Error("设置登录状态失败!", zap.Error(err))
+		log.Log().Error("设置登录状态失败!", zap.Error(err))
 		response.FailWithMessage("设置登录状态失败", ctx)
 	} else {
 		var blackJWT model.SysJwtBlacklist

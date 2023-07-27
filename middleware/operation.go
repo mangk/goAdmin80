@@ -3,7 +3,7 @@ package middleware
 import (
 	"bytes"
 	"encoding/json"
-	"github.com/mangk/goAdmin80/core"
+	"github.com/mangk/goAdmin80/log"
 	"github.com/mangk/goAdmin80/model"
 	"io"
 	"net/http"
@@ -33,7 +33,7 @@ func OperationRecord() gin.HandlerFunc {
 			var err error
 			body, err = io.ReadAll(c.Request.Body)
 			if err != nil {
-				core.Log().Error("read body from request error:", zap.Error(err))
+				log.Log().Error("read body from request error:", zap.Error(err))
 			} else {
 				c.Request.Body = io.NopCloser(bytes.NewBuffer(body))
 			}
@@ -114,7 +114,7 @@ func OperationRecord() gin.HandlerFunc {
 		}
 
 		if err := record.Create(); err != nil {
-			core.Log().Error("create operation record error:", zap.Error(err))
+			log.Log().Error("create operation record error:", zap.Error(err))
 		}
 	}
 }

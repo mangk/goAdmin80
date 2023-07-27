@@ -22,7 +22,7 @@ go.work
 
 .idea
 .vscode
-log/*
+.DS_Store
 uploads/*
 
 front/node_modules/*

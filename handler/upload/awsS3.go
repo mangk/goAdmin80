@@ -3,7 +3,8 @@ package upload
 import (
 	"errors"
 	"fmt"
-	"github.com/mangk/goAdmin80/core"
+	"github.com/mangk/goAdmin80/config"
+	"github.com/mangk/goAdmin80/log"
 	"mime/multipart"
 	"time"
 
@@ -15,7 +16,9 @@ import (
 	"go.uber.org/zap"
 )
 
-type AwsS3 struct{}
+type AwsS3 struct {
+	cfg config.File
+}
 
 //@author: [WqyJh](https://github.com/WqyJh)
 //@object: *AwsS3
@@ -24,30 +27,30 @@ type AwsS3 struct{}
 //@param: file *multipart.FileHeader
 //@return: string, string, error
 
-func (*AwsS3) UploadFile(file *multipart.FileHeader) (string, string, error) {
-	session := newSession()
+func (a *AwsS3) UploadFile(file *multipart.FileHeader) (string, string, error) {
+	session := a.newSession()
 	uploader := s3manager.NewUploader(session)
 
 	fileKey := fmt.Sprintf("%d%s", time.Now().Unix(), file.Filename)
-	filename := core.Config().AwsS3.PathPrefix + "/" + fileKey
+	filename := a.cfg.PrefixPath + "/" + fileKey
 	f, openError := file.Open()
 	if openError != nil {
-		core.Log().Error("function file.Open() Filed", zap.Any("err", openError.Error()))
+		log.Log().Error("function file.Open() Filed", zap.Any("err", openError.Error()))
 		return "", "", errors.New("function file.Open() Filed, err:" + openError.Error())
 	}
 	defer f.Close() // 创建文件 defer 关闭
 
 	_, err := uploader.Upload(&s3manager.UploadInput{
-		Bucket: aws.String(core.Config().AwsS3.Bucket),
+		Bucket: aws.String(a.cfg.Bucket),
 		Key:    aws.String(filename),
 		Body:   f,
 	})
 	if err != nil {
-		core.Log().Error("function uploader.Upload() Filed", zap.Any("err", err.Error()))
+		log.Log().Error("function uploader.Upload() Filed", zap.Any("err", err.Error()))
 		return "", "", err
 	}
 
-	return core.Config().AwsS3.BaseURL + "/" + filename, fileKey, nil
+	return a.cfg.PrefixPath + "/" + filename, fileKey, nil
 }
 
 //@author: [WqyJh](https://github.com/WqyJh)
@@ -57,18 +60,18 @@ func (*AwsS3) UploadFile(file *multipart.FileHeader) (string, string, error) {
 //@param: file *multipart.FileHeader
 //@return: string, string, error
 
-func (*AwsS3) DeleteFile(key string) error {
-	session := newSession()
+func (a *AwsS3) DeleteFile(key string) error {
+	session := a.newSession()
 	svc := s3.New(session)
-	filename := core.Config().AwsS3.PathPrefix + "/" + key
-	bucket := core.Config().AwsS3.Bucket
+	filename := a.cfg.PrefixPath + "/" + key
+	bucket := a.cfg.Bucket
 
 	_, err := svc.DeleteObject(&s3.DeleteObjectInput{
 		Bucket: aws.String(bucket),
 		Key:    aws.String(filename),
 	})
 	if err != nil {
-		core.Log().Error("function svc.DeleteObject() Filed", zap.Any("err", err.Error()))
+		log.Log().Error("function svc.DeleteObject() Filed", zap.Any("err", err.Error()))
 		return errors.New("function svc.DeleteObject() Filed, err:" + err.Error())
 	}
 
@@ -80,15 +83,15 @@ func (*AwsS3) DeleteFile(key string) error {
 }
 
 // newSession Create S3 session
-func newSession() *session.Session {
+func (a *AwsS3) newSession() *session.Session {
 	sess, _ := session.NewSession(&aws.Config{
-		Region:           aws.String(core.Config().AwsS3.Region),
-		Endpoint:         aws.String(core.Config().AwsS3.Endpoint), //minio在这里设置地址,可以兼容
-		S3ForcePathStyle: aws.Bool(core.Config().AwsS3.S3ForcePathStyle),
-		DisableSSL:       aws.Bool(core.Config().AwsS3.DisableSSL),
+		Region:   aws.String(a.cfg.Region),
+		Endpoint: aws.String(a.cfg.Bucket), //minio在这里设置地址,可以兼容
+		//S3ForcePathStyle: aws.Bool(core.Config().AwsS3.S3ForcePathStyle), // TODO 这里似乎不匹配
+		//DisableSSL:       aws.Bool(core.Config().AwsS3.DisableSSL), // TODO 这里似乎不匹配
 		Credentials: credentials.NewStaticCredentials(
-			core.Config().AwsS3.SecretID,
-			core.Config().AwsS3.SecretKey,
+			a.cfg.ID,
+			a.cfg.Key,
 			"",
 		),
 	})

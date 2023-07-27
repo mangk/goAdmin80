@@ -1,7 +1,7 @@
 package model
 
 import (
-	"github.com/mangk/goAdmin80/core"
+	"github.com/mangk/goAdmin80/db"
 	"github.com/mangk/goAdmin80/handler/request"
 	"time"
 )
@@ -23,17 +23,17 @@ type SysOperationRecord struct {
 }
 
 func (s SysOperationRecord) Create() (err error) {
-	err = core.DB().Create(&s).Error
+	err = db.DB().Create(&s).Error
 	return err
 }
 
 func (s SysOperationRecord) DeleteSysOperationRecordByIds(ids []int) (err error) {
-	err = core.DB().Delete(&s, "id in (?)", ids).Error
+	err = db.DB().Delete(&s, "id in (?)", ids).Error
 	return err
 }
 
 func (s *SysOperationRecord) GetSysOperationRecord(id int) (sysOperationRecord SysOperationRecord, err error) {
-	err = core.DB().Where("id = ?", id).First(&sysOperationRecord).Error
+	err = db.DB().Where("id = ?", id).First(&sysOperationRecord).Error
 	return
 }
 
@@ -44,22 +44,22 @@ func (s SysOperationRecord) GetSysOperationRecordInfoList(info struct {
 	limit := info.PageSize
 	offset := info.PageSize * (info.Page - 1)
 	// 创建db
-	db := core.DB().Model(&SysOperationRecord{})
+	cdb := db.DB().Model(&SysOperationRecord{})
 	var sysOperationRecords []SysOperationRecord
 	// 如果有条件搜索 下方会自动创建搜索语句
 	if info.Method != "" {
-		db = db.Where("method = ?", info.Method)
+		cdb = cdb.Where("method = ?", info.Method)
 	}
 	if info.Path != "" {
-		db = db.Where("path LIKE ?", "%"+info.Path+"%")
+		cdb = cdb.Where("path LIKE ?", "%"+info.Path+"%")
 	}
 	if info.Status != 0 {
-		db = db.Where("status = ?", info.Status)
+		cdb = cdb.Where("status = ?", info.Status)
 	}
-	err = db.Count(&total).Error
+	err = cdb.Count(&total).Error
 	if err != nil {
 		return
 	}
-	err = db.Order("id desc").Limit(limit).Offset(offset).Preload("User").Find(&sysOperationRecords).Error
+	err = cdb.Order("id desc").Limit(limit).Offset(offset).Preload("User").Find(&sysOperationRecords).Error
 	return sysOperationRecords, total, err
 }

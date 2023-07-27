@@ -2,8 +2,8 @@ package handler
 
 import (
 	"github.com/gin-gonic/gin"
-	"github.com/mangk/goAdmin80/core"
 	"github.com/mangk/goAdmin80/handler/response"
+	"github.com/mangk/goAdmin80/log"
 	"github.com/mangk/goAdmin80/model"
 	"github.com/mangk/goAdmin80/utils"
 	"go.uber.org/zap"
@@ -26,7 +26,7 @@ func CasbinUpdate(ctx *gin.Context) {
 	}
 	err := model.Casbin{}.UpdateCasbin(cmr.AuthorityId, cmr.CasbinInfos)
 	if err != nil {
-		core.Log().Error("更新失败!", zap.Error(err))
+		log.Log().Error("更新失败!", zap.Error(err))
 		response.FailWithMessage("更新失败", ctx)
 		return
 	}

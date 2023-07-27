@@ -1,7 +1,9 @@
-package core
+package log
 
 import (
 	rotatelogs "github.com/lestrrat-go/file-rotatelogs"
+	"github.com/mangk/goAdmin80/config"
+	"github.com/mangk/goAdmin80/core"
 	"go.uber.org/zap"
 	"go.uber.org/zap/zapcore"
 	"log"
@@ -10,11 +12,16 @@ import (
 	"time"
 )
 
-func Log() *zap.Logger {
-	return _core.log
+var _log *zap.Logger
+
+func init() {
+	core.ModuleAdd(l{})
 }
 
-func (c *Core) initLog() {
+type l struct {
+}
+
+func (l l) Init() uint8 {
 	var (
 		writer    []zapcore.WriteSyncer // 日志输出位置
 		encoder   zapcore.Encoder       // 日志格式化
@@ -23,7 +30,7 @@ func (c *Core) initLog() {
 		opt       []zap.Option
 	)
 
-	level = Config().Zap.TransportLevel()
+	level = config.LogCfg().TransportLevel()
 
 	encodeCfg = zapcore.EncoderConfig{
 		TimeKey:       "_time",
@@ -34,20 +41,20 @@ func (c *Core) initLog() {
 		FunctionKey:   zapcore.OmitKey,
 		MessageKey:    "msg",
 		LineEnding:    zapcore.DefaultLineEnding,
-		EncodeLevel:   Config().Zap.ZapEncodeLevel(),
+		EncodeLevel:   config.LogCfg().ZapEncodeLevel(),
 		EncodeTime: func(t time.Time, encoder zapcore.PrimitiveArrayEncoder) {
 			encoder.AppendString(t.Format("2006-01-02 15:04:05.00000"))
 		},
 		EncodeCaller: zapcore.ShortCallerEncoder,
 	}
 
-	if Config().Zap.Format == "json" {
+	if config.LogCfg().Format == "json" {
 		encoder = zapcore.NewJSONEncoder(encodeCfg)
 	} else {
 		encoder = zapcore.NewConsoleEncoder(encodeCfg)
 	}
 
-	for _, s := range Config().Zap.Output {
+	for _, s := range config.LogCfg().Output {
 		switch s {
 		case "console":
 			writer = append(writer, zapcore.AddSync(os.Stdout))
@@ -60,22 +67,28 @@ func (c *Core) initLog() {
 		writer = append(writer, zapcore.AddSync(os.Stdout))
 	}
 
-	if Config().Zap.Prefix != "" {
-		opt = append(opt, zap.Fields(zap.String("_prefix", Config().Zap.Prefix)))
+	if config.LogCfg().Prefix != "" {
+		opt = append(opt, zap.Fields(zap.String("_prefix", config.LogCfg().Prefix)))
 	}
 	opt = append(opt, zap.WithCaller(true))
 
-	c.log = zap.New(zapcore.NewCore(encoder, zapcore.NewMultiWriteSyncer(writer...), level), opt...)
-	zap.ReplaceGlobals(c.log)
+	_log = zap.New(zapcore.NewCore(encoder, zapcore.NewMultiWriteSyncer(writer...), level), opt...)
+	zap.ReplaceGlobals(_log)
 
-	log.SetOutput(NewZapLoggerAdapter(c.log, "_sys"))
+	log.SetOutput(NewZapLoggerAdapter(_log, "_sys"))
+
+	return core.ModuleLog
+}
+
+func Log() *zap.Logger {
+	return _log
 }
 
 func getLogfileWriter(dirName string) *rotatelogs.RotateLogs {
 	fileWriter, err := rotatelogs.New(
 		path.Join(dirName, "%Y-%m-%d.log"),
 		rotatelogs.WithClock(rotatelogs.Local),
-		rotatelogs.WithMaxAge(time.Duration(Config().Zap.MaxAge)*24*time.Hour), // 日志留存时间
+		rotatelogs.WithMaxAge(time.Duration(config.LogCfg().MaxAge)*24*time.Hour), // 日志留存时间
 		rotatelogs.WithRotationTime(time.Hour*24),
 	)
 	if err != nil {
@@ -104,7 +117,7 @@ func (a *ZapLoggerAdapter) Write(p []byte) (n int, err error) {
 
 func (a *ZapLoggerAdapter) Printf(message string, data ...interface{}) {
 	// TODO 通过 a.name 区分日志类型
-	_core.log.WithOptions(zap.WithCaller(false)).With(zap.Namespace(a.name)).Info("", zap.String("message", message), zap.Any("data", data))
+	_log.WithOptions(zap.WithCaller(false)).With(zap.Namespace(a.name)).Info("", zap.String("message", message), zap.Any("data", data))
 }
 
 func (a *ZapLoggerAdapter) Info(msg string, keysAndValues ...interface{}) {

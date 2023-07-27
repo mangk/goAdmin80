@@ -4,7 +4,8 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	"github.com/mangk/goAdmin80/core"
+	"github.com/mangk/goAdmin80/config"
+	"github.com/mangk/goAdmin80/log"
 	"github.com/qiniu/go-sdk/v7/auth/qbox"
 	"github.com/qiniu/go-sdk/v7/storage"
 	"mime/multipart"
@@ -13,7 +14,9 @@ import (
 	"go.uber.org/zap"
 )
 
-type Qiniu struct{}
+type Qiniu struct {
+	cfg config.File
+}
 
 //@author: [piexlmax](https://github.com/piexlmax)
 //@author: [ccfish86](https://github.com/ccfish86)
@@ -24,18 +27,18 @@ type Qiniu struct{}
 //@param: file *multipart.FileHeader
 //@return: string, string, error
 
-func (*Qiniu) UploadFile(file *multipart.FileHeader) (string, string, error) {
-	putPolicy := storage.PutPolicy{Scope: core.Config().Qiniu.Bucket}
-	mac := qbox.NewMac(core.Config().Qiniu.AccessKey, core.Config().Qiniu.SecretKey)
+func (q *Qiniu) UploadFile(file *multipart.FileHeader) (string, string, error) {
+	putPolicy := storage.PutPolicy{Scope: q.cfg.Bucket}
+	mac := qbox.NewMac(q.cfg.ID, q.cfg.Key)
 	upToken := putPolicy.UploadToken(mac)
-	cfg := qiniuConfig()
+	cfg := q.qiniuConfig()
 	formUploader := storage.NewFormUploader(cfg)
 	ret := storage.PutRet{}
 	putExtra := storage.PutExtra{Params: map[string]string{"x:name": "github logo"}}
 
 	f, openError := file.Open()
 	if openError != nil {
-		core.Log().Error("function file.Open() Filed", zap.Any("err", openError.Error()))
+		log.Log().Error("function file.Open() Filed", zap.Any("err", openError.Error()))
 
 		return "", "", errors.New("function file.Open() Filed, err:" + openError.Error())
 	}
@@ -43,10 +46,10 @@ func (*Qiniu) UploadFile(file *multipart.FileHeader) (string, string, error) {
 	fileKey := fmt.Sprintf("%d%s", time.Now().Unix(), file.Filename) // 文件名格式 自己可以改 建议保证唯一性
 	putErr := formUploader.Put(context.Background(), &ret, upToken, fileKey, f, file.Size, &putExtra)
 	if putErr != nil {
-		core.Log().Error("function formUploader.Put() Filed", zap.Any("err", putErr.Error()))
+		log.Log().Error("function formUploader.Put() Filed", zap.Any("err", putErr.Error()))
 		return "", "", errors.New("function formUploader.Put() Filed, err:" + putErr.Error())
 	}
-	return core.Config().Qiniu.ImgPath + "/" + ret.Key, ret.Key, nil
+	return q.cfg.PrefixPath + "/" + ret.Key, ret.Key, nil
 }
 
 //@author: [piexlmax](https://github.com/piexlmax)
@@ -58,12 +61,12 @@ func (*Qiniu) UploadFile(file *multipart.FileHeader) (string, string, error) {
 //@param: key string
 //@return: error
 
-func (*Qiniu) DeleteFile(key string) error {
-	mac := qbox.NewMac(core.Config().Qiniu.AccessKey, core.Config().Qiniu.SecretKey)
-	cfg := qiniuConfig()
+func (q *Qiniu) DeleteFile(key string) error {
+	mac := qbox.NewMac(q.cfg.ID, q.cfg.Key)
+	cfg := q.qiniuConfig()
 	bucketManager := storage.NewBucketManager(mac, cfg)
-	if err := bucketManager.Delete(core.Config().Qiniu.Bucket, key); err != nil {
-		core.Log().Error("function bucketManager.Delete() Filed", zap.Any("err", err.Error()))
+	if err := bucketManager.Delete(q.cfg.Bucket, key); err != nil {
+		log.Log().Error("function bucketManager.Delete() Filed", zap.Any("err", err.Error()))
 		return errors.New("function bucketManager.Delete() Filed, err:" + err.Error())
 	}
 	return nil
@@ -75,12 +78,12 @@ func (*Qiniu) DeleteFile(key string) error {
 //@description: 根据配置文件进行返回七牛云的配置
 //@return: *storage.Config
 
-func qiniuConfig() *storage.Config {
+func (q *Qiniu) qiniuConfig() *storage.Config {
 	cfg := storage.Config{
-		UseHTTPS:      core.Config().Qiniu.UseHTTPS,
-		UseCdnDomains: core.Config().Qiniu.UseCdnDomains,
+		UseHTTPS:      q.cfg.CdnURL != "", // TODO 这里似乎不匹配
+		UseCdnDomains: q.cfg.CdnURL != "", // TODO 这里似乎不匹配
 	}
-	switch core.Config().Qiniu.Zone { // 根据配置文件进行初始化空间对应的机房
+	switch q.cfg.Bucket { // 根据配置文件进行初始化空间对应的机房 // TODO 这里似乎不匹配
 	case "ZoneHuadong":
 		cfg.Zone = &storage.ZoneHuadong
 	case "ZoneHuabei":

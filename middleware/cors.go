@@ -2,13 +2,13 @@ package middleware
 
 import (
 	"github.com/gin-gonic/gin"
-	"github.com/mangk/goAdmin80/core"
-	"github.com/mangk/goAdmin80/core/config"
+	"github.com/mangk/goAdmin80/config"
+	"github.com/mangk/goAdmin80/log"
 	"net/http"
 )
 
 func Cors() gin.HandlerFunc {
-	core.Log().Info("use middleware cors")
+	log.Log().Info("use middleware cors")
 	return func(c *gin.Context) {
 		origin := c.Request.Header.Get("Origin")
 		c.Header("Access-Control-Allow-Origin", origin)
@@ -24,7 +24,7 @@ func Cors() gin.HandlerFunc {
 
 func CorsByRules() gin.HandlerFunc {
 	// 放行全部
-	if core.Config().Cors.Mode == "allowAll" {
+	if config.CORSCfg().Mode == "allowAll" {
 		return Cors()
 	}
 	return func(c *gin.Context) {
@@ -42,7 +42,7 @@ func CorsByRules() gin.HandlerFunc {
 		}
 
 		// 严格白名单模式且未通过检查，直接拒绝处理请求
-		if whitelist == nil && core.Config().Cors.Mode == "strictWhitelist" {
+		if whitelist == nil && config.CORSCfg().Mode == "strictWhitelist" {
 			c.AbortWithStatus(http.StatusForbidden)
 			return
 		}
@@ -53,7 +53,7 @@ func CorsByRules() gin.HandlerFunc {
 }
 
 func checkCors(currentOrigin string) *config.CORSWhitelist {
-	for _, whitelist := range core.Config().Cors.Whitelist {
+	for _, whitelist := range config.CORSCfg().Whitelist {
 		// 遍历配置中的跨域头，寻找匹配项
 		if currentOrigin == whitelist.AllowOrigin {
 			return &whitelist

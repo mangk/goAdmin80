@@ -5,7 +5,7 @@ import (
 	"strings"
 )
 
-type Zap struct {
+type Log struct {
 	Prefix      string   `json:"prefix" yaml:"prefix"`           // 日志前缀
 	MaxAge      int      `json:"maxAge" yaml:"maxAge"`           // 日志留存时间
 	Level       string   `json:"level" yaml:"level"`             // 级别 debug/info/warn/error/dpanic/panic/fatal
@@ -14,24 +14,24 @@ type Zap struct {
 	Output      []string `json:"output" yaml:"output"`           // 输出形式 console(stdout)/youDirName/TODO 对接日志接收器
 }
 
-func (z Zap) ZapEncodeLevel() zapcore.LevelEncoder {
+func (l Log) ZapEncodeLevel() zapcore.LevelEncoder {
 	switch {
-	case z.EncodeLevel == 0: // 小写编码器(默认)
+	case l.EncodeLevel == 0: // 小写编码器(默认)
 		return zapcore.LowercaseLevelEncoder
-	case z.EncodeLevel == 1: // 小写编码器带颜色
+	case l.EncodeLevel == 1: // 小写编码器带颜色
 		return zapcore.LowercaseColorLevelEncoder
-	case z.EncodeLevel == 2: // 大写编码器
+	case l.EncodeLevel == 2: // 大写编码器
 		return zapcore.CapitalLevelEncoder
-	case z.EncodeLevel == 3: // 大写编码器带颜色
+	case l.EncodeLevel == 3: // 大写编码器带颜色
 		return zapcore.CapitalColorLevelEncoder
 	default:
 		return zapcore.LowercaseLevelEncoder
 	}
 }
 
-func (z Zap) TransportLevel() zapcore.Level {
-	z.Level = strings.ToLower(z.Level)
-	switch z.Level {
+func (l Log) TransportLevel() zapcore.Level {
+	l.Level = strings.ToLower(l.Level)
+	switch l.Level {
 	case "debug":
 		return zapcore.DebugLevel
 	case "info":

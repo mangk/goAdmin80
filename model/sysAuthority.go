@@ -2,7 +2,7 @@ package model
 
 import (
 	"errors"
-	"github.com/mangk/goAdmin80/core"
+	"github.com/mangk/goAdmin80/db"
 	"github.com/mangk/goAdmin80/handler/request"
 	"gorm.io/gorm"
 	"strconv"
@@ -29,15 +29,15 @@ func (SysAuthority) TableName() string {
 
 func (s SysAuthority) SetMenuAuthority(auth *SysAuthority) error {
 	var d SysAuthority
-	core.DB().Preload("SysMenus").First(&d, "authority_id = ?", auth.AuthorityId)
-	err := core.DB().Model(&d).Association("SysMenus").Replace(&auth.SysMenus)
+	db.DB().Preload("SysMenus").First(&d, "authority_id = ?", auth.AuthorityId)
+	err := db.DB().Model(&d).Association("SysMenus").Replace(&auth.SysMenus)
 	return err
 }
 
 func (s SysAuthority) GetAuthorityInfoList(info request.PageInfo) (list interface{}, total int64, err error) {
 	limit := info.PageSize
 	offset := info.PageSize * (info.Page - 1)
-	db := core.DB().Model(&SysAuthority{})
+	db := db.DB().Model(&SysAuthority{})
 	if err = db.Where("parent_id = ?", "0").Count(&total).Error; total == 0 || err != nil {
 		return
 	}
@@ -50,7 +50,7 @@ func (s SysAuthority) GetAuthorityInfoList(info request.PageInfo) (list interfac
 }
 
 func (s SysAuthority) findChildrenAuthority(authority *SysAuthority) (err error) {
-	err = core.DB().Preload("DataAuthorityId").Where("parent_id = ?", authority.AuthorityId).Find(&authority.Children).Error
+	err = db.DB().Preload("DataAuthorityId").Where("parent_id = ?", authority.AuthorityId).Find(&authority.Children).Error
 	if len(authority.Children) > 0 {
 		for k := range authority.Children {
 			err = s.findChildrenAuthority(&authority.Children[k])
@@ -61,10 +61,10 @@ func (s SysAuthority) findChildrenAuthority(authority *SysAuthority) (err error)
 
 func (s SysAuthority) CreateAuthority(auth SysAuthority) (SysAuthority, error) {
 	var authorityBox SysAuthority
-	if !errors.Is(core.DB().Where("authority_id = ?", auth.AuthorityId).First(&authorityBox).Error, gorm.ErrRecordNotFound) {
+	if !errors.Is(db.DB().Where("authority_id = ?", auth.AuthorityId).First(&authorityBox).Error, gorm.ErrRecordNotFound) {
 		return auth, errors.New("存在相同角色id")
 	}
-	err := core.DB().Create(&auth).Error
+	err := db.DB().Create(&auth).Error
 	return auth, err
 }
 
@@ -75,7 +75,7 @@ type SysAuthorityCopyResponse struct {
 
 func (s SysAuthority) CopyAuthority(copyInfo SysAuthorityCopyResponse) (SysAuthority, error) {
 	//var authorityBox SysAuthority
-	//if !errors.Is(core.DB().Where("authority_id = ?", copyInfo.Authority.AuthorityId).First(&authorityBox).Error, gorm.ErrRecordNotFound) {
+	//if !errors.Is(db.DB().Where("authority_id = ?", copyInfo.Authority.AuthorityId).First(&authorityBox).Error, gorm.ErrRecordNotFound) {
 	//	return SysAuthority{}, errors.New("存在相同角色id")
 	//}
 	//copyInfo.Authority.Children = []SysAuthority{}
@@ -90,7 +90,7 @@ func (s SysAuthority) CopyAuthority(copyInfo SysAuthorityCopyResponse) (SysAutho
 	//	baseMenu = append(baseMenu, v.SysBaseMenu)
 	//}
 	//copyInfo.Authority.SysMenus = baseMenu
-	//err = core.DB().Create(&copyInfo.Authority).Error
+	//err = db.DB().Create(&copyInfo.Authority).Error
 	//if err != nil {
 	//	return SysAuthority{}, err
 	//}
@@ -105,30 +105,30 @@ func (s SysAuthority) CopyAuthority(copyInfo SysAuthorityCopyResponse) (SysAutho
 }
 
 func (s SysAuthority) DeleteAuthority(auth *SysAuthority) (err error) {
-	if errors.Is(core.DB().Debug().Preload("Users").First(&auth).Error, gorm.ErrRecordNotFound) {
+	if errors.Is(db.DB().Debug().Preload("Users").First(&auth).Error, gorm.ErrRecordNotFound) {
 		return errors.New("该角色不存在")
 	}
 	if len(auth.Users) != 0 {
 		return errors.New("此角色有用户正在使用禁止删除")
 	}
-	if !errors.Is(core.DB().Where("authority_id = ?", auth.AuthorityId).First(&SysUser{}).Error, gorm.ErrRecordNotFound) {
+	if !errors.Is(db.DB().Where("authority_id = ?", auth.AuthorityId).First(&SysUser{}).Error, gorm.ErrRecordNotFound) {
 		return errors.New("此角色有用户正在使用禁止删除")
 	}
-	if !errors.Is(core.DB().Where("parent_id = ?", auth.AuthorityId).First(&SysAuthority{}).Error, gorm.ErrRecordNotFound) {
+	if !errors.Is(db.DB().Where("parent_id = ?", auth.AuthorityId).First(&SysAuthority{}).Error, gorm.ErrRecordNotFound) {
 		return errors.New("此角色存在子角色不允许删除")
 	}
-	db := core.DB().Where("authority_id = ?", auth.AuthorityId).First(auth)
-	err = db.Unscoped().Delete(auth).Error
+	curDBdb := db.DB().Where("authority_id = ?", auth.AuthorityId).First(auth)
+	err = curDBdb.Unscoped().Delete(auth).Error
 	if err != nil {
 		return
 	}
 	// 删除角色拥有的菜单
-	err = core.DB().Where("sys_authority_authority_id = ?", auth.AuthorityId).Delete(&SysAuthorityMenu{}).Error
+	err = db.DB().Where("sys_authority_authority_id = ?", auth.AuthorityId).Delete(&SysAuthorityMenu{}).Error
 	if err != nil {
 		return
 	}
 	// 删除角色与用户对应关系
-	err = core.DB().Delete(&[]SysUserAuthority{}, "sys_authority_authority_id = ?", auth.AuthorityId).Error
+	err = db.DB().Delete(&[]SysUserAuthority{}, "sys_authority_authority_id = ?", auth.AuthorityId).Error
 	if err != nil {
 		return
 	}
@@ -138,12 +138,12 @@ func (s SysAuthority) DeleteAuthority(auth *SysAuthority) (err error) {
 }
 
 func (s SysAuthority) UpdateAuthority(auth SysAuthority) (authority SysAuthority, err error) {
-	err = core.DB().Where("authority_id = ?", auth.AuthorityId).First(&SysAuthority{}).Updates(&auth).Error
+	err = db.DB().Where("authority_id = ?", auth.AuthorityId).First(&SysAuthority{}).Updates(&auth).Error
 	return auth, err
 }
 
 func (s SysAuthority) SetDataAuthority(auth SysAuthority) error {
-	core.DB().Preload("DataAuthorityId").First(&s, "authority_id = ?", auth.AuthorityId)
-	err := core.DB().Model(&s).Association("DataAuthorityId").Replace(&auth.DataAuthorityId)
+	db.DB().Preload("DataAuthorityId").First(&s, "authority_id = ?", auth.AuthorityId)
+	err := db.DB().Model(&s).Association("DataAuthorityId").Replace(&auth.DataAuthorityId)
 	return err
 }

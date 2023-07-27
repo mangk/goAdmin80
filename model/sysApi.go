@@ -3,7 +3,7 @@ package model
 import (
 	"errors"
 	"fmt"
-	"github.com/mangk/goAdmin80/core"
+	"github.com/mangk/goAdmin80/db"
 	"github.com/mangk/goAdmin80/handler/request"
 	"gorm.io/gorm"
 )
@@ -82,7 +82,7 @@ func (s SysApi) systemApi() []SysApi {
 }
 
 func (s SysApi) GetById(id int) (SysApi, error) {
-	err := core.DB().Where("id = ?", id).First(&s).Error
+	err := db.DB().Where("id = ?", id).First(&s).Error
 	return s, err
 }
 
@@ -90,12 +90,12 @@ func (s *SysApi) Create() error {
 	if s.IsExist(s.Path, s.Method) {
 		return errors.New("存在相同api")
 	}
-	return core.DB().Create(s).Error
+	return db.DB().Create(s).Error
 }
 
 func (s *SysApi) Update() error {
 	var old SysApi
-	err := core.DB().Where("id = ?", s.ID).First(&old).Error
+	err := db.DB().Where("id = ?", s.ID).First(&old).Error
 	if old.Path != s.Path || old.Method != s.Method {
 		if s.IsExist(s.Path, s.Method) {
 			return errors.New("存在相同api")
@@ -107,17 +107,17 @@ func (s *SysApi) Update() error {
 	if err = (Casbin{}).UpdateCasbinApi(old.Path, s.Path, old.Method, s.Method); err != nil {
 		return err
 	}
-	err = core.DB().Model(s).UpdateColumns(map[string]interface{}{"path": s.Path, "description": s.Description, "api_group": s.ApiGroup, "method": s.Method}).Error
+	err = db.DB().Model(s).UpdateColumns(map[string]interface{}{"path": s.Path, "description": s.Description, "api_group": s.ApiGroup, "method": s.Method}).Error
 	return err
 }
 
 func (s SysApi) IsExist(path, method string) bool {
-	return !errors.Is(core.DB().Where("path = ? AND method = ?", path, method).First(&SysApi{}).Error, gorm.ErrRecordNotFound)
+	return !errors.Is(db.DB().Where("path = ? AND method = ?", path, method).First(&SysApi{}).Error, gorm.ErrRecordNotFound)
 }
 
 func (s SysApi) Delete(ids []int) error {
 	var records []SysApi
-	err := core.DB().Find(&records, "id in ?", ids).Delete(&s, ids).Error
+	err := db.DB().Find(&records, "id in ?", ids).Delete(&s, ids).Error
 	if err != nil {
 		return err
 	}
@@ -133,7 +133,7 @@ func (s SysApi) Delete(ids []int) error {
 
 func (s SysApi) All() ([]SysApi, error) {
 	var all []SysApi
-	err := core.DB().Find(&all).Error
+	err := db.DB().Find(&all).Error
 	for _, v := range s.systemApi() {
 		all = append(all, v)
 	}
@@ -143,7 +143,7 @@ func (s SysApi) All() ([]SysApi, error) {
 func (s SysApi) GetAPIInfoList(api SysApi, info request.PageInfo, order string, desc bool) (list interface{}, total int64, err error) {
 	limit := info.PageSize
 	offset := info.PageSize * (info.Page - 1)
-	db := core.DB().Model(&SysApi{})
+	db := db.DB().Model(&SysApi{})
 	var apiList []SysApi
 
 	if api.Path != "" {

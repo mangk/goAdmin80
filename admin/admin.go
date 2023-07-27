@@ -1,24 +1,27 @@
-package engine
+package admin
 
 import (
-	"github.com/gin-gonic/gin"
+	"github.com/mangk/goAdmin80/config"
 	"github.com/mangk/goAdmin80/core"
-	"github.com/mangk/goAdmin80/front"
 	"github.com/mangk/goAdmin80/handler"
 	"github.com/mangk/goAdmin80/middleware"
-	"io/fs"
 	"net/http"
-	"strings"
 )
 
-func SysInit(path string) *core.Core {
-	c := core.New(path)
+func init() {
+	core.ModuleAdd(a{})
+}
 
+type a struct {
+}
+
+func (a) Init() uint8 {
 	root := core.HttpEngine()
+
 	root.Use(middleware.CorsByRules())
 
 	// ----------注册系统本地上传静态文件----------
-	for _, cfg := range core.Config().File {
+	for _, cfg := range config.FileCfg() {
 		if cfg.Driver == "local" {
 			root.StaticFS(cfg.PrefixPath, http.Dir(cfg.StorePath))
 		}
@@ -113,25 +116,5 @@ func SysInit(path string) *core.Core {
 		}
 	}
 
-	// ----------注册表单编辑器静态文件接口----------
-	root.Static("/form-generator", "./front/formGenerator") // TODO 这里还需不需要
-	// ----------注册系统默认静态文件接口----------
-	assets, _ := fs.Sub(front.Front, "dist/assets")
-	root.StaticFS(strings.TrimRight(core.Config().System.FrontRouterPrefix, "/")+"/assets", http.FS(assets))
-	root.GET(strings.TrimRight(core.Config().System.FrontRouterPrefix, "/")+"/", func(ctx *gin.Context) {
-		index, _ := fs.ReadFile(front.Front, "dist/index.html")
-		ctx.Header("Content-Type", "text/html; charset=utf-8")
-		ctx.String(200, "%s", index)
-	})
-
-	// ----------系统初始化 end----------
-	/*
-		这里结合 engine.go tmp 方法中的注释部分可以用来编辑 debug 模版页面
-	*/
-	//root.Delims("{[{", "}]}").SetFuncMap(template.FuncMap{
-	//	"formatElement": formatElement,
-	//})
-	//root.LoadHTMLFiles("/Users/mangk/Data/Code/goAdmin80/front/convert.vue")
-
-	return c
+	return core.ModuleAdmin
 }

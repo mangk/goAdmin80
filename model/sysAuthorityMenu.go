@@ -1,7 +1,7 @@
 package model
 
 import (
-	"github.com/mangk/goAdmin80/core"
+	"github.com/mangk/goAdmin80/db"
 )
 
 type SysAuthorityMenu struct {
@@ -15,7 +15,7 @@ func (s SysAuthorityMenu) TableName() string {
 
 func (s SysAuthorityMenu) GetMenuIdsByAuthorityIds(ids []int) (menuIds []int) {
 	res := []SysAuthorityMenu{}
-	core.DB().Where("sys_authority_authority_id in ?", ids).Find(&res)
+	db.DB().Where("sys_authority_authority_id in ?", ids).Find(&res)
 	for _, v := range res {
 		menuIds = append(menuIds, v.MenuId)
 	}
@@ -23,7 +23,7 @@ func (s SysAuthorityMenu) GetMenuIdsByAuthorityIds(ids []int) (menuIds []int) {
 }
 
 func (s SysAuthorityMenu) SaveAuthority(authorityId int, menus []SysMenu) error {
-	if err := core.DB().Where("sys_authority_authority_id = ?", authorityId).Delete(&s).Error; err != nil {
+	if err := db.DB().Where("sys_authority_authority_id = ?", authorityId).Delete(&s).Error; err != nil {
 		return err
 	}
 	data := []SysAuthorityMenu{}
@@ -33,7 +33,7 @@ func (s SysAuthorityMenu) SaveAuthority(authorityId int, menus []SysMenu) error 
 			AuthorityId: authorityId,
 		})
 	}
-	if err := core.DB().CreateInBatches(data, len(data)).Error; err != nil {
+	if err := db.DB().CreateInBatches(data, len(data)).Error; err != nil {
 		return err
 	}
 	return nil

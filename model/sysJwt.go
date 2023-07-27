@@ -4,7 +4,10 @@ import (
 	"context"
 	"errors"
 	"github.com/golang-jwt/jwt/v4"
-	"github.com/mangk/goAdmin80/core"
+	"github.com/mangk/goAdmin80/cache"
+	"github.com/mangk/goAdmin80/config"
+	"github.com/mangk/goAdmin80/db"
+	"github.com/mangk/goAdmin80/log"
 	"github.com/mangk/goAdmin80/utils"
 	"go.uber.org/zap"
 	"time"
@@ -18,9 +21,9 @@ type SysJwtBlacklist struct {
 const jwtPrefix = "jwtBlackList:"
 
 func (s SysJwtBlacklist) IsBlack(jwt string) bool {
-	has, err := core.Redis().Get(context.Background(), jwtPrefix+jwt).Bool()
+	has, err := cache.Redis().Get(context.Background(), jwtPrefix+jwt).Bool()
 	if err != nil && err.Error() != "redis: nil" {
-		core.DB().Where("jwt = ?", jwt).First(&s)
+		db.DB().Where("jwt = ?", jwt).First(&s)
 		if s.Jwt == "" {
 			return false
 		}
@@ -41,19 +44,19 @@ var (
 )
 
 func NewJWT(signingKey string) *Jwt {
-	return &Jwt{[]byte(core.Config().JWT.SigningKey)}
+	return &Jwt{[]byte(config.JwtCfg().SigningKey)}
 }
 
 func (j *Jwt) CreateClaims(baseClaims BaseClaims) CustomClaims {
-	bf, _ := utils.ParseDuration(core.Config().JWT.BufferTime)
-	ep, _ := utils.ParseDuration(core.Config().JWT.ExpiresTime)
+	bf, _ := utils.ParseDuration(config.JwtCfg().BufferTime)
+	ep, _ := utils.ParseDuration(config.JwtCfg().ExpiresTime)
 	claims := CustomClaims{
 		BaseClaims: baseClaims,
 		BufferTime: int64(bf / time.Second), // 缓冲时间1天 缓冲时间内会获得新的token刷新令牌 此时一个用户会存在两个有效令牌 但是前端只留一个 另一个会丢失
 		StandardClaims: jwt.StandardClaims{
 			NotBefore: time.Now().Unix() - 1000,  // 签名生效时间
 			ExpiresAt: time.Now().Add(ep).Unix(), // 过期时间 7天  配置文件
-			Issuer:    core.Config().JWT.Issuer,  // 签名的发行者
+			Issuer:    config.JwtCfg().Issuer,    // 签名的发行者
 		},
 	}
 	return claims
@@ -105,12 +108,12 @@ func (j *Jwt) ParseToken(tokenString string) (*CustomClaims, error) {
 
 // 拉黑 jwt
 func (j Jwt) JsonInBlacklist(jwtList SysJwtBlacklist) (err error) {
-	err = core.DB().Create(&jwtList).Error
+	err = db.DB().Create(&jwtList).Error
 	if err != nil {
 		return
 	}
-	dr, err := utils.ParseDuration(core.Config().JWT.ExpiresTime)
-	core.Redis().Set(context.Background(), jwtPrefix+jwtList.Jwt, true, dr)
+	dr, err := utils.ParseDuration(config.JwtCfg().ExpiresTime)
+	cache.Redis().Set(context.Background(), jwtPrefix+jwtList.Jwt, true, dr)
 	return
 }
 
@@ -125,30 +128,30 @@ func (j *Jwt) IsBlacklist(jwt string) bool {
 }
 
 func (j *Jwt) GetRedisJWT(userName string) (redisJWT string, err error) {
-	redisJWT, err = core.Redis().Get(context.Background(), userName).Result()
+	redisJWT, err = cache.Redis().Get(context.Background(), userName).Result()
 	return redisJWT, err
 }
 
 func (j *Jwt) SetRedisJWT(jwt string, userName string) (err error) {
 	// 此处过期时间等于jwt过期时间
-	dr, err := utils.ParseDuration(core.Config().JWT.ExpiresTime)
+	dr, err := utils.ParseDuration(config.JwtCfg().ExpiresTime)
 	if err != nil {
 		return err
 	}
 	timer := dr
-	err = core.Redis().Set(context.Background(), userName, jwt, timer).Err()
+	err = cache.Redis().Set(context.Background(), userName, jwt, timer).Err()
 	return err
 }
 
 func LoadAll() {
 	var data []string
-	err := core.DB().Model(&SysJwtBlacklist{}).Select("jwt").Find(&data).Error
+	err := db.DB().Model(&SysJwtBlacklist{}).Select("jwt").Find(&data).Error
 	if err != nil {
-		core.Log().Error("加载数据库jwt黑名单失败!", zap.Error(err))
+		log.Log().Error("加载数据库jwt黑名单失败!", zap.Error(err))
 		return
 	}
 	for i := 0; i < len(data); i++ {
 		// TODO 这里设置的作用
-		core.Cache().SetDefault(data[i], struct{}{})
+		cache.Cache().SetDefault(data[i], struct{}{})
 	} // jwt黑名单 加入 BlackCache 中
 }
