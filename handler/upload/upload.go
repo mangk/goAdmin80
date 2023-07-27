@@ -4,7 +4,8 @@ import (
 	"crypto/md5"
 	"encoding/hex"
 	"fmt"
-	"github.com/mangk/goAdmin80/core"
+	"github.com/mangk/goAdmin80/config"
+	"github.com/mangk/goAdmin80/log"
 	"io"
 	"mime/multipart"
 )
@@ -19,7 +20,7 @@ func NewOss(ossType ...string) OSS {
 	if len(ossType) > 0 {
 		t = ossType[0]
 	}
-	cfg, ok := core.Config().File[t]
+	cfg, ok := config.FileCfg()[t]
 
 	if ok {
 		switch cfg.Driver {
@@ -34,11 +35,11 @@ func NewOss(ossType ...string) OSS {
 		//case "aws-s3":
 		//	return &AwsS3{}
 		default:
-			core.Log().Panic(fmt.Sprintf("[%s]未知的对象存储", t))
+			log.Log().Panic(fmt.Sprintf("[%s]未知的对象存储", t))
 			return nil
 		}
 	}
-	core.Log().Panic(fmt.Sprintf("[%s]未知的对象存储", t))
+	log.Log().Panic(fmt.Sprintf("[%s]未知的对象存储", t))
 	return nil
 }
 

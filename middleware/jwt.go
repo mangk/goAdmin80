@@ -1,8 +1,9 @@
 package middleware
 
 import (
-	"github.com/mangk/goAdmin80/core"
+	"github.com/mangk/goAdmin80/config"
 	"github.com/mangk/goAdmin80/handler/response"
+	"github.com/mangk/goAdmin80/log"
 	"github.com/mangk/goAdmin80/model"
 	"github.com/mangk/goAdmin80/utils"
 	"strconv"
@@ -29,7 +30,7 @@ func JWTAuth() gin.HandlerFunc {
 			c.Abort()
 			return
 		}
-		j := model.NewJWT(core.Config().JWT.SigningKey)
+		j := model.NewJWT(config.JwtCfg().SigningKey)
 		// parseToken 解析token包含的信息
 		claims, err := j.ParseToken(token)
 		if err != nil {
@@ -54,16 +55,16 @@ func JWTAuth() gin.HandlerFunc {
 
 		// TODO 这里是 token 续期？
 		if claims.ExpiresAt-time.Now().Unix() < claims.BufferTime {
-			dr, _ := utils.ParseDuration(core.Config().JWT.ExpiresTime)
+			dr, _ := utils.ParseDuration(config.JwtCfg().ExpiresTime)
 			claims.ExpiresAt = time.Now().Add(dr).Unix()
 			newToken, _ := j.CreateTokenByOldToken(token, *claims)
 			newClaims, _ := j.ParseToken(newToken)
 			c.Header("new-token", newToken)
 			c.Header("new-expires-at", strconv.FormatInt(newClaims.ExpiresAt, 10))
-			if core.Config().System.UseMultipoint {
+			if config.ServerCfg().UseMultipoint {
 				RedisJwtToken, err := j.GetRedisJWT(newClaims.Username)
 				if err != nil {
-					core.Log().Error("get redis jwt failed", zap.Error(err))
+					log.Log().Error("get redis jwt failed", zap.Error(err))
 				} else { // 当之前的取成功时才进行拉黑操作
 					_ = j.JsonInBlacklist(model.SysJwtBlacklist{Jwt: RedisJwtToken})
 				}

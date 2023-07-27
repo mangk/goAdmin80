@@ -3,8 +3,10 @@ package handler
 import (
 	"context"
 	"github.com/gin-gonic/gin"
+	"github.com/mangk/goAdmin80/config"
 	"github.com/mangk/goAdmin80/core"
 	"github.com/mangk/goAdmin80/handler/response"
+	"github.com/mangk/goAdmin80/log"
 	"github.com/mojocn/base64Captcha"
 	"go.uber.org/zap"
 	"time"
@@ -13,31 +15,31 @@ import (
 var store = NewDefaultRedisStore()
 
 func Captcha(ctx *gin.Context) {
-	cfg := core.Config()
+	cfg := config.CaptchaCfg()
 
 	// 判断验证码是否开启
 	key := ctx.ClientIP()
 	v, ok := core.Cache().Get(key)
 	if !ok {
-		core.Cache().Set(key, 1, time.Second*time.Duration(cfg.Captcha.OpenCaptchaTimeOut))
+		core.Cache().Set(key, 1, time.Second*time.Duration(cfg.OpenCaptchaTimeOut))
 	}
 
 	var oc bool
-	if cfg.Captcha.OpenCaptcha == 0 || cfg.Captcha.OpenCaptcha < interfaceToInt(v) {
+	if cfg.OpenCaptcha == 0 || cfg.OpenCaptcha < interfaceToInt(v) {
 		oc = true
 	}
-	driver := base64Captcha.NewDriverDigit(cfg.Captcha.ImgHeight, cfg.Captcha.ImgWidth, cfg.Captcha.KeyLong, 0.7, 80)
+	driver := base64Captcha.NewDriverDigit(cfg.ImgHeight, cfg.ImgWidth, cfg.KeyLong, 0.7, 80)
 	cp := base64Captcha.NewCaptcha(driver, store.UseWithCtx(ctx))
 	id, b64s, err := cp.Generate()
 	if err != nil {
-		core.Log().Error("验证码获取失败!", zap.Error(err))
+		log.Log().Error("验证码获取失败!", zap.Error(err))
 		response.FailWithMessage("验证码获取失败", ctx)
 		return
 	}
 	response.OkWithDetailed(map[string]interface{}{
 		"captchaId":     id,
 		"picPath":       b64s,
-		"captchaLength": cfg.Captcha.KeyLong,
+		"captchaLength": cfg.KeyLong,
 		"openCaptcha":   oc,
 	}, "验证码获取成功", ctx)
 }
@@ -73,7 +75,7 @@ func (rs *RedisStore) UseWithCtx(ctx context.Context) base64Captcha.Store {
 func (rs *RedisStore) Set(id string, value string) error {
 	err := core.Redis().Set(rs.Context, rs.PreKey+id, value, rs.Expiration).Err()
 	if err != nil {
-		core.Log().Error("RedisStoreSetError!", zap.Error(err))
+		log.Log().Error("RedisStoreSetError!", zap.Error(err))
 	}
 	return err
 }
@@ -81,13 +83,13 @@ func (rs *RedisStore) Set(id string, value string) error {
 func (rs *RedisStore) Get(key string, clear bool) string {
 	val, err := core.Redis().Get(rs.Context, key).Result()
 	if err != nil {
-		core.Log().Error("RedisStoreGetError!", zap.Error(err))
+		log.Log().Error("RedisStoreGetError!", zap.Error(err))
 		return ""
 	}
 	if clear {
 		err := core.Redis().Del(rs.Context, key).Err()
 		if err != nil {
-			core.Log().Error("RedisStoreClearError!", zap.Error(err))
+			log.Log().Error("RedisStoreClearError!", zap.Error(err))
 			return ""
 		}
 	}

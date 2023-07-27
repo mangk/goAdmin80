@@ -1,13 +1,15 @@
-package engine
+package admin
 
 import (
 	"bytes"
 	"fmt"
 	"github.com/gin-gonic/gin"
 	"github.com/mangk/goAdmin80/core"
+	"github.com/mangk/goAdmin80/db"
 	"github.com/mangk/goAdmin80/front"
 	"github.com/mangk/goAdmin80/handler/request"
 	"github.com/mangk/goAdmin80/handler/response"
+	"github.com/mangk/goAdmin80/log"
 	"github.com/mangk/goAdmin80/middleware"
 	"github.com/mangk/goAdmin80/model"
 	"html/template"
@@ -169,7 +171,7 @@ func (e *Engine) RegisterGetHandler(relativePath string, handlerFunc gin.Handler
 	relativePath = strings.Trim(relativePath, "/")
 	key := fmt.Sprintf("%s|%s", relativePath, "GET")
 	if _, ok := e.userFunc[key]; ok {
-		core.Log().Error("Unsupported methods")
+		log.Log().Error("Unsupported methods")
 		panic("path as registered")
 	}
 	e.userFunc[key] = handlerFunc
@@ -180,7 +182,7 @@ func (e *Engine) RegisterPostHandler(relativePath string, handlerFunc gin.Handle
 	relativePath = strings.Trim(relativePath, "/")
 	key := fmt.Sprintf("%s|%s", relativePath, "POST")
 	if _, ok := e.userFunc[key]; ok {
-		core.Log().Error("Unsupported methods")
+		log.Log().Error("Unsupported methods")
 		panic("path as registered")
 	}
 	e.userFunc[key] = handlerFunc
@@ -191,7 +193,7 @@ func (e *Engine) RegisterPatchHandler(relativePath string, handlerFunc gin.Handl
 	relativePath = strings.Trim(relativePath, "/")
 	key := fmt.Sprintf("%s|%s", relativePath, "PATCH")
 	if _, ok := e.userFunc[key]; ok {
-		core.Log().Error("Unsupported methods")
+		log.Log().Error("Unsupported methods")
 		panic("path as registered")
 	}
 	e.userFunc[key] = handlerFunc
@@ -202,7 +204,7 @@ func (e *Engine) RegisterDeleteHandler(relativePath string, handlerFunc gin.Hand
 	relativePath = strings.Trim(relativePath, "/")
 	key := fmt.Sprintf("%s|%s", relativePath, "DELETE")
 	if _, ok := e.userFunc[key]; ok {
-		core.Log().Error("Unsupported methods")
+		log.Log().Error("Unsupported methods")
 		panic("path as registered")
 	}
 	e.userFunc[key] = handlerFunc
@@ -221,7 +223,7 @@ func (e *Engine) register(relativePath, method string, handlerFunc ...gin.Handle
 	case "DELETE":
 		g.DELETE(e.ap+"/"+relativePath, handlerFunc...)
 	default:
-		core.Log().Error("Unsupported methods")
+		log.Log().Error("Unsupported methods")
 		panic("Unsupported methods")
 	}
 }
@@ -259,7 +261,7 @@ func (e *Engine) page(ctx *gin.Context) {
 	if e.opt.CustomDataOrigin != nil {
 		data, count, req.PageSize, err = e.opt.CustomDataOrigin.Page(req)
 	} else {
-		query := core.DB(e.opt.DbName).Table(e.opt.TableName)
+		query := db.DB(e.opt.DbName).Table(e.opt.TableName)
 		for _, condition := range req.Query {
 			for _, field := range e.field {
 				if condition.Column == field.Column {
@@ -448,7 +450,7 @@ func (e *Engine) updateById(ctx *gin.Context) {
 			}
 		}
 
-		err = core.DB(e.opt.DbName).Table(e.opt.TableName).Where(fmt.Sprintf("%s = ?", e.opt.PK), req.Ids[0]).Updates(update).Error
+		err = db.DB(e.opt.DbName).Table(e.opt.TableName).Where(fmt.Sprintf("%s = ?", e.opt.PK), req.Ids[0]).Updates(update).Error
 		if err != nil {
 			response.FailWithDetailed(err.Error(), "数据更新错误", ctx)
 			return
@@ -489,7 +491,7 @@ func (e *Engine) create(ctx *gin.Context) {
 			WITHOUT_DEFAULT:
 			}
 		}
-		err := core.DB(e.opt.DbName).Table(e.opt.TableName).Create(create).Error
+		err := db.DB(e.opt.DbName).Table(e.opt.TableName).Create(create).Error
 		if err != nil {
 			response.FailWithDetailed(err.Error(), "数据创建错误", ctx)
 			return
@@ -516,7 +518,7 @@ func (e *Engine) delete(ctx *gin.Context) {
 			return
 		}
 
-		query := core.DB(e.opt.DbName).Table(e.opt.TableName).Where(fmt.Sprintf("%s in ?", e.opt.PK), req.Ids)
+		query := db.DB(e.opt.DbName).Table(e.opt.TableName).Where(fmt.Sprintf("%s in ?", e.opt.PK), req.Ids)
 		var err error
 		if e.opt.SoftDelete != "" {
 			err = query.Updates(map[string]interface{}{e.opt.SoftDelete: time.Now().Format("2006-01-02 15:05:05")}).Error
@@ -548,7 +550,7 @@ func (e *Engine) selectColumns() string {
 }
 
 func (e *Engine) queryById(id string) (map[string]interface{}, error) {
-	query := core.DB(e.opt.DbName).Table(e.opt.TableName).Select(e.selectColumns()).Where(fmt.Sprintf("%s = ?", e.opt.PK), id)
+	query := db.DB(e.opt.DbName).Table(e.opt.TableName).Select(e.selectColumns()).Where(fmt.Sprintf("%s = ?", e.opt.PK), id)
 	if e.opt.SoftDelete != "" {
 		query = query.Where(fmt.Sprintf("%s IS NULL", e.opt.SoftDelete))
 	}

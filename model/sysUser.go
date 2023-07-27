@@ -2,7 +2,7 @@ package model
 
 import (
 	"errors"
-	"github.com/mangk/goAdmin80/core"
+	"github.com/mangk/goAdmin80/db"
 	"github.com/mangk/goAdmin80/handler/request"
 	"github.com/mangk/goAdmin80/utils"
 	"github.com/satori/go.uuid"
@@ -35,7 +35,7 @@ func (SysUser) TableName() string {
 func (s SysUser) Login(username, password string) (user *SysUser, err error) {
 
 	user = &SysUser{}
-	err = core.DB().Where("username = ?", username).Preload("Authorities").Preload("Authority").First(user).Error
+	err = db.DB().Where("username = ?", username).Preload("Authorities").Preload("Authority").First(user).Error
 	if err == nil {
 		if ok := utils.BcryptCheck(password, user.Password); !ok {
 			return nil, errors.New("密码错误")
@@ -47,19 +47,19 @@ func (s SysUser) Login(username, password string) (user *SysUser, err error) {
 func (s SysUser) GetUserInfoList(info request.PageInfo) (list interface{}, total int64, err error) {
 	limit := info.PageSize
 	offset := info.PageSize * (info.Page - 1)
-	db := core.DB().Model(&SysUser{})
+	cdb := db.DB().Model(&SysUser{})
 	var userList []SysUser
-	err = db.Count(&total).Error
+	err = cdb.Count(&total).Error
 	if err != nil {
 		return
 	}
-	err = db.Limit(limit).Offset(offset).Preload("Authorities").Preload("Authority").Find(&userList).Error
+	err = cdb.Limit(limit).Offset(offset).Preload("Authorities").Preload("Authority").Find(&userList).Error
 	return userList, total, err
 }
 
 func (s SysUser) GetUserInfo(uuid uuid.UUID) (user SysUser, err error) {
 	var reqUser SysUser
-	err = core.DB().Preload("Authorities").Preload("Authority").First(&reqUser, "uuid = ?", uuid).Error
+	err = db.DB().Preload("Authorities").Preload("Authority").First(&reqUser, "uuid = ?", uuid).Error
 	if err != nil {
 		return reqUser, err
 	}
@@ -68,51 +68,51 @@ func (s SysUser) GetUserInfo(uuid uuid.UUID) (user SysUser, err error) {
 
 func (s SysUser) Register() (userInter SysUser, err error) {
 	var user SysUser
-	if !errors.Is(core.DB().Where("username = ?", s.Username).First(&user).Error, gorm.ErrRecordNotFound) { // 判断用户名是否注册
+	if !errors.Is(db.DB().Where("username = ?", s.Username).First(&user).Error, gorm.ErrRecordNotFound) { // 判断用户名是否注册
 		return userInter, errors.New("用户名已注册")
 	}
 	// TODO 创建用户涉及到多表操作，需要开启事务
 	// 否则 附加uuid 密码hash加密 注册
 	s.Password = utils.BcryptHash(s.Password)
 	s.UUID = uuid.NewV4()
-	err = core.DB().Create(&s).Error
+	err = db.DB().Create(&s).Error
 	return s, err
 }
 
 func (s SysUser) ChangePassword(newPassword string) (userInter *SysUser, err error) {
 	var user SysUser
-	if err = core.DB().Where("id = ?", s.ID).First(&user).Error; err != nil {
+	if err = db.DB().Where("id = ?", s.ID).First(&user).Error; err != nil {
 		return nil, err
 	}
 	if ok := utils.BcryptCheck(s.Password, user.Password); !ok {
 		return nil, errors.New("原密码错误")
 	}
 	user.Password = utils.BcryptHash(newPassword)
-	err = core.DB().Save(&user).Error
+	err = db.DB().Save(&user).Error
 	return &user, err
 }
 
 func (s SysUser) SetUserAuthority() (err error) {
-	assignErr := core.DB().Where("sys_user_id = ? AND sys_authority_authority_id = ?", s.ID, s.AuthorityId).First(&SysUserAuthority{}).Error
+	assignErr := db.DB().Where("sys_user_id = ? AND sys_authority_authority_id = ?", s.ID, s.AuthorityId).First(&SysUserAuthority{}).Error
 	if errors.Is(assignErr, gorm.ErrRecordNotFound) {
 		return errors.New("该用户无此角色")
 	}
-	err = core.DB().Where("id = ?", s.ID).First(&SysUser{}).Update("authority_id", s.AuthorityId).Error
+	err = db.DB().Where("id = ?", s.ID).First(&SysUser{}).Update("authority_id", s.AuthorityId).Error
 	return err
 }
 
 func (s SysUser) DeleteUser(id int) (err error) {
 	var user SysUser
-	err = core.DB().Where("id = ?", id).Delete(&user).Error
+	err = db.DB().Where("id = ?", id).Delete(&user).Error
 	if err != nil {
 		return err
 	}
-	err = core.DB().Delete(&[]SysUserAuthority{}, "sys_user_id = ?", id).Error
+	err = db.DB().Delete(&[]SysUserAuthority{}, "sys_user_id = ?", id).Error
 	return err
 }
 
 func (s SysUser) SetUserAuthorities(authorityIds []int) (err error) {
-	return core.DB().Transaction(func(tx *gorm.DB) error {
+	return db.DB().Transaction(func(tx *gorm.DB) error {
 		TxErr := tx.Delete(&[]SysUserAuthority{}, "sys_user_id = ?", s.ID).Error
 		if TxErr != nil {
 			return TxErr
@@ -137,7 +137,7 @@ func (s SysUser) SetUserAuthorities(authorityIds []int) (err error) {
 }
 
 func (s SysUser) SetUserInfo(req SysUser) error {
-	return core.DB().Model(&SysUser{}).
+	return db.DB().Model(&SysUser{}).
 		Select("updated_at", "nick_name", "header_img", "phone", "email", "sideMode", "enable").
 		Where("id=?", req.ID).
 		Updates(map[string]interface{}{
@@ -154,12 +154,12 @@ func (s SysUser) SetUserInfo(req SysUser) error {
 func (s SysUser) ResetPassword() (err error) {
 	// TODO 随机密码，并发送邮件或短信等形式来告诉用户密码
 	password := "123456"
-	err = core.DB().Model(&SysUser{}).Where("id = ?", s.ID).Update("password", utils.BcryptHash(password)).Error
+	err = db.DB().Model(&SysUser{}).Where("id = ?", s.ID).Update("password", utils.BcryptHash(password)).Error
 	return err
 }
 
 func (s SysUser) SetSelfInfo(req SysUser) error {
-	return core.DB().Model(&SysUser{}).
+	return db.DB().Model(&SysUser{}).
 		Where("id=?", req.ID).
 		Updates(req).Error
 }

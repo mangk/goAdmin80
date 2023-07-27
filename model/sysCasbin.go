@@ -8,7 +8,9 @@ import (
 	"github.com/gin-gonic/gin"
 	_ "github.com/go-sql-driver/mysql"
 	"github.com/golang-jwt/jwt/v4"
-	"github.com/mangk/goAdmin80/core"
+	"github.com/mangk/goAdmin80/config"
+	"github.com/mangk/goAdmin80/db"
+	"github.com/mangk/goAdmin80/log"
 	"go.uber.org/zap"
 	"strconv"
 	"sync"
@@ -58,7 +60,7 @@ func (c Casbin) UpdateCasbin(AuthorityID int, casbinInfos []CasbinInfo) error {
 
 // API更新随动
 func (c Casbin) UpdateCasbinApi(oldPath string, newPath string, oldMethod string, newMethod string) error {
-	err := core.DB().Model(&gormadapter.CasbinRule{}).Where("v1 = ? AND v2 = ?", oldPath, oldMethod).Updates(map[string]interface{}{
+	err := db.DB().Model(&gormadapter.CasbinRule{}).Where("v1 = ? AND v2 = ?", oldPath, oldMethod).Updates(map[string]interface{}{
 		"v1": newPath,
 		"v2": newMethod,
 	}).Error
@@ -98,7 +100,7 @@ var (
 // 持久化到数据库  引入自定义规则
 func (c Casbin) Casbin() *casbin.SyncedEnforcer {
 	once.Do(func() {
-		a, _ := gormadapter.NewAdapterByDB(core.DB())
+		a, _ := gormadapter.NewAdapterByDB(db.DB())
 		text := `
 		[request_definition]
 		r = sub, obj, act
@@ -117,7 +119,7 @@ func (c Casbin) Casbin() *casbin.SyncedEnforcer {
 		`
 		m, err := model.NewModelFromString(text)
 		if err != nil {
-			core.Log().Error("字符串加载模型失败!", zap.Error(err))
+			log.Log().Error("字符串加载模型失败!", zap.Error(err))
 			return
 		}
 		cachedEnforcer, _ = casbin.NewSyncedEnforcer(m, a)
@@ -169,10 +171,10 @@ func DefaultCasbin() []CasbinInfo {
 func GetClaims(c *gin.Context) (*CustomClaims, error) {
 	token := c.Request.Header.Get("Authorization")
 	token = token[7:]
-	j := NewJWT(core.Config().JWT.SigningKey)
+	j := NewJWT(config.JwtCfg().SigningKey)
 	claims, err := j.ParseToken(token)
 	if err != nil {
-		core.Log().Error("从Gin的Context中获取从jwt解析信息失败, 请检查请求头是否存在x-token且claims是否为规定结构")
+		log.Log().Error("从Gin的Context中获取从jwt解析信息失败, 请检查请求头是否存在x-token且claims是否为规定结构")
 	}
 	return claims, err
 }

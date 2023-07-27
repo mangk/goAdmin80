@@ -2,9 +2,9 @@ package handler
 
 import (
 	"github.com/gin-gonic/gin"
-	"github.com/mangk/goAdmin80/core"
 	"github.com/mangk/goAdmin80/handler/request"
 	"github.com/mangk/goAdmin80/handler/response"
+	"github.com/mangk/goAdmin80/log"
 	"github.com/mangk/goAdmin80/model"
 	"github.com/mangk/goAdmin80/utils"
 	"go.uber.org/zap"
@@ -19,7 +19,7 @@ func OperationRecordCreate(ctx *gin.Context) {
 	}
 	err = sysOperationRecord.Create()
 	if err != nil {
-		core.Log().Error("创建失败!", zap.Error(err))
+		log.Log().Error("创建失败!", zap.Error(err))
 		response.FailWithMessage("创建失败", ctx)
 		return
 	}
@@ -37,7 +37,7 @@ func OperationRecordDelete(ctx *gin.Context) {
 	}
 	err = model.SysOperationRecord{}.DeleteSysOperationRecordByIds(IDS.Ids)
 	if err != nil {
-		core.Log().Error("批量删除失败!", zap.Error(err))
+		log.Log().Error("批量删除失败!", zap.Error(err))
 		response.FailWithMessage("批量删除失败", ctx)
 		return
 	}
@@ -58,7 +58,7 @@ func OperationRecordGetById(ctx *gin.Context) {
 	}
 	reSysOperationRecord, err := sysOperationRecord.GetSysOperationRecord(sysOperationRecord.ID)
 	if err != nil {
-		core.Log().Error("查询失败!", zap.Error(err))
+		log.Log().Error("查询失败!", zap.Error(err))
 		response.FailWithMessage("查询失败", ctx)
 		return
 	}
@@ -78,7 +78,7 @@ func OperationRecordPage(ctx *gin.Context) {
 	}
 	list, total, err := model.SysOperationRecord{}.GetSysOperationRecordInfoList(pageInfo)
 	if err != nil {
-		core.Log().Error("获取失败!", zap.Error(err))
+		log.Log().Error("获取失败!", zap.Error(err))
 		response.FailWithMessage("获取失败", ctx)
 		return
 	}

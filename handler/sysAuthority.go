@@ -2,9 +2,9 @@ package handler
 
 import (
 	"github.com/gin-gonic/gin"
-	"github.com/mangk/goAdmin80/core"
 	"github.com/mangk/goAdmin80/handler/request"
 	"github.com/mangk/goAdmin80/handler/response"
+	"github.com/mangk/goAdmin80/log"
 	"github.com/mangk/goAdmin80/model"
 	"github.com/mangk/goAdmin80/utils"
 	"go.uber.org/zap"
@@ -24,7 +24,7 @@ func AuthorityPage(c *gin.Context) {
 	}
 	list, total, err := model.SysAuthority{}.GetAuthorityInfoList(pageInfo)
 	if err != nil {
-		core.Log().Error("获取失败!", zap.Error(err))
+		log.Log().Error("获取失败!", zap.Error(err))
 		response.FailWithMessage("获取失败"+err.Error(), c)
 		return
 	}
@@ -48,7 +48,7 @@ func AuthorityCreate(ctx *gin.Context) {
 		return
 	}
 	if authBack, err := (model.SysAuthority{}).CreateAuthority(authority); err != nil {
-		core.Log().Error("创建失败!", zap.Error(err))
+		log.Log().Error("创建失败!", zap.Error(err))
 		response.FailWithMessage("创建失败"+err.Error(), ctx)
 	} else {
 		// TODO 这里关注一下创建角色时的默认值
@@ -69,7 +69,7 @@ func AuthorityDelete(ctx *gin.Context) {
 		return
 	}
 	if err := (model.SysAuthority{}).DeleteAuthority(&authority); err != nil { // 删除角色之前需要判断是否有用户正在使用此角色
-		core.Log().Error("删除失败!", zap.Error(err))
+		log.Log().Error("删除失败!", zap.Error(err))
 		response.FailWithMessage("删除失败"+err.Error(), ctx)
 		return
 	}
@@ -90,7 +90,7 @@ func AuthorityUpdate(ctx *gin.Context) {
 	}
 	authority, err := model.SysAuthority{}.UpdateAuthority(auth)
 	if err != nil {
-		core.Log().Error("更新失败!", zap.Error(err))
+		log.Log().Error("更新失败!", zap.Error(err))
 		response.FailWithMessage("更新失败"+err.Error(), ctx)
 		return
 	}
@@ -111,7 +111,7 @@ func AuthoritySetData(c *gin.Context) {
 	}
 	err := model.SysAuthority{}.SetDataAuthority(auth)
 	if err != nil {
-		core.Log().Error("设置失败!", zap.Error(err))
+		log.Log().Error("设置失败!", zap.Error(err))
 		response.FailWithMessage("设置失败"+err.Error(), c)
 		return
 	}

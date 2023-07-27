@@ -2,7 +2,8 @@ package model
 
 import (
 	"errors"
-	"github.com/mangk/goAdmin80/core"
+	"github.com/mangk/goAdmin80/db"
+	"github.com/mangk/goAdmin80/log"
 	"gorm.io/gorm"
 )
 
@@ -202,7 +203,7 @@ func (s SysMenu) GetAllMenu(tree, loadSystem bool) ([]SysMenu, error) {
 		systemMenu = s.systemMenu()
 	}
 	menus := []SysMenu{}
-	core.DB().Find(&menus)
+	db.DB().Find(&menus)
 	for _, menu := range systemMenu {
 		menus = append(menus, menu)
 	}
@@ -225,7 +226,7 @@ func (s SysMenu) GetAllTreeMenuByAuthorityId(authorityIds []int, tree bool) ([]S
 	menuIds := SysAuthorityMenu{}.GetMenuIdsByAuthorityIds(authorityIds)
 	// 查询菜单列表
 	menus := []SysMenu{}
-	core.DB().Where("id in ?", menuIds).Order("sort").Find(&menus)
+	db.DB().Where("id in ?", menuIds).Order("sort").Find(&menus)
 	for _, menu := range systemMenu {
 		for _, menuId := range menuIds {
 			if menu.ID == menuId {
@@ -242,7 +243,7 @@ func (s SysMenu) GetAllTreeMenuByAuthorityId(authorityIds []int, tree bool) ([]S
 func (s SysMenu) getBaseMenuTreeMap() (treeMap map[int][]SysMenu, err error) {
 	var allMenus []SysMenu
 	treeMap = make(map[int][]SysMenu)
-	err = core.DB().Order("sort").Find(&allMenus).Error
+	err = db.DB().Order("sort").Find(&allMenus).Error
 	for _, v := range allMenus {
 		treeMap[v.ParentId] = append(treeMap[v.ParentId], v)
 	}
@@ -258,26 +259,26 @@ func (s SysMenu) getBaseChildrenList(menu *SysMenu, treeMap map[int][]SysMenu) (
 }
 
 func (s SysMenu) GetBaseMenuById(id int) (menu SysMenu, err error) {
-	err = core.DB().Where("id = ?", id).First(&menu).Error //.Preload("MenuBtn").Preload("Parameters")
+	err = db.DB().Where("id = ?", id).First(&menu).Error //.Preload("MenuBtn").Preload("Parameters")
 	return
 }
 
 func (s SysMenu) AddBaseMenu(menu SysMenu) error {
-	if !errors.Is(core.DB().Where("name = ?", menu.Name).First(&SysMenu{}).Error, gorm.ErrRecordNotFound) {
+	if !errors.Is(db.DB().Where("name = ?", menu.Name).First(&SysMenu{}).Error, gorm.ErrRecordNotFound) {
 		return errors.New("存在重复name，请修改name")
 	}
-	return core.DB().Create(&menu).Error
+	return db.DB().Create(&menu).Error
 }
 
 func (s SysMenu) DeleteBaseMenu(id int) (err error) {
-	err = core.DB().Where("parent_id = ?", id).First(&SysMenu{}).Error
+	err = db.DB().Where("parent_id = ?", id).First(&SysMenu{}).Error
 	if err != nil {
 		var menu SysMenu
-		db := core.DB().Preload("SysAuthoritys").Where("id = ?", id).First(&menu).Delete(&menu)
+		cdb := db.DB().Preload("SysAuthoritys").Where("id = ?", id).First(&menu).Delete(&menu)
 		if len(menu.SysAuthoritys) > 0 {
-			err = core.DB().Model(&menu).Association("SysAuthoritys").Delete(&menu.SysAuthoritys)
+			err = db.DB().Model(&menu).Association("SysAuthoritys").Delete(&menu.SysAuthoritys)
 		} else {
-			err = db.Error
+			err = cdb.Error
 			if err != nil {
 				return
 			}
@@ -305,18 +306,18 @@ func (s SysMenu) UpdateBaseMenu(menu SysMenu) (err error) {
 	upDateMap["sort"] = menu.Sort
 	upDateMap["ssr_path"] = menu.SSRPath
 
-	err = core.DB().Transaction(func(tx *gorm.DB) error {
+	err = db.DB().Transaction(func(tx *gorm.DB) error {
 		db := tx.Where("id = ?", menu.ID).Find(&oldMenu)
 		if oldMenu.Name != menu.Name {
 			if !errors.Is(tx.Where("id <> ? AND name = ?", menu.ID, menu.Name).First(&SysMenu{}).Error, gorm.ErrRecordNotFound) {
-				core.Log().Debug("存在相同name修改失败")
+				log.Log().Debug("存在相同name修改失败")
 				return errors.New("存在相同name修改失败")
 			}
 		}
 
 		txErr := db.Updates(upDateMap).Error
 		if txErr != nil {
-			core.Log().Debug(txErr.Error())
+			log.Log().Debug(txErr.Error())
 			return txErr
 		}
 		return nil

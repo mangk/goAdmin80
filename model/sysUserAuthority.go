@@ -1,6 +1,8 @@
 package model
 
-import "github.com/mangk/goAdmin80/core"
+import (
+	"github.com/mangk/goAdmin80/db"
+)
 
 type SysUserAuthority struct {
 	SysUserId               int `gorm:"column:sys_user_id"`
@@ -13,7 +15,7 @@ func (s SysUserAuthority) TableName() string {
 
 func (s SysUserAuthority) GetAuthorityAuthorityIdByUserId(uid int) (aid []int) {
 	res := []SysUserAuthority{}
-	core.DB().Where("sys_user_id = ?", uid).Find(&res)
+	db.DB().Where("sys_user_id = ?", uid).Find(&res)
 	for _, v := range res {
 		aid = append(aid, v.SysAuthorityAuthorityId)
 	}

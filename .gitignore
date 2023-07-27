@@ -22,7 +22,6 @@ go.work
 
 .idea
 .vscode
-log/*
 uploads/*
 
 front/node_modules/*
