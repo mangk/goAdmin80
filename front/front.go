@@ -3,6 +3,7 @@ package front
 import (
 	"embed"
 	"github.com/gin-gonic/gin"
+	"github.com/mangk/goAdmin80/admin"
 	"github.com/mangk/goAdmin80/config"
 	"github.com/mangk/goAdmin80/core"
 	"io/fs"
@@ -34,6 +35,8 @@ func (f) Init() uint8 {
 		ctx.Header("Content-Type", "text/html; charset=utf-8")
 		ctx.String(200, "%s", index)
 	})
+
+	admin.SetTmpStr(Convert)
 
 	return core.ModuleFront
 }

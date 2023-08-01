@@ -6,7 +6,6 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/mangk/goAdmin80/core"
 	"github.com/mangk/goAdmin80/db"
-	"github.com/mangk/goAdmin80/front"
 	"github.com/mangk/goAdmin80/handler/request"
 	"github.com/mangk/goAdmin80/handler/response"
 	"github.com/mangk/goAdmin80/log"
@@ -96,6 +95,12 @@ type DataOrigin interface {
 	UpdateById(req request.CRUDRequest) (id interface{}, err error)
 	Create(req request.CRUDRequest) (id interface{}, err error)
 	Delete(req request.CRUDRequest) (id interface{}, err error)
+}
+
+var tmpStr string
+
+func SetTmpStr(str string) {
+	tmpStr = str
 }
 
 func NewEngine(absolutePath string, opt Options) *Engine {
@@ -246,7 +251,7 @@ func (e *Engine) tmp(ctx *gin.Context) {
 	var buf bytes.Buffer
 	t, _ := template.New("convert").Delims("{[{", "}]}").Funcs(template.FuncMap{
 		"formatElement": formatElement,
-	}).Parse(front.Convert)
+	}).Parse(tmpStr)
 	_ = t.Execute(&buf, data)
 	ctx.String(200, "%s", buf.String())
 }
