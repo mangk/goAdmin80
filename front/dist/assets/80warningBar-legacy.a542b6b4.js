@@ -1,0 +1,4 @@
+/*! 
+ Build based on gin-vue-admin 
+ Time : 1690887351000 */
+System.register(["./80index-legacy.083ebbc4.js","./80icon-legacy.518b8698.js","./80warningBar.vue_vue_type_style_index_0_scoped_a7c6b110_lang-legacy.518b8698.js","./80_plugin-vue_export-helper-legacy.c6aa7c23.js"],(function(e,n){"use strict";var t,r,a,u,i,c,l,s,o,f,_;return{setters:[function(e){t=e.o,r=e.d,a=e.f,u=e.w,i=e.X,c=e.aP,l=e.e,s=e.t,o=e.M,f=e.B},null,null,function(e){_=e._}],execute:function(){e("W",_({__name:"warningBar",props:{title:{type:String,default:""},href:{type:String,default:""}},setup:function(e){var n=e,_=function(){n.href&&window.open(n.href)};return function(n,p){var g=f;return t(),r("div",{class:o(["warning-bar",e.href&&"can-click"]),onClick:_},[a(g,null,{default:u((function(){return[a(i(c))]})),_:1}),l("span",null,s(e.title),1)],2)}}},[["__scopeId","data-v-a7c6b110"]]))}}}));

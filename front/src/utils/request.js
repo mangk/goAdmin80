@@ -5,7 +5,7 @@ import router from '@/router/index'
 import {ElMessage, ElMessageBox} from 'element-plus'
 
 const service = axios.create({
-    baseURL: '/_sys',
+    baseURL: window.g.HOST + '/_sys',
     timeout: 30000
 })
 let acitveAxios = 0
