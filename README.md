@@ -4,7 +4,7 @@
 
 `goAmin80`是一个可以快速创建管理后台的项目。使用gin作为http框架，casbin与jwt做权限校验，elementPlus生成管理后台ui。
 
-一个想要做到8⃣️0⃣️分的后端管理框架
+一个想要做到8⃣️0⃣️分的后端管理项目
 
 ## Quick Start
 
