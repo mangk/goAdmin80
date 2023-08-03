@@ -24,8 +24,8 @@ db: # 最少提供 default 模块
     password:
     prefix:
     singular: false
-    maxIdleConns: 10
-    maxOpenConns: 20
+    maxIdleConn: 10
+    maxOpenConn: 20
     logMode: 4
   another:
     driver: mysql
@@ -37,8 +37,8 @@ db: # 最少提供 default 模块
     password:
     prefix:
     singular: false
-    maxIdleConns: 10
-    maxOpenConns: 20
+    maxIdleConn: 10
+    maxOpenConn: 20
     logMode: 4
 cache:
   default:
