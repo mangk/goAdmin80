@@ -3,11 +3,8 @@
     <div class="login_panel">
       <div class="login_panel_form">
         <div class="login_panel_form_title">
-          <img
-              class="login_panel_form_title_logo"
-              src="../../assets/goAdmin80.png"
-              alt
-          >
+          <img v-if="!sysInfoObj.logo" class="login_panel_form_title_logo" src="../../assets/goAdmin80.png" alt>
+          <img v-if="sysInfoObj.logo" class="login_panel_form_title_logo" :src="sysInfoObj.logo" alt>
           <p class="login_panel_form_title_p">{{ sysInfoObj.name }}</p>
         </div>
         <el-form
@@ -112,18 +109,10 @@ const checkPassword = (rule, value, callback) => {
   }
 }
 
-// 获取系统配置
 const sysInfoObj = reactive({
-  name: config.appName
+  name: window.g.NAME ? window.g.NAME : config.appName,
+  logo: window.g.LOGO ? window.g.LOGO : false
 })
-const getSysInfo = () => {
-  sysInfo().then(async (data) => {
-    if (data.data.sysName !== "") {
-      sysInfoObj.name = data.data.sysName
-    }
-  })
-}
-getSysInfo()
 
 // 获取验证码
 const loginVerify = () => {

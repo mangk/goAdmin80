@@ -4,7 +4,8 @@
       <el-row :class="[isShadowBg?'shadowBg':'']" @click="changeShadow()"/>
       <el-aside class="main-cont main-left gva-aside">
         <div class="tilte" :style="{background: backgroundColor}">
-          <img alt class="logoimg" src="../../assets/goAdmin80.png">
+          <img v-if="!sysInfoObj.logo" alt class="logoimg" src="../../assets/goAdmin80.png">
+          <img v-if="sysInfoObj.logo" alt class="logoimg" :src="sysInfoObj.logo">
           <div v-if="isSider" class="tit-text" :style="{color:textColor}">{{ sysInfoObj.name }}</div>
         </div>
         <Aside class="aside"/>
@@ -180,14 +181,14 @@ initPage()
 
 // 获取系统配置
 const sysInfoObj = reactive({
-  name: config.appName
+  name: window.g.NAME ? window.g.NAME : config.appName,
+  logo: window.g.LOGO ? window.g.LOGO : false
 })
 const getSysInfo = () => {
+  if (!window.g.LOAD_INFO) {
+    return
+  }
   sysInfo().then(async (data) => {
-    if (data.data.hasOwnProperty("sysName")) {
-      sysInfoObj.name = data.data.sysName;
-    }
-
     if (data.data.hasOwnProperty("message")) {
       ElMessage(data.data.message);
     }
