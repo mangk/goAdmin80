@@ -1,6 +1,10 @@
 package log
 
 import (
+	"encoding/json"
+	"fmt"
+	"github.com/gin-gonic/gin"
+	"github.com/google/uuid"
 	rotatelogs "github.com/lestrrat-go/file-rotatelogs"
 	"github.com/mangk/goAdmin80/config"
 	"github.com/mangk/goAdmin80/core"
@@ -82,6 +86,17 @@ func (l l) Init() uint8 {
 
 func Log() *zap.Logger {
 	return _log
+}
+
+func Trace(ctx *gin.Context, data ...interface{}) {
+	traceKey := "_trace"
+	traceId, ok := ctx.Get(traceKey)
+	if !ok {
+		traceId = uuid.New().String()
+		ctx.Set(traceKey, traceId)
+	}
+	d, _ := json.Marshal(data)
+	_log.Info(fmt.Sprintf("[%s]%s", traceId, d))
 }
 
 func getLogfileWriter(dirName string) *rotatelogs.RotateLogs {
