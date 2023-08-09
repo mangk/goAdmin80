@@ -89,7 +89,7 @@ func Log() *zap.Logger {
 }
 
 func Trace(ctx *gin.Context, data ...interface{}) {
-	traceKey := "_trace"
+	traceKey := "_ctxTrace"
 	traceId, ok := ctx.Get(traceKey)
 	if !ok {
 		traceId = uuid.New().String()
