@@ -6,6 +6,7 @@ import (
 )
 
 var _config *Config
+var _viper *viper.Viper
 
 type Config struct {
 	Server  Server           `json:"server,omitempty" yaml:"server,omitempty"`
@@ -37,6 +38,11 @@ func Init(cfgFilePath ...string) {
 		panic(fmt.Errorf("解析 %s.yaml 配置文件错误:	\n", configPath, err))
 	}
 
+	_viper = v
+}
+
+func Cfg(path string) interface{} {
+	return _viper.Get(path)
 }
 
 func ServerCfg() Server {
