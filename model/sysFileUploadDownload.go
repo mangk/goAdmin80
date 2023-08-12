@@ -16,8 +16,8 @@ type SysFileUploadAndDownload struct {
 	Key  string `json:"key" gorm:"comment:编号"`   // 编号
 }
 
-func (s SysFileUploadAndDownload) Upload(file SysFileUploadAndDownload) error {
-	return db.DB().Create(&file).Error
+func (s SysFileUploadAndDownload) Upload(file *SysFileUploadAndDownload) error {
+	return db.DB().Create(file).Error
 }
 
 func (s SysFileUploadAndDownload) GetFileRecordInfoList(info request.PageInfo) (list interface{}, total int64, err error) {

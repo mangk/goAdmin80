@@ -208,7 +208,7 @@ func uploadFile(header *multipart.FileHeader, noSave, driver string) (file model
 			Tag:  s[len(s)-1],
 			Key:  key,
 		}
-		return f, model.SysFileUploadAndDownload{}.Upload(f)
+		return f, (model.SysFileUploadAndDownload{}).Upload(&f)
 	}
 	return
 }
