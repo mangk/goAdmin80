@@ -31,7 +31,7 @@ func Result(httpCode, systemCode int, data interface{}, msg string, c *gin.Conte
 	c.JSON(httpCode, resp)
 	if trace, has := c.Get("_trace"); has {
 		req, _ := c.Get("_req")
-		log.Log().WithOptions(zap.WithCaller(false)).With(zap.Namespace("_trace")).Info("", zap.String("_method", c.Request.Method), zap.Any("_req", req), zap.Any("_resp", resp), zap.Any("_id", trace))
+		log.ZapLog().WithOptions(zap.WithCaller(false)).With(zap.Namespace("_trace")).Info("", zap.String("_method", c.Request.Method), zap.Any("_req", req), zap.Any("_resp", resp), zap.Any("_id", trace))
 	}
 }
 

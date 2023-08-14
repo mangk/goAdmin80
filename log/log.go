@@ -1,9 +1,7 @@
 package log
 
 import (
-	"encoding/json"
 	"fmt"
-	"github.com/gin-gonic/gin"
 	"github.com/google/uuid"
 	rotatelogs "github.com/lestrrat-go/file-rotatelogs"
 	"github.com/mangk/goAdmin80/config"
@@ -19,13 +17,50 @@ import (
 var _log *zap.Logger
 
 func init() {
-	core.ModuleAdd(l{})
+	core.ModuleAdd(Log{})
 }
 
-type l struct {
+type Log struct {
+	trace string
 }
 
-func (l l) Init() uint8 {
+func (l *Log) Info(msg string) {
+	_log.Info("[" + l.trace + "]" + msg)
+}
+
+func (l *Log) Infof(format string, a ...any) {
+	a = append([]any{l.trace}, a...)
+	_log.Info(fmt.Sprintf("[%s]"+format, a...))
+}
+
+func (l *Log) Warn(msg string) {
+	_log.Warn("[" + l.trace + "]" + msg)
+}
+
+func (l *Log) Warnf(format string, a ...any) {
+	a = append([]any{l.trace}, a...)
+	_log.Warn(fmt.Sprintf("[%s]"+format, a...))
+}
+
+func (l *Log) Error(msg string) {
+	_log.Error("[" + l.trace + "]" + msg)
+}
+
+func (l *Log) Errorf(format string, a ...any) {
+	a = append([]any{l.trace}, a...)
+	_log.Error(fmt.Sprintf("[%s]"+format, a...))
+}
+
+func (l *Log) Debug(msg string) {
+	_log.Debug("[" + l.trace + "]" + msg)
+}
+
+func (l *Log) Debugf(format string, a ...any) {
+	a = append([]any{l.trace}, a...)
+	_log.Debug(fmt.Sprintf("[%s]"+format, a...))
+}
+
+func (l Log) Init() uint8 {
 	var (
 		writer    []zapcore.WriteSyncer // 日志输出位置
 		encoder   zapcore.Encoder       // 日志格式化
@@ -84,19 +119,51 @@ func (l l) Init() uint8 {
 	return core.ModuleLog
 }
 
-func Log() *zap.Logger {
+func ZapLog() *zap.Logger {
 	return _log
 }
 
-func Trace(ctx *gin.Context, data ...interface{}) {
-	traceKey := "_ctxTrace"
-	traceId, ok := ctx.Get(traceKey)
-	if !ok {
-		traceId = uuid.New().String()
-		ctx.Set(traceKey, traceId)
+func Info(msg string) {
+	_log.Info(msg)
+}
+
+func Infof(format string, a ...any) {
+	_log.Info(fmt.Sprintf(format, a...))
+}
+
+func Warn(msg string) {
+	_log.Warn(msg)
+}
+
+func Warnf(format string, a ...any) {
+	_log.Warn(fmt.Sprintf(format, a...))
+}
+
+func Error(msg string) {
+	_log.Error(msg)
+}
+
+func Errorf(format string, a ...any) {
+	_log.Error(fmt.Sprintf(format, a...))
+}
+
+func Debug(msg string) {
+	_log.Debug(msg)
+}
+
+func Debugf(format string, a ...any) {
+	_log.Debug(fmt.Sprintf(format, a...))
+}
+
+func Trace(trace ...string) *Log {
+	var t string
+	if len(trace) != 0 {
+		t = trace[0]
+	} else {
+		t = uuid.New().String()
 	}
-	d, _ := json.Marshal(data)
-	_log.Info(fmt.Sprintf("[%s]%s", traceId, d))
+
+	return &Log{trace: t}
 }
 
 func getLogfileWriter(dirName string) *rotatelogs.RotateLogs {
