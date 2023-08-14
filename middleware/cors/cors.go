@@ -1,4 +1,4 @@
-package middleware
+package cors
 
 import (
 	"github.com/gin-gonic/gin"
@@ -22,7 +22,7 @@ func Cors() gin.HandlerFunc {
 	}
 }
 
-func CorsByRules() gin.HandlerFunc {
+func MiddlewareCorsByRules() gin.HandlerFunc {
 	// 放行全部
 	if config.CORSCfg().Mode == "allowAll" {
 		return Cors()

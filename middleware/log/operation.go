@@ -1,4 +1,4 @@
-package middleware
+package log
 
 import (
 	"bytes"
@@ -25,7 +25,7 @@ func init() {
 	}
 }
 
-func OperationRecord() gin.HandlerFunc {
+func MiddlewareOperationRecord() gin.HandlerFunc {
 	return func(c *gin.Context) {
 		var body []byte
 		var userId int

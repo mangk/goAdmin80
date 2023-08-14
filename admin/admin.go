@@ -4,7 +4,9 @@ import (
 	"github.com/mangk/goAdmin80/config"
 	"github.com/mangk/goAdmin80/core"
 	"github.com/mangk/goAdmin80/handler"
-	"github.com/mangk/goAdmin80/middleware"
+	"github.com/mangk/goAdmin80/middleware/auth"
+	"github.com/mangk/goAdmin80/middleware/cors"
+	"github.com/mangk/goAdmin80/middleware/log"
 	"net/http"
 )
 
@@ -18,7 +20,7 @@ type a struct {
 func (a) Init() uint8 {
 	root := core.HttpEngine()
 
-	root.Use(middleware.CorsByRules())
+	root.Use(cors.MiddlewareCorsByRules())
 
 	// ----------注册系统本地上传静态文件----------
 	for _, cfg := range config.FileCfg() {
@@ -36,13 +38,13 @@ func (a) Init() uint8 {
 			sysGroup.POST("login", handler.UserLogin)
 			sysGroup.POST("captcha", handler.Captcha)
 		}
-		sysGroup.Use(middleware.JWTAuth()).Use(middleware.CasbinHandler()) // 增加鉴权
+		sysGroup.Use(auth.MiddlewareJWTAuth()).Use(auth.MiddlewareCasbin()) // 增加鉴权
 		{
 			apiRouter := sysGroup.Group("api")
 			apiRouter.POST("all", handler.ApiAll)   // 获取所有api
 			apiRouter.POST("page", handler.ApiPage) // 获取Api列表
 
-			apiRouter.Use(middleware.OperationRecord())
+			apiRouter.Use(log.MiddlewareOperationRecord())
 			apiRouter.POST("getById", handler.ApiGetById) // 获取单条Api信息
 			apiRouter.POST("", handler.ApiCreate)         // 创建Api
 			apiRouter.PATCH("", handler.ApiUpdate)        // 更新api
@@ -57,7 +59,7 @@ func (a) Init() uint8 {
 			userRouter.POST("page", handler.UserPage)           // 分页获取用户列表
 			userRouter.POST("getUserInfo", handler.UserGetInfo) // 获取自身信息
 
-			userRouter.Use(middleware.OperationRecord())
+			userRouter.Use(log.MiddlewareOperationRecord())
 			userRouter.POST("adminRegister", handler.UserRegister)         // 管理员注册账号
 			userRouter.PATCH("changePassword", handler.UserChangePassword) // 用户修改密码
 			//userRouter.PATCH("setUserAuthority", handler.UserSetAuthority)     // 设置用户权限
@@ -74,7 +76,7 @@ func (a) Init() uint8 {
 			menuRouter.POST("getByAuthorityId", handler.MenuByAuthority) // 依据角色id获取菜单
 			menuRouter.POST("getById", handler.MenuById)                 // 根据id获取菜单
 
-			menuRouter.Use(middleware.OperationRecord())
+			menuRouter.Use(log.MiddlewareOperationRecord())
 			menuRouter.POST("add", handler.MenuAdd)                       // 新增菜单
 			menuRouter.POST("addMenuAuthority", handler.MenuAddAuthority) // 增加menu和角色关联关系
 			menuRouter.DELETE("", handler.MenuDelete)                     // 删除菜单
@@ -84,13 +86,13 @@ func (a) Init() uint8 {
 			casbinRouter := sysGroup.Group("casbin")
 			casbinRouter.POST("getPolicyPathByAuthorityId", handler.CasbinGetPolicyPathByAuthorityId) // 权限相关路由
 
-			casbinRouter.Use(middleware.OperationRecord()).PATCH("", handler.CasbinUpdate)
+			casbinRouter.Use(log.MiddlewareOperationRecord()).PATCH("", handler.CasbinUpdate)
 		}
 		{
 			authorityRouter := sysGroup.Group("authority")
 			authorityRouter.POST("page", handler.AuthorityPage) // 获取角色列表
 
-			authorityRouter.Use(middleware.OperationRecord())
+			authorityRouter.Use(log.MiddlewareOperationRecord())
 			authorityRouter.POST("", handler.AuthorityCreate)                   // 创建角色
 			authorityRouter.DELETE("", handler.AuthorityDelete)                 // 删除角色
 			authorityRouter.PATCH("", handler.AuthorityUpdate)                  // 更新角色

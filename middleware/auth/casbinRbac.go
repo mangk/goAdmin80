@@ -1,4 +1,4 @@
-package middleware
+package auth
 
 import (
 	"github.com/gin-gonic/gin"
@@ -7,7 +7,7 @@ import (
 	"strconv"
 )
 
-func CasbinHandler() gin.HandlerFunc {
+func MiddlewareCasbin() gin.HandlerFunc {
 	return func(ctx *gin.Context) {
 		waitUse, _ := model.GetClaims(ctx)
 		//获取请求的PATH
