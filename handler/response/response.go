@@ -67,12 +67,38 @@ func FailWithMessage(message string, c *gin.Context, httpCode ...int) {
 	Result(hc, ERROR, map[string]interface{}{}, message, c)
 }
 
+func FailMessageByMap(msgMap map[int]string, msgCode int, c *gin.Context, httpCode ...int) {
+	hc := http.StatusOK
+	if len(httpCode) == 1 {
+		hc = httpCode[0]
+	}
+	message, ok := msgMap[msgCode]
+	if !ok {
+		message = "未知错误"
+	}
+
+	Result(hc, msgCode, map[string]interface{}{}, message, c)
+}
+
 func FailWithDetailed(data interface{}, message string, c *gin.Context, httpCode ...int) {
 	hc := http.StatusOK
 	if len(httpCode) == 1 {
 		hc = httpCode[0]
 	}
 	Result(hc, ERROR, data, message, c)
+}
+
+func FailDetailedByMap(data interface{}, msgMap map[int]string, msgCode int, c *gin.Context, httpCode ...int) {
+	hc := http.StatusOK
+	if len(httpCode) == 1 {
+		hc = httpCode[0]
+	}
+	message, ok := msgMap[msgCode]
+	if !ok {
+		message = "未知错误"
+	}
+
+	Result(hc, msgCode, data, message, c)
 }
 
 type PageResult struct {
