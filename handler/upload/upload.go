@@ -35,11 +35,11 @@ func NewOss(ossType ...string) OSS {
 		//case "aws-s3":
 		//	return &AwsS3{}
 		default:
-			log.Log().Panic(fmt.Sprintf("[%s]未知的对象存储", t))
+			log.ZapLog().Panic(fmt.Sprintf("[%s]未知的对象存储", t))
 			return nil
 		}
 	}
-	log.Log().Panic(fmt.Sprintf("[%s]未知的对象存储", t))
+	log.ZapLog().Panic(fmt.Sprintf("[%s]未知的对象存储", t))
 	return nil
 }
 

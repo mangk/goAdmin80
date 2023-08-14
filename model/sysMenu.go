@@ -310,14 +310,14 @@ func (s SysMenu) UpdateBaseMenu(menu SysMenu) (err error) {
 		db := tx.Where("id = ?", menu.ID).Find(&oldMenu)
 		if oldMenu.Name != menu.Name {
 			if !errors.Is(tx.Where("id <> ? AND name = ?", menu.ID, menu.Name).First(&SysMenu{}).Error, gorm.ErrRecordNotFound) {
-				log.Log().Debug("存在相同name修改失败")
+				log.Debug("存在相同name修改失败")
 				return errors.New("存在相同name修改失败")
 			}
 		}
 
 		txErr := db.Updates(upDateMap).Error
 		if txErr != nil {
-			log.Log().Debug(txErr.Error())
+			log.Debug(txErr.Error())
 			return txErr
 		}
 		return nil

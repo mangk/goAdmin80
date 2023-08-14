@@ -34,7 +34,7 @@ func (l *Local) UploadFile(file *multipart.FileHeader, keyPrefix ...string) (str
 	// 尝试创建此路径
 	mkdirErr := os.MkdirAll(l.cfg.StorePath, os.ModePerm)
 	if mkdirErr != nil {
-		log.Log().Error("function os.MkdirAll() Filed", zap.Any("err", mkdirErr.Error()))
+		log.ZapLog().Error("function os.MkdirAll() Filed", zap.Any("err", mkdirErr.Error()))
 		return "", "", "", errors.New("function os.MkdirAll() Filed, err:" + mkdirErr.Error())
 	}
 	// 拼接路径和文件名
@@ -49,14 +49,14 @@ func (l *Local) UploadFile(file *multipart.FileHeader, keyPrefix ...string) (str
 
 	f, openError := file.Open() // 读取文件
 	if openError != nil {
-		log.Log().Error("function file.Open() Filed", zap.Any("err", openError.Error()))
+		log.ZapLog().Error("function file.Open() Filed", zap.Any("err", openError.Error()))
 		return "", "", "", errors.New("function file.Open() Filed, err:" + openError.Error())
 	}
 	defer f.Close() // 创建文件 defer 关闭
 
 	out, createErr := os.Create(p)
 	if createErr != nil {
-		log.Log().Error("function os.Create() Filed", zap.Any("err", createErr.Error()))
+		log.ZapLog().Error("function os.Create() Filed", zap.Any("err", createErr.Error()))
 
 		return "", "", "", errors.New("function os.Create() Filed, err:" + createErr.Error())
 	}
@@ -65,7 +65,7 @@ func (l *Local) UploadFile(file *multipart.FileHeader, keyPrefix ...string) (str
 	md5 := fileMd5(f)
 	_, copyErr := io.Copy(out, f) // 传输（拷贝）文件
 	if copyErr != nil {
-		log.Log().Error("function io.Copy() Filed", zap.Any("err", copyErr.Error()))
+		log.ZapLog().Error("function io.Copy() Filed", zap.Any("err", copyErr.Error()))
 		return "", "", "", errors.New("function io.Copy() Filed, err:" + copyErr.Error())
 	}
 

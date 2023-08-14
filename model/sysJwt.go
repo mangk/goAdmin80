@@ -147,7 +147,7 @@ func LoadAll() {
 	var data []string
 	err := db.DB().Model(&SysJwtBlacklist{}).Select("jwt").Find(&data).Error
 	if err != nil {
-		log.Log().Error("加载数据库jwt黑名单失败!", zap.Error(err))
+		log.ZapLog().Error("加载数据库jwt黑名单失败!", zap.Error(err))
 		return
 	}
 	for i := 0; i < len(data); i++ {

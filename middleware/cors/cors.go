@@ -8,7 +8,7 @@ import (
 )
 
 func Cors() gin.HandlerFunc {
-	log.Log().Info("use middleware cors")
+	log.Info("use middleware cors")
 	return func(c *gin.Context) {
 		origin := c.Request.Header.Get("Origin")
 		c.Header("Access-Control-Allow-Origin", origin)

@@ -64,7 +64,7 @@ func MiddlewareJWTAuth() gin.HandlerFunc {
 			if config.ServerCfg().UseMultipoint {
 				RedisJwtToken, err := j.GetRedisJWT(newClaims.Username)
 				if err != nil {
-					log.Log().Error("get redis jwt failed", zap.Error(err))
+					log.ZapLog().Error("get redis jwt failed", zap.Error(err))
 				} else { // 当之前的取成功时才进行拉黑操作
 					_ = j.JsonInBlacklist(model.SysJwtBlacklist{Jwt: RedisJwtToken})
 				}

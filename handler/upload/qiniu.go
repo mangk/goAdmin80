@@ -38,7 +38,7 @@ func (q *Qiniu) UploadFile(file *multipart.FileHeader) (string, string, error) {
 
 	f, openError := file.Open()
 	if openError != nil {
-		log.Log().Error("function file.Open() Filed", zap.Any("err", openError.Error()))
+		log.ZapLog().Error("function file.Open() Filed", zap.Any("err", openError.Error()))
 
 		return "", "", errors.New("function file.Open() Filed, err:" + openError.Error())
 	}
@@ -46,7 +46,7 @@ func (q *Qiniu) UploadFile(file *multipart.FileHeader) (string, string, error) {
 	fileKey := fmt.Sprintf("%d%s", time.Now().Unix(), file.Filename) // 文件名格式 自己可以改 建议保证唯一性
 	putErr := formUploader.Put(context.Background(), &ret, upToken, fileKey, f, file.Size, &putExtra)
 	if putErr != nil {
-		log.Log().Error("function formUploader.Put() Filed", zap.Any("err", putErr.Error()))
+		log.ZapLog().Error("function formUploader.Put() Filed", zap.Any("err", putErr.Error()))
 		return "", "", errors.New("function formUploader.Put() Filed, err:" + putErr.Error())
 	}
 	return q.cfg.PrefixPath + "/" + ret.Key, ret.Key, nil
@@ -66,7 +66,7 @@ func (q *Qiniu) DeleteFile(key string) error {
 	cfg := q.qiniuConfig()
 	bucketManager := storage.NewBucketManager(mac, cfg)
 	if err := bucketManager.Delete(q.cfg.Bucket, key); err != nil {
-		log.Log().Error("function bucketManager.Delete() Filed", zap.Any("err", err.Error()))
+		log.ZapLog().Error("function bucketManager.Delete() Filed", zap.Any("err", err.Error()))
 		return errors.New("function bucketManager.Delete() Filed, err:" + err.Error())
 	}
 	return nil

@@ -33,7 +33,7 @@ func MiddlewareOperationRecord() gin.HandlerFunc {
 			var err error
 			body, err = io.ReadAll(c.Request.Body)
 			if err != nil {
-				log.Log().Error("read body from request error:", zap.Error(err))
+				log.ZapLog().Error("read body from request error:", zap.Error(err))
 			} else {
 				c.Request.Body = io.NopCloser(bytes.NewBuffer(body))
 			}
@@ -114,7 +114,7 @@ func MiddlewareOperationRecord() gin.HandlerFunc {
 		}
 
 		if err := record.Create(); err != nil {
-			log.Log().Error("create operation record error:", zap.Error(err))
+			log.ZapLog().Error("create operation record error:", zap.Error(err))
 		}
 	}
 }

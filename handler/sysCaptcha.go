@@ -33,7 +33,7 @@ func Captcha(ctx *gin.Context) {
 	cp := base64Captcha.NewCaptcha(driver, store.UseWithCtx(ctx))
 	id, b64s, err := cp.Generate()
 	if err != nil {
-		log.Log().Error("验证码获取失败!", zap.Error(err))
+		log.ZapLog().Error("验证码获取失败!", zap.Error(err))
 		response.FailWithMessage("验证码获取失败", ctx)
 		return
 	}
@@ -76,7 +76,7 @@ func (rs *RedisStore) UseWithCtx(ctx context.Context) base64Captcha.Store {
 func (rs *RedisStore) Set(id string, value string) error {
 	err := cache.Redis().Set(rs.Context, rs.PreKey+id, value, rs.Expiration).Err()
 	if err != nil {
-		log.Log().Error("RedisStoreSetError!", zap.Error(err))
+		log.ZapLog().Error("RedisStoreSetError!", zap.Error(err))
 	}
 	return err
 }
@@ -84,13 +84,13 @@ func (rs *RedisStore) Set(id string, value string) error {
 func (rs *RedisStore) Get(key string, clear bool) string {
 	val, err := cache.Redis().Get(rs.Context, key).Result()
 	if err != nil {
-		log.Log().Error("RedisStoreGetError!", zap.Error(err))
+		log.ZapLog().Error("RedisStoreGetError!", zap.Error(err))
 		return ""
 	}
 	if clear {
 		err := cache.Redis().Del(rs.Context, key).Err()
 		if err != nil {
-			log.Log().Error("RedisStoreClearError!", zap.Error(err))
+			log.ZapLog().Error("RedisStoreClearError!", zap.Error(err))
 			return ""
 		}
 	}

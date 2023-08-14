@@ -15,7 +15,7 @@ func JwtJsonInBlacklist(ctx *gin.Context) {
 	jwt := model.SysJwtBlacklist{Jwt: token}
 	err := model.Jwt{}.JsonInBlacklist(jwt)
 	if err != nil {
-		log.Log().Error("jwt作废失败!", zap.Error(err))
+		log.ZapLog().Error("jwt作废失败!", zap.Error(err))
 		response.FailWithMessage("jwt作废失败", ctx)
 		return
 	}

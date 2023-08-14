@@ -35,7 +35,7 @@ func (a *AwsS3) UploadFile(file *multipart.FileHeader) (string, string, error) {
 	filename := a.cfg.PrefixPath + "/" + fileKey
 	f, openError := file.Open()
 	if openError != nil {
-		log.Log().Error("function file.Open() Filed", zap.Any("err", openError.Error()))
+		log.ZapLog().Error("function file.Open() Filed", zap.Any("err", openError.Error()))
 		return "", "", errors.New("function file.Open() Filed, err:" + openError.Error())
 	}
 	defer f.Close() // 创建文件 defer 关闭
@@ -46,7 +46,7 @@ func (a *AwsS3) UploadFile(file *multipart.FileHeader) (string, string, error) {
 		Body:   f,
 	})
 	if err != nil {
-		log.Log().Error("function uploader.Upload() Filed", zap.Any("err", err.Error()))
+		log.ZapLog().Error("function uploader.Upload() Filed", zap.Any("err", err.Error()))
 		return "", "", err
 	}
 
@@ -71,7 +71,7 @@ func (a *AwsS3) DeleteFile(key string) error {
 		Key:    aws.String(filename),
 	})
 	if err != nil {
-		log.Log().Error("function svc.DeleteObject() Filed", zap.Any("err", err.Error()))
+		log.ZapLog().Error("function svc.DeleteObject() Filed", zap.Any("err", err.Error()))
 		return errors.New("function svc.DeleteObject() Filed, err:" + err.Error())
 	}
 

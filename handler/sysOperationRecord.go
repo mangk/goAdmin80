@@ -19,7 +19,7 @@ func OperationRecordCreate(ctx *gin.Context) {
 	}
 	err = sysOperationRecord.Create()
 	if err != nil {
-		log.Log().Error("创建失败!", zap.Error(err))
+		log.ZapLog().Error("创建失败!", zap.Error(err))
 		response.FailWithMessage("创建失败", ctx)
 		return
 	}
@@ -37,7 +37,7 @@ func OperationRecordDelete(ctx *gin.Context) {
 	}
 	err = model.SysOperationRecord{}.DeleteSysOperationRecordByIds(IDS.Ids)
 	if err != nil {
-		log.Log().Error("批量删除失败!", zap.Error(err))
+		log.ZapLog().Error("批量删除失败!", zap.Error(err))
 		response.FailWithMessage("批量删除失败", ctx)
 		return
 	}
@@ -58,7 +58,7 @@ func OperationRecordGetById(ctx *gin.Context) {
 	}
 	reSysOperationRecord, err := sysOperationRecord.GetSysOperationRecord(sysOperationRecord.ID)
 	if err != nil {
-		log.Log().Error("查询失败!", zap.Error(err))
+		log.ZapLog().Error("查询失败!", zap.Error(err))
 		response.FailWithMessage("查询失败", ctx)
 		return
 	}
@@ -78,7 +78,7 @@ func OperationRecordPage(ctx *gin.Context) {
 	}
 	list, total, err := model.SysOperationRecord{}.GetSysOperationRecordInfoList(pageInfo)
 	if err != nil {
-		log.Log().Error("获取失败!", zap.Error(err))
+		log.ZapLog().Error("获取失败!", zap.Error(err))
 		response.FailWithMessage("获取失败", ctx)
 		return
 	}

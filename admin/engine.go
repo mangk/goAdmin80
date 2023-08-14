@@ -177,7 +177,7 @@ func (e *Engine) RegisterGetHandler(relativePath string, handlerFunc gin.Handler
 	relativePath = strings.Trim(relativePath, "/")
 	key := fmt.Sprintf("%s|%s", relativePath, "GET")
 	if _, ok := e.userFunc[key]; ok {
-		log.Log().Error("Unsupported methods")
+		log.Error("Unsupported methods")
 		panic("path as registered")
 	}
 	e.userFunc[key] = handlerFunc
@@ -188,7 +188,7 @@ func (e *Engine) RegisterPostHandler(relativePath string, handlerFunc gin.Handle
 	relativePath = strings.Trim(relativePath, "/")
 	key := fmt.Sprintf("%s|%s", relativePath, "POST")
 	if _, ok := e.userFunc[key]; ok {
-		log.Log().Error("Unsupported methods")
+		log.Error("Unsupported methods")
 		panic("path as registered")
 	}
 	e.userFunc[key] = handlerFunc
@@ -199,7 +199,7 @@ func (e *Engine) RegisterPatchHandler(relativePath string, handlerFunc gin.Handl
 	relativePath = strings.Trim(relativePath, "/")
 	key := fmt.Sprintf("%s|%s", relativePath, "PATCH")
 	if _, ok := e.userFunc[key]; ok {
-		log.Log().Error("Unsupported methods")
+		log.Error("Unsupported methods")
 		panic("path as registered")
 	}
 	e.userFunc[key] = handlerFunc
@@ -210,7 +210,7 @@ func (e *Engine) RegisterDeleteHandler(relativePath string, handlerFunc gin.Hand
 	relativePath = strings.Trim(relativePath, "/")
 	key := fmt.Sprintf("%s|%s", relativePath, "DELETE")
 	if _, ok := e.userFunc[key]; ok {
-		log.Log().Error("Unsupported methods")
+		log.Error("Unsupported methods")
 		panic("path as registered")
 	}
 	e.userFunc[key] = handlerFunc
@@ -229,7 +229,7 @@ func (e *Engine) register(relativePath, method string, handlerFunc ...gin.Handle
 	case "DELETE":
 		g.DELETE(e.ap+"/"+relativePath, handlerFunc...)
 	default:
-		log.Log().Error("Unsupported methods")
+		log.Error("Unsupported methods")
 		panic("Unsupported methods")
 	}
 }

@@ -26,7 +26,7 @@ func CasbinUpdate(ctx *gin.Context) {
 	}
 	err := model.Casbin{}.UpdateCasbin(cmr.AuthorityId, cmr.CasbinInfos)
 	if err != nil {
-		log.Log().Error("更新失败!", zap.Error(err))
+		log.ZapLog().Error("更新失败!", zap.Error(err))
 		response.FailWithMessage("更新失败", ctx)
 		return
 	}

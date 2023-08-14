@@ -20,7 +20,7 @@ func MenuAll(ctx *gin.Context) {
 	}
 	menuList, err := model.SysMenu{}.GetAllMenu(param.Tree, param.LoadSystem)
 	if err != nil {
-		log.Log().Error("获取失败!", zap.Error(err))
+		log.ZapLog().Error("获取失败!", zap.Error(err))
 		response.FailWithMessage("获取失败", ctx)
 		return
 	}
@@ -35,7 +35,7 @@ func MenuAll(ctx *gin.Context) {
 func MenuGetTreeByAuthorityId(ctx *gin.Context) {
 	menus, err := model.SysMenu{}.GetAllTreeMenuByAuthorityId(model.GetUserAuthorityId(ctx), true)
 	if err != nil {
-		log.Log().Error("获取失败!", zap.Error(err))
+		log.ZapLog().Error("获取失败!", zap.Error(err))
 		response.FailWithMessage("获取失败", ctx)
 		return
 	}
@@ -61,7 +61,7 @@ func MenuByUser(ctx *gin.Context) {
 
 	menus, err := model.SysMenu{}.GetMenuByUserId(u.BaseClaims.ID, param.Tree)
 	if err != nil {
-		log.Log().Error("获取失败!", zap.Error(err))
+		log.ZapLog().Error("获取失败!", zap.Error(err))
 		response.FailWithMessage("获取失败", ctx)
 		return
 	}
@@ -82,7 +82,7 @@ func MenuByAuthority(ctx *gin.Context) {
 	}
 	menus, err := model.SysMenu{}.GetAllTreeMenuByAuthorityId([]int{param.AuthorityId}, false)
 	if err != nil {
-		log.Log().Error("获取失败!", zap.Error(err))
+		log.ZapLog().Error("获取失败!", zap.Error(err))
 		response.FailWithDetailed(menus, "获取失败", ctx)
 		return
 	}
@@ -103,7 +103,7 @@ func MenuById(ctx *gin.Context) {
 	}
 	menu, err := model.SysMenu{}.GetBaseMenuById(idInfo.ID)
 	if err != nil {
-		log.Log().Error("获取失败!", zap.Error(err))
+		log.ZapLog().Error("获取失败!", zap.Error(err))
 		response.FailWithMessage("获取失败", ctx)
 		return
 	}
@@ -125,7 +125,7 @@ func MenuAdd(ctx *gin.Context) {
 		return
 	}
 	if err := (model.SysMenu{}).AddBaseMenu(menu); err != nil {
-		log.Log().Error("添加失败!", zap.Error(err))
+		log.ZapLog().Error("添加失败!", zap.Error(err))
 		response.FailWithMessage("添加失败", ctx)
 		return
 	}
@@ -147,7 +147,7 @@ func MenuAddAuthority(ctx *gin.Context) {
 	}
 
 	if err := (model.SysAuthorityMenu{}).SaveAuthority(authorityMenu.AuthorityId, authorityMenu.Menus); err != nil {
-		log.Log().Error("添加失败!", zap.Error(err))
+		log.ZapLog().Error("添加失败!", zap.Error(err))
 		response.FailWithMessage("添加失败", ctx)
 	} else {
 		response.OkWithMessage("添加成功", ctx)
@@ -167,7 +167,7 @@ func MenuDelete(ctx *gin.Context) {
 		return
 	}
 	if err := (model.SysMenu{}).DeleteBaseMenu(menu.ID); err != nil {
-		log.Log().Error("删除失败!", zap.Error(err))
+		log.ZapLog().Error("删除失败!", zap.Error(err))
 		response.FailWithMessage("删除失败:"+err.Error(), ctx)
 		return
 	}
@@ -192,7 +192,7 @@ func MenuUpdate(ctx *gin.Context) {
 		return
 	}
 	if err := (model.SysMenu{}).UpdateBaseMenu(menu); err != nil {
-		log.Log().Error("更新失败!", zap.Error(err))
+		log.ZapLog().Error("更新失败!", zap.Error(err))
 		response.FailWithMessage("更新失败", ctx)
 		return
 	}

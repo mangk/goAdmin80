@@ -21,14 +21,14 @@ func (a *AliyunOSS) UploadFile(file *multipart.FileHeader, keyPrefix ...string) 
 	c := bucket.GetConfig()
 	fmt.Println(c)
 	if err != nil {
-		log.Log().Error("function AliyunOSS.NewBucket() Failed", zap.Any("err", err.Error()))
+		log.ZapLog().Error("function AliyunOSS.NewBucket() Failed", zap.Any("err", err.Error()))
 		return "", "", "", errors.New("function AliyunOSS.NewBucket() Failed, err:" + err.Error())
 	}
 
 	// 读取本地文件。
 	f, openError := file.Open()
 	if openError != nil {
-		log.Log().Error("function file.Open() Failed", zap.Any("err", openError.Error()))
+		log.ZapLog().Error("function file.Open() Failed", zap.Any("err", openError.Error()))
 		return "", "", "", errors.New("function file.Open() Failed, err:" + openError.Error())
 	}
 	defer f.Close() // 创建文件 defer 关闭
@@ -43,7 +43,7 @@ func (a *AliyunOSS) UploadFile(file *multipart.FileHeader, keyPrefix ...string) 
 	// 上传文件流。
 	err = bucket.PutObject(fileKey, f)
 	if err != nil {
-		log.Log().Error("function formUploader.Put() Failed", zap.Any("err", err.Error()))
+		log.ZapLog().Error("function formUploader.Put() Failed", zap.Any("err", err.Error()))
 		return "", "", "", errors.New("function formUploader.Put() Failed, err:" + err.Error())
 	}
 
@@ -56,7 +56,7 @@ func (a *AliyunOSS) UploadFile(file *multipart.FileHeader, keyPrefix ...string) 
 func (a *AliyunOSS) DeleteFile(key string) error {
 	bucket, err := NewBucket(a.cfg)
 	if err != nil {
-		log.Log().Error("function AliyunOSS.NewBucket() Failed", zap.Any("err", err.Error()))
+		log.ZapLog().Error("function AliyunOSS.NewBucket() Failed", zap.Any("err", err.Error()))
 		return errors.New("function AliyunOSS.NewBucket() Failed, err:" + err.Error())
 	}
 
@@ -64,7 +64,7 @@ func (a *AliyunOSS) DeleteFile(key string) error {
 	// 如需删除文件夹，请将objectName设置为对应的文件夹名称。如果文件夹非空，则需要将文件夹下的所有object删除后才能删除该文件夹。
 	err = bucket.DeleteObject(key)
 	if err != nil {
-		log.Log().Error("function bucketManager.Delete() Filed", zap.Any("err", err.Error()))
+		log.ZapLog().Error("function bucketManager.Delete() Filed", zap.Any("err", err.Error()))
 		return errors.New("function bucketManager.Delete() Filed, err:" + err.Error())
 	}
 

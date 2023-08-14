@@ -119,7 +119,7 @@ func (c Casbin) Casbin() *casbin.SyncedEnforcer {
 		`
 		m, err := model.NewModelFromString(text)
 		if err != nil {
-			log.Log().Error("字符串加载模型失败!", zap.Error(err))
+			log.ZapLog().Error("字符串加载模型失败!", zap.Error(err))
 			return
 		}
 		cachedEnforcer, _ = casbin.NewSyncedEnforcer(m, a)
@@ -174,7 +174,7 @@ func GetClaims(c *gin.Context) (*CustomClaims, error) {
 	j := NewJWT(config.JwtCfg().SigningKey)
 	claims, err := j.ParseToken(token)
 	if err != nil {
-		log.Log().Error("从Gin的Context中获取从jwt解析信息失败, 请检查请求头是否存在x-token且claims是否为规定结构")
+		log.Error("从Gin的Context中获取从jwt解析信息失败, 请检查请求头是否存在x-token且claims是否为规定结构")
 	}
 	return claims, err
 }

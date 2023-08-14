@@ -24,7 +24,7 @@ func (t *TencentCOS) UploadFile(file *multipart.FileHeader, keyPrefix ...string)
 	client := NewClient(t.cfg)
 	f, openError := file.Open()
 	if openError != nil {
-		log.Log().Error("function file.Open() Filed", zap.Any("err", openError.Error()))
+		log.ZapLog().Error("function file.Open() Filed", zap.Any("err", openError.Error()))
 		return "", "", "", errors.New("function file.Open() Filed, err:" + openError.Error())
 	}
 	defer f.Close() // 创建文件 defer 关闭
@@ -54,7 +54,7 @@ func (t *TencentCOS) DeleteFile(key string) error {
 	client := NewClient(t.cfg)
 	_, err := client.Object.Delete(context.Background(), key)
 	if err != nil {
-		log.Log().Error("function bucketManager.Delete() Filed", zap.Any("err", err.Error()))
+		log.ZapLog().Error("function bucketManager.Delete() Filed", zap.Any("err", err.Error()))
 		return errors.New("function bucketManager.Delete() Filed, err:" + err.Error())
 	}
 	return nil
