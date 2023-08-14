@@ -25,39 +25,39 @@ type Log struct {
 }
 
 func (l *Log) Info(msg string) {
-	_log.Info("[" + l.trace + "]" + msg)
+	Info("[" + l.trace + "]" + msg)
 }
 
 func (l *Log) Infof(format string, a ...any) {
 	a = append([]any{l.trace}, a...)
-	_log.Info(fmt.Sprintf("[%s]"+format, a...))
+	Info(fmt.Sprintf("[%s]"+format, a...))
 }
 
 func (l *Log) Warn(msg string) {
-	_log.Warn("[" + l.trace + "]" + msg)
+	Warn("[" + l.trace + "]" + msg)
 }
 
 func (l *Log) Warnf(format string, a ...any) {
 	a = append([]any{l.trace}, a...)
-	_log.Warn(fmt.Sprintf("[%s]"+format, a...))
+	Warn(fmt.Sprintf("[%s]"+format, a...))
 }
 
 func (l *Log) Error(msg string) {
-	_log.Error("[" + l.trace + "]" + msg)
+	Error("[" + l.trace + "]" + msg)
 }
 
 func (l *Log) Errorf(format string, a ...any) {
 	a = append([]any{l.trace}, a...)
-	_log.Error(fmt.Sprintf("[%s]"+format, a...))
+	Error(fmt.Sprintf("[%s]"+format, a...))
 }
 
 func (l *Log) Debug(msg string) {
-	_log.Debug("[" + l.trace + "]" + msg)
+	Debug("[" + l.trace + "]" + msg)
 }
 
 func (l *Log) Debugf(format string, a ...any) {
 	a = append([]any{l.trace}, a...)
-	_log.Debug(fmt.Sprintf("[%s]"+format, a...))
+	Debug(fmt.Sprintf("[%s]"+format, a...))
 }
 
 func (l Log) Init() uint8 {
