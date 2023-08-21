@@ -1,4 +1,4 @@
-package log
+package logWithUser
 
 import (
 	"bytes"
@@ -8,6 +8,7 @@ import (
 	"io"
 	"net/http"
 	"net/url"
+	"strconv"
 	"strings"
 	"sync"
 	"time"
@@ -24,7 +25,7 @@ func init() {
 	}
 }
 
-func MiddlewareOperationRecord(saveDB bool) gin.HandlerFunc {
+func MiddlewareOperationRecord() gin.HandlerFunc {
 	return func(c *gin.Context) {
 		var body []byte
 		var userId int
@@ -48,6 +49,16 @@ func MiddlewareOperationRecord(saveDB bool) gin.HandlerFunc {
 				}
 			}
 			body, _ = json.Marshal(&m)
+		}
+		claims, _ := model.GetClaims(c)
+		if claims.ID != 0 {
+			userId = int(claims.ID)
+		} else {
+			id, err := strconv.Atoi(c.Request.Header.Get("x-user-id"))
+			if err != nil {
+				userId = 0
+			}
+			userId = id
 		}
 		record := model.SysOperationRecord{
 			Ip:     c.ClientIP(),
@@ -102,13 +113,8 @@ func MiddlewareOperationRecord(saveDB bool) gin.HandlerFunc {
 			}
 		}
 
-		if saveDB {
-			if err := record.Create(); err != nil {
-				log.ZapLog().Error("create operation record error:", zap.Error(err))
-			}
-		} else {
-			msg, _ := json.Marshal(record)
-			log.Info("[MiddlewareOperationRecord] " + string(msg))
+		if err := record.Create(); err != nil {
+			log.ZapLog().Error("create operation record error:", zap.Error(err))
 		}
 	}
 }
