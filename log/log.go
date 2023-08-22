@@ -24,42 +24,6 @@ type Log struct {
 	trace string
 }
 
-func (l *Log) Info(msg string) {
-	Info("[" + l.trace + "]" + msg)
-}
-
-func (l *Log) Infof(format string, a ...any) {
-	a = append([]any{l.trace}, a...)
-	Info(fmt.Sprintf("[%s]"+format, a...))
-}
-
-func (l *Log) Warn(msg string) {
-	Warn("[" + l.trace + "]" + msg)
-}
-
-func (l *Log) Warnf(format string, a ...any) {
-	a = append([]any{l.trace}, a...)
-	Warn(fmt.Sprintf("[%s]"+format, a...))
-}
-
-func (l *Log) Error(msg string) {
-	Error("[" + l.trace + "]" + msg)
-}
-
-func (l *Log) Errorf(format string, a ...any) {
-	a = append([]any{l.trace}, a...)
-	Error(fmt.Sprintf("[%s]"+format, a...))
-}
-
-func (l *Log) Debug(msg string) {
-	Debug("[" + l.trace + "]" + msg)
-}
-
-func (l *Log) Debugf(format string, a ...any) {
-	a = append([]any{l.trace}, a...)
-	Debug(fmt.Sprintf("[%s]"+format, a...))
-}
-
 func (l Log) Init() uint8 {
 	var (
 		writer    []zapcore.WriteSyncer // 日志输出位置
@@ -109,7 +73,7 @@ func (l Log) Init() uint8 {
 	if config.LogCfg().Prefix != "" {
 		opt = append(opt, zap.Fields(zap.String("_prefix", config.LogCfg().Prefix)))
 	}
-	opt = append(opt, zap.WithCaller(true))
+	opt = append(opt, zap.WithCaller(true), zap.AddCallerSkip(1))
 
 	_log = zap.New(zapcore.NewCore(encoder, zapcore.NewMultiWriteSyncer(writer...), level), opt...)
 	zap.ReplaceGlobals(_log)
@@ -117,6 +81,42 @@ func (l Log) Init() uint8 {
 	log.SetOutput(NewZapLoggerAdapter(_log, "_sys"))
 
 	return core.ModuleLog
+}
+
+func (l *Log) Info(msg string) {
+	_log.Info("[" + l.trace + "]" + msg)
+}
+
+func (l *Log) Infof(format string, a ...any) {
+	a = append([]any{l.trace}, a...)
+	_log.Info(fmt.Sprintf("[%s]"+format, a...))
+}
+
+func (l *Log) Warn(msg string) {
+	_log.Warn("[" + l.trace + "]" + msg)
+}
+
+func (l *Log) Warnf(format string, a ...any) {
+	a = append([]any{l.trace}, a...)
+	_log.Warn(fmt.Sprintf("[%s]"+format, a...))
+}
+
+func (l *Log) Error(msg string) {
+	_log.Error("[" + l.trace + "]" + msg)
+}
+
+func (l *Log) Errorf(format string, a ...any) {
+	a = append([]any{l.trace}, a...)
+	_log.Error(fmt.Sprintf("[%s]"+format, a...))
+}
+
+func (l *Log) Debug(msg string) {
+	_log.Debug("[" + l.trace + "]" + msg)
+}
+
+func (l *Log) Debugf(format string, a ...any) {
+	a = append([]any{l.trace}, a...)
+	_log.Debug(fmt.Sprintf("[%s]"+format, a...))
 }
 
 func ZapLog() *zap.Logger {
