@@ -59,7 +59,13 @@ func MiddlewareOperationRecord() gin.HandlerFunc {
 			ErrorMessage string        `json:"error_message" form:"error_message" gorm:"column:error_message;comment:错误信息"`  // 错误信息
 			Body         string        `json:"body" form:"body" gorm:"type:text;column:body;comment:请求Body"`                 // 请求Body
 			Resp         string        `json:"resp" form:"resp" gorm:"type:text;column:resp;comment:响应Body"`                 // 响应Body
-		}{}
+		}{
+			Ip:     c.ClientIP(),
+			Method: c.Request.Method,
+			Path:   c.Request.URL.Path,
+			Agent:  c.Request.UserAgent(),
+			Body:   string(body),
+		}
 
 		// 上传文件时候 中间件日志进行裁断操作
 		if strings.Contains(c.GetHeader("Content-Type"), "multipart/form-data") {
