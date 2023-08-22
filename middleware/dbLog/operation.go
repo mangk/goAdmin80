@@ -1,4 +1,4 @@
-package logWithUser
+package dbLog
 
 import (
 	"bytes"

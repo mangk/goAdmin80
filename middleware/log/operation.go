@@ -3,14 +3,14 @@ package log
 import (
 	"bytes"
 	"encoding/json"
-	"github.com/mangk/goAdmin80/log"
-	"github.com/mangk/goAdmin80/model"
 	"io"
 	"net/http"
 	"net/url"
 	"strings"
 	"sync"
 	"time"
+
+	"github.com/mangk/goAdmin80/log"
 
 	"github.com/gin-gonic/gin"
 	"go.uber.org/zap"
@@ -24,10 +24,9 @@ func init() {
 	}
 }
 
-func MiddlewareOperationRecord(saveDB bool) gin.HandlerFunc {
+func MiddlewareOperationRecord() gin.HandlerFunc {
 	return func(c *gin.Context) {
 		var body []byte
-		var userId int
 		if c.Request.Method != http.MethodGet {
 			var err error
 			body, err = io.ReadAll(c.Request.Body)
@@ -49,14 +48,18 @@ func MiddlewareOperationRecord(saveDB bool) gin.HandlerFunc {
 			}
 			body, _ = json.Marshal(&m)
 		}
-		record := model.SysOperationRecord{
-			Ip:     c.ClientIP(),
-			Method: c.Request.Method,
-			Path:   c.Request.URL.Path,
-			Agent:  c.Request.UserAgent(),
-			Body:   string(body),
-			UserID: userId,
-		}
+
+		record := struct {
+			Ip           string        `json:"ip" form:"ip" gorm:"column:ip;comment:请求ip"`                                   // 请求ip
+			Method       string        `json:"method" form:"method" gorm:"column:method;comment:请求方法"`                       // 请求方法
+			Path         string        `json:"path" form:"path" gorm:"column:path;comment:请求路径"`                             // 请求路径
+			Status       int           `json:"status" form:"status" gorm:"column:status;comment:请求状态"`                       // 请求状态
+			Latency      time.Duration `json:"latency" form:"latency" gorm:"column:latency;comment:延迟" swaggertype:"string"` // 延迟
+			Agent        string        `json:"agent" form:"agent" gorm:"column:agent;comment:代理"`                            // 代理
+			ErrorMessage string        `json:"error_message" form:"error_message" gorm:"column:error_message;comment:错误信息"`  // 错误信息
+			Body         string        `json:"body" form:"body" gorm:"type:text;column:body;comment:请求Body"`                 // 请求Body
+			Resp         string        `json:"resp" form:"resp" gorm:"type:text;column:resp;comment:响应Body"`                 // 响应Body
+		}{}
 
 		// 上传文件时候 中间件日志进行裁断操作
 		if strings.Contains(c.GetHeader("Content-Type"), "multipart/form-data") {
@@ -102,14 +105,8 @@ func MiddlewareOperationRecord(saveDB bool) gin.HandlerFunc {
 			}
 		}
 
-		if saveDB {
-			if err := record.Create(); err != nil {
-				log.ZapLog().Error("create operation record error:", zap.Error(err))
-			}
-		} else {
-			msg, _ := json.Marshal(record)
-			log.Info("[MiddlewareOperationRecord] " + string(msg))
-		}
+		msg, _ := json.Marshal(record)
+		log.Info("[MiddlewareOperationRecord] " + string(msg))
 	}
 }
 
