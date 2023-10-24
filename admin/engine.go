@@ -2,7 +2,6 @@ package admin
 
 import (
 	"bytes"
-	"errors"
 	"fmt"
 	"github.com/gin-gonic/gin"
 	"github.com/mangk/goAdmin80/core"
@@ -10,9 +9,9 @@ import (
 	"github.com/mangk/goAdmin80/handler/request"
 	"github.com/mangk/goAdmin80/handler/response"
 	"github.com/mangk/goAdmin80/log"
+	rm "github.com/mangk/goAdmin80/middleware/request"
 	"github.com/mangk/goAdmin80/model"
 	"html/template"
-	"io"
 	"math"
 	"strings"
 	"sync"
@@ -152,15 +151,15 @@ func (e *Engine) Register() {
 		} else {
 			switch st[0] {
 			case "p":
-				f = []gin.HandlerFunc{requestVerifyMiddleware(), e.page}
+				f = []gin.HandlerFunc{rm.MiddlewareRequestVerify(), e.page}
 			case "r":
-				f = []gin.HandlerFunc{requestVerifyMiddleware(), e.getById}
+				f = []gin.HandlerFunc{rm.MiddlewareRequestVerify(), e.getById}
 			case "c":
-				f = []gin.HandlerFunc{requestVerifyMiddleware(), e.create}
+				f = []gin.HandlerFunc{rm.MiddlewareRequestVerify(), e.create}
 			case "u":
-				f = []gin.HandlerFunc{requestVerifyMiddleware(), e.updateById}
+				f = []gin.HandlerFunc{rm.MiddlewareRequestVerify(), e.updateById}
 			case "d":
-				f = []gin.HandlerFunc{requestVerifyMiddleware(), e.delete}
+				f = []gin.HandlerFunc{rm.MiddlewareRequestVerify(), e.delete}
 			}
 		}
 		e.register(st[0], st[1], f...)
@@ -258,7 +257,7 @@ func (e *Engine) tmp(ctx *gin.Context) {
 }
 
 func (e *Engine) page(ctx *gin.Context) {
-	req := ctx.MustGet(_rk_).(request.CRUDRequest)
+	req := ctx.MustGet(rm.RK).(request.CRUDRequest)
 
 	var count int64
 	var data []map[string]interface{}
@@ -392,7 +391,7 @@ func (e *Engine) page(ctx *gin.Context) {
 }
 
 func (e *Engine) getById(ctx *gin.Context) {
-	req := ctx.MustGet(_rk_).(request.CRUDRequest)
+	req := ctx.MustGet(rm.RK).(request.CRUDRequest)
 
 	var data map[string]interface{}
 	var err error
@@ -424,7 +423,7 @@ func (e *Engine) getById(ctx *gin.Context) {
 }
 
 func (e *Engine) updateById(ctx *gin.Context) {
-	req := ctx.MustGet(_rk_).(request.CRUDRequest)
+	req := ctx.MustGet(rm.RK).(request.CRUDRequest)
 
 	var id interface{}
 	var err error
@@ -472,7 +471,7 @@ func (e *Engine) updateById(ctx *gin.Context) {
 }
 
 func (e *Engine) create(ctx *gin.Context) {
-	req := ctx.MustGet(_rk_).(request.CRUDRequest)
+	req := ctx.MustGet(rm.RK).(request.CRUDRequest)
 
 	var id interface{}
 	var err error
@@ -512,7 +511,7 @@ func (e *Engine) create(ctx *gin.Context) {
 }
 
 func (e *Engine) delete(ctx *gin.Context) {
-	req := ctx.MustGet(_rk_).(request.CRUDRequest)
+	req := ctx.MustGet(rm.RK).(request.CRUDRequest)
 
 	var id interface{}
 	var err error
@@ -630,41 +629,4 @@ func formatElement(field Field) (html interface{}) {
 	}
 	return
 
-}
-
-const _rk_ = "_goAdmin80Request_"
-
-func requestVerifyMiddleware() gin.HandlerFunc {
-	return func(ctx *gin.Context) {
-		req := request.CRUDRequest{}
-		if err := ctx.ShouldBindJSON(&req); err != nil {
-			if !errors.Is(err, io.EOF) {
-				response.FailWithDetailed(err.Error(), "请求出错", ctx)
-				ctx.Abort()
-				return
-			}
-		}
-		if req.Page == 0 {
-			req.Page = 1
-		}
-		if req.PageSize == 0 {
-			req.PageSize = 20
-		}
-		if req.PageSize > 1000 {
-			req.PageSize = 1000
-		}
-		if req.Id != "" {
-			for _, v := range strings.Split(req.Id, ",") {
-				if strings.Index(v, ",") != -1 {
-					response.FailWithMessage("读取数据 ID 错误", ctx)
-				}
-				if v != "" {
-					req.Ids = append(req.Ids, v)
-				}
-			}
-		}
-		// TODO 增加 Verify
-		ctx.Set(_rk_, req)
-		ctx.Next()
-	}
 }
