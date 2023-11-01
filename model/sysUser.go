@@ -2,12 +2,13 @@ package model
 
 import (
 	"errors"
+	"time"
+
 	"github.com/mangk/goAdmin80/db"
 	"github.com/mangk/goAdmin80/handler/request"
 	"github.com/mangk/goAdmin80/utils"
-	"github.com/satori/go.uuid"
+	uuid "github.com/satori/go.uuid"
 	"gorm.io/gorm"
-	"time"
 )
 
 type SysUser struct {
@@ -53,7 +54,7 @@ func (s SysUser) GetUserInfoList(info request.PageInfo) (list interface{}, total
 	if err != nil {
 		return
 	}
-	err = cdb.Limit(limit).Offset(offset).Preload("Authorities").Preload("Authority").Find(&userList).Error
+	err = cdb.Where("id > ?", 0).Limit(limit).Offset(offset).Preload("Authorities").Preload("Authority").Find(&userList).Error
 	return userList, total, err
 }
 
