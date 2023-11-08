@@ -1,11 +1,13 @@
 package core
 
 import (
+	"flag"
 	"fmt"
+	"log"
+
 	"github.com/fvbock/endless"
 	"github.com/gin-gonic/gin"
 	"github.com/mangk/goAdmin80/config"
-	"log"
 )
 
 const (
@@ -24,9 +26,12 @@ type GoAdmin80 struct {
 	initialized, moduleDB, moduleCache, moduleLog, moduleAdmin, moduleFront bool
 }
 
-func New(configPath string) *GoAdmin80 {
+func New() *GoAdmin80 {
+	cfgPath := flag.String("c", "./config.yaml", "config file path")
+	flag.Parse()
+
 	if _g80 == nil {
-		config.Init(configPath)
+		config.Init(*cfgPath)
 
 		switch config.ServerCfg().Env {
 		case "debug", "test":
