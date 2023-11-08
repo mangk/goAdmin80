@@ -1,13 +1,8 @@
 <template>
   <div>
-    <el-upload
-        :action="`${path}/fileUploadAndDownload/upload?driver=${props.oss}`"
-        :headers="{ 'Authorization': 'Bearer '+userStore.token }"
-        :show-file-list="false"
-        :on-success="handleImageSuccess"
-        :before-upload="beforeImageUpload"
-        :multiple="false"
-    >
+    <el-upload :action="`${path}/fileUploadAndDownload/upload?driver=${props.oss}`"
+      :headers="{ 'Authorization': 'Bearer ' + userStore.token }" :show-file-list="false" :on-success="handleImageSuccess"
+      :before-upload="beforeImageUpload" :multiple="false">
       <el-button type="primary">上传至{{ props.btnName }}</el-button>
     </el-upload>
   </div>
@@ -15,9 +10,9 @@
 
 <script setup>
 import ImageCompress from '@/utils/image'
-import {ref} from 'vue'
-import {ElMessage} from 'element-plus'
-import {useUserStore} from '@/pinia/modules/user'
+import { ref } from 'vue'
+import { ElMessage } from 'element-plus'
+import { useUserStore } from '@/pinia/modules/user'
 
 const emit = defineEmits(['on-success'])
 const props = defineProps({
@@ -35,7 +30,7 @@ const props = defineProps({
   },
   btnName: {
     type: String,
-    default: "上传"
+    default: "服务端"
   },
   oss: {
     type: String,
@@ -43,7 +38,7 @@ const props = defineProps({
   }
 })
 
-const path = ref('/_sys')
+const path = ref(window.g.HOST + '/_sys')
 
 const userStore = useUserStore()
 
@@ -66,7 +61,7 @@ const beforeImageUpload = (file) => {
 }
 
 const handleImageSuccess = (res) => {
-  const {data} = res
+  const { data } = res
   emit('on-success')
 }
 

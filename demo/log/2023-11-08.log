@@ -1,0 +1,6 @@
+{"_level":"info","_time":"2023-11-08 11:45:33.30938","_caller":"cors/cors.go:11","msg":"use middleware cors"}
+{"_level":"info","_time":"2023-11-08 11:45:33.31012","msg":"","_sys":{"log":"2023/11/08 11:45:33 8962 127.0.0.1:8888\n"}}
+{"_level":"error","_time":"2023-11-08 11:45:39.90842","_caller":"gin@v1.9.1/context.go:174","msg":"登陆失败! 用户名不存在或者密码错误!","error":"密码错误"}
+{"_level":"error","_time":"2023-11-08 11:45:47.72329","_caller":"gin@v1.9.1/context.go:174","msg":"登陆失败! 用户名不存在或者密码错误!","error":"密码错误"}
+{"_level":"info","_time":"2023-11-08 11:50:28.17246","_caller":"cors/cors.go:11","msg":"use middleware cors"}
+{"_level":"info","_time":"2023-11-08 11:50:28.17323","msg":"","_sys":{"log":"2023/11/08 11:50:28 9874 127.0.0.1:8888\n"}}
