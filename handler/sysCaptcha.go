@@ -31,7 +31,7 @@ func Captcha(ctx *gin.Context) {
 	}
 	driver := base64Captcha.NewDriverDigit(cfg.ImgHeight, cfg.ImgWidth, cfg.KeyLong, 0.7, 80)
 	cp := base64Captcha.NewCaptcha(driver, store.UseWithCtx(ctx))
-	id, b64s, err := cp.Generate()
+	id, b64s, _, err := cp.Generate()
 	if err != nil {
 		log.ZapLog().Error("验证码获取失败!", zap.Error(err))
 		response.FailWithMessage("验证码获取失败", ctx)
