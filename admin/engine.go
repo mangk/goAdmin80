@@ -551,7 +551,7 @@ func (e *Engine) selectColumns() string {
 			selectColumns = append(selectColumns, field.Column)
 		}
 	}
-	return strings.Join(selectColumns, ",")
+	return "`" + strings.Join(selectColumns, "`,`") + "`"
 }
 
 func (e *Engine) queryById(id string) (map[string]interface{}, error) {

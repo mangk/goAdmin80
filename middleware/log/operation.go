@@ -24,7 +24,9 @@ func init() {
 	}
 }
 
-func MiddlewareOperationRecord() gin.HandlerFunc {
+// 记录日志的中间件
+// flag 1:记录请求日志;2:记录响应日志;3:记录请求和响应;
+func MiddlewareOperationRecord(flag int) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		var body []byte
 		if c.Request.Method != http.MethodGet {
@@ -64,7 +66,9 @@ func MiddlewareOperationRecord() gin.HandlerFunc {
 			Method: c.Request.Method,
 			Path:   c.Request.URL.Path,
 			Agent:  c.Request.UserAgent(),
-			Body:   string(body),
+		}
+		if flag == 1 || flag == 3 {
+			record.Body = string(body)
 		}
 
 		// 上传文件时候 中间件日志进行裁断操作
@@ -91,7 +95,9 @@ func MiddlewareOperationRecord() gin.HandlerFunc {
 		record.ErrorMessage = c.Errors.ByType(gin.ErrorTypePrivate).String()
 		record.Status = c.Writer.Status()
 		record.Latency = latency
-		record.Resp = writer.body.String()
+		if flag == 2 || flag == 3 {
+			record.Resp = writer.body.String()
+		}
 
 		if strings.Contains(c.Writer.Header().Get("Pragma"), "public") ||
 			strings.Contains(c.Writer.Header().Get("Expires"), "0") ||
