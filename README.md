@@ -1,8 +1,12 @@
 # goAdmin80
 
-## 简介
+## Demo 站点
 
-## Quick Start
+https://goadmin80.solobit.cn
+
+## Demo 文件
+
+https://github.com/mangk/goAdmin80/blob/main/demo/main.go
 
 # 鸣谢
 
