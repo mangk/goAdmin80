@@ -1,11 +1,5 @@
 # goAdmin80
 
-## Demo 站点
-
-https://goadmin80.solobit.cn
-账号：example
-密码：123456
-
 ## Demo 文件
 
 https://github.com/mangk/goAdmin80/blob/main/demo/main.go
