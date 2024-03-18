@@ -95,6 +95,10 @@ func (t LocalTime) Value() (driver.Value, error) {
 	return tlt, nil
 }
 
+func (t LocalTime) Format(layout string) string {
+	return time.Time(t).Format(layout)
+}
+
 func (t *LocalTime) Scan(v interface{}) error {
 	if value, ok := v.(time.Time); ok {
 		*t = LocalTime(value)
