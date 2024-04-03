@@ -63,5 +63,4 @@ func DB(name ...string) *gorm.DB {
 	}
 
 	panic(fmt.Sprintf("[%s]数据库不存在", name))
-	return nil
 }

@@ -61,8 +61,6 @@ func Redis(driver ...string) *redis.Client {
 		return cache
 	}
 	panic(fmt.Sprintf("[%s]redis不存在", driver))
-
-	return nil
 }
 
 func Cache() local_cache.Cache {

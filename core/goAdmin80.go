@@ -53,7 +53,7 @@ func New() *GoAdmin80 {
 	// 等待模块初始化队列内都完成
 	if modulesInitChannel != nil {
 		close(modulesInitChannel)
-		for true {
+		for {
 			v, ok := <-modulesInitChannel
 			if !ok {
 				break

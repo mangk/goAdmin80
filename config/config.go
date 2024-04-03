@@ -32,10 +32,10 @@ func Init(cfgFilePath ...string) {
 	v.SetConfigFile(configPath)
 	v.SetConfigType("yaml")
 	if err := v.ReadInConfig(); err != nil {
-		panic(fmt.Errorf("读取 %s 配置文件错误:	\n", configPath, err))
+		panic(fmt.Errorf("读取 %s 配置文件错误:	%s", configPath, err))
 	}
 	if err := v.Unmarshal(_config); err != nil {
-		panic(fmt.Errorf("解析 %s.yaml 配置文件错误:	\n", configPath, err))
+		panic(fmt.Errorf("解析 %s.yaml 配置文件错误: %s", configPath, err))
 	}
 
 	_viper = v
