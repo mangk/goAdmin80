@@ -62,7 +62,7 @@ func UserLogin(ctx *gin.Context) {
 			response.FailWithMessage("用户被禁止登录", ctx)
 			return
 		}
-		tokenNext(ctx, *user)
+		TokenNext(ctx, *user)
 		return
 	}
 	// 验证码次数+1
@@ -348,7 +348,7 @@ func UserResetPassword(ctx *gin.Context) {
 	response.OkWithMessage("重置成功", ctx)
 }
 
-func tokenNext(ctx *gin.Context, user model.SysUser) {
+func TokenNext(ctx *gin.Context, user model.SysUser) {
 	j := &model.Jwt{SigningKey: []byte(config.JwtCfg().SigningKey)} // 唯一签名
 	ids := []int{}
 	for _, authority := range user.Authorities {
