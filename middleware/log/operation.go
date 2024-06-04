@@ -59,12 +59,14 @@ func MiddlewareOperationRecord(flag int) gin.HandlerFunc {
 			Latency      time.Duration `json:"latency" form:"latency" gorm:"column:latency;comment:延迟" swaggertype:"string"` // 延迟
 			Agent        string        `json:"agent" form:"agent" gorm:"column:agent;comment:代理"`                            // 代理
 			ErrorMessage string        `json:"error_message" form:"error_message" gorm:"column:error_message;comment:错误信息"`  // 错误信息
+			Header       http.Header   `json:"header" form:"header" gorm:"column:header;serializer:json;"`                   // 请求header
 			Body         string        `json:"body" form:"body" gorm:"type:text;column:body;comment:请求Body"`                 // 请求Body
 			Resp         string        `json:"resp" form:"resp" gorm:"type:text;column:resp;comment:响应Body"`                 // 响应Body
 		}{
 			Ip:     c.ClientIP(),
 			Method: c.Request.Method,
 			Path:   c.Request.URL.Path,
+			Header: c.Request.Header,
 			Agent:  c.Request.UserAgent(),
 		}
 		if flag == 1 || flag == 3 {
