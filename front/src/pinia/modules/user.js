@@ -65,7 +65,17 @@ export const useUserStore = defineStore('user', () => {
                 asyncRouters.forEach(asyncRouter => {
                     router.addRoute(asyncRouter)
                 })
-                await router.replace({name: userInfo.value.authority.defaultRouter})
+
+                var defaultRouter = userInfo.value.authority.defaultRouter
+                var redirect = document.location.hash
+                if (redirect.indexOf("redirect") != -1) {
+                    var r = redirect.split("/")
+                    if (r.length>0) {
+                        defaultRouter = r.pop()
+                    }
+                }
+                
+                await router.replace({name: defaultRouter})
                 loadingInstance.value.close()
 
                 const isWin = ref(/windows/i.test(navigator.userAgent))

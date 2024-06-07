@@ -6,7 +6,7 @@ import Nprogress from 'nprogress'
 
 const whiteList = ['Login', 'Init']
 
-const getRouter = async(userStore) => {
+const getRouter = async (userStore) => {
   const routerStore = useRouterStore()
   await routerStore.SetAsyncRouter()
   await userStore.GetUserInfo()
@@ -35,7 +35,7 @@ async function handleKeepAlive(to) {
   }
 }
 
-router.beforeEach(async(to, from) => {
+router.beforeEach(async (to, from) => {
   const routerStore = useRouterStore()
   Nprogress.start()
   const userStore = useUserStore()
@@ -51,7 +51,17 @@ router.beforeEach(async(to, from) => {
       }
       // token 可以解析但是却是不存在的用户 id 或角色 id 会导致无限调用
       if (userStore.userInfo?.authority?.defaultRouter != null) {
-        return { name: userStore.userInfo.authority.defaultRouter }
+
+        var defaultRouter = userStore.userInfo.authority.defaultRouter
+        var redirect = document.location.hash
+        if (redirect.indexOf("redirect") != -1) {
+          var r = redirect.split("/")
+          if (r.length > 0) {
+            defaultRouter = r.pop()
+          }
+        }
+
+        return { name: defaultRouter }
       } else {
         // 强制退出账号
         userStore.ClearStorage()
