@@ -89,6 +89,10 @@ func (g *GoAdmin80) ListenAndServer() {
 	log.Printf("Project EXIT!")
 }
 
+func (g *GoAdmin80) Run() {
+	g.httpClient.Run(fmt.Sprintf(":%d", config.ServerCfg().Port))
+}
+
 // ---------------------------------------------------------------------------------------------------------------------
 // 用来储存等待初始化的系统模块
 var modulesInitChannel chan Module
