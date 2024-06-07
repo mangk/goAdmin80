@@ -1,6 +1,8 @@
 package handler
 
 import (
+	"time"
+
 	"github.com/gin-gonic/gin"
 	"github.com/go-redis/redis/v8"
 	"github.com/mangk/goAdmin80/cache"
@@ -11,7 +13,6 @@ import (
 	"github.com/mangk/goAdmin80/model"
 	"github.com/mangk/goAdmin80/utils"
 	"go.uber.org/zap"
-	"time"
 )
 
 func UserLogin(ctx *gin.Context) {
@@ -368,7 +369,7 @@ func TokenNext(ctx *gin.Context, user model.SysUser) {
 		response.FailWithMessage("获取token失败", ctx)
 		return
 	}
-	if !config.ServerCfg().UseMultipoint {
+	if config.ServerCfg().UseMultipoint {
 		response.OkWithDetailed(map[string]interface{}{
 			"user":      user,
 			"token":     token,
