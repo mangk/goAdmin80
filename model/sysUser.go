@@ -2,8 +2,9 @@ package model
 
 import (
 	"errors"
-	"github.com/mangk/goAdmin80/config"
 	"time"
+
+	"github.com/mangk/goAdmin80/config"
 
 	"github.com/mangk/goAdmin80/db"
 	"github.com/mangk/goAdmin80/handler/request"
@@ -22,7 +23,7 @@ type SysUser struct {
 	HeaderImg   string         `json:"headerImg" gorm:"comment:用户头像"`                   // 用户头像
 	BaseColor   string         `json:"baseColor" gorm:"default:#fff;comment:基础颜色"`      // 基础颜色
 	ActiveColor string         `json:"activeColor" gorm:"default:#1890ff;comment:活跃颜色"` // 活跃颜色
-	AuthorityId int            `json:"authorityId" gorm:"default:888;comment:用户角色ID"`   // 用户角色ID
+	AuthorityId int            `json:"authorityId" gorm:"default:0;comment:用户角色ID"`     // 用户角色ID
 	Authority   SysAuthority   `json:"authority" gorm:"foreignKey:AuthorityId;references:AuthorityId;comment:用户角色"`
 	Authorities []SysAuthority `json:"authorities" gorm:"many2many:sys_user_authority;"`
 	Phone       string         `json:"phone"  gorm:"comment:用户手机号"`                     // 用户手机号

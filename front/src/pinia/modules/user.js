@@ -1,10 +1,10 @@
-import {getUserInfo, login, setSelfInfo} from '@/api/user'
-import {jsonInBlacklist} from '@/api/jwt'
+import { getUserInfo, login, setSelfInfo } from '@/api/user'
+import { jsonInBlacklist } from '@/api/jwt'
 import router from '@/router/index'
-import {ElLoading, ElMessage} from 'element-plus'
-import {defineStore} from 'pinia'
-import {computed, ref, watch} from 'vue'
-import {useRouterStore} from './router'
+import { ElLoading, ElMessage } from 'element-plus'
+import { defineStore } from 'pinia'
+import { computed, ref, watch } from 'vue'
+import { useRouterStore } from './router'
 
 export const useUserStore = defineStore('user', () => {
     const loadingInstance = ref(null)
@@ -31,7 +31,7 @@ export const useUserStore = defineStore('user', () => {
         token.value = ''
         window.localStorage.removeItem('token')
         localStorage.clear()
-        router.push({name: 'Init', replace: true})
+        router.push({ name: 'Init', replace: true })
     }
 
     const ResetUserInfo = (value = {}) => {
@@ -70,12 +70,15 @@ export const useUserStore = defineStore('user', () => {
                 var redirect = document.location.hash
                 if (redirect.indexOf("redirect") != -1) {
                     var r = redirect.split("/")
-                    if (r.length>0) {
-                        defaultRouter = r.pop()
+                    if (r.length > 0) {
+                        var u = r.pop()
+                        if (u != "") {
+                            defaultRouter = u
+                        }
                     }
                 }
-                
-                await router.replace({name: defaultRouter})
+
+                await router.replace({ name: defaultRouter })
                 loadingInstance.value.close()
 
                 const isWin = ref(/windows/i.test(navigator.userAgent))
@@ -98,7 +101,7 @@ export const useUserStore = defineStore('user', () => {
             token.value = ''
             sessionStorage.clear()
             localStorage.clear()
-            router.push({name: 'Login', replace: true})
+            router.push({ name: 'Login', replace: true })
             window.location.reload()
         }
     }
@@ -110,7 +113,7 @@ export const useUserStore = defineStore('user', () => {
     }
     /* 设置侧边栏模式*/
     const changeSideMode = async (data) => {
-        const res = await setSelfInfo({sideMode: data})
+        const res = await setSelfInfo({ sideMode: data })
         if (res.code === 0) {
             userInfo.value.sideMode = data
             ElMessage({
