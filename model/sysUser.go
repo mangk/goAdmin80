@@ -2,6 +2,7 @@ package model
 
 import (
 	"errors"
+	"github.com/mangk/goAdmin80/config"
 	"time"
 
 	"github.com/mangk/goAdmin80/db"
@@ -31,6 +32,18 @@ type SysUser struct {
 
 func (SysUser) TableName() string {
 	return "sys_users"
+}
+
+func (s *SysUser) AfterUpdate(tx *gorm.DB) (err error) {
+	j := NewJWT(config.JwtCfg().SigningKey)
+
+	RedisJwtToken, _ := j.GetRedisJWT(s.Username)
+	if RedisJwtToken != "" {
+		j.JsonInBlacklist(SysJwtBlacklist{
+			Jwt: RedisJwtToken,
+		})
+	}
+	return nil
 }
 
 func (s SysUser) Login(username, password string) (user *SysUser, err error) {
