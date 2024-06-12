@@ -44,9 +44,9 @@ func (s SysMenu) systemMenu() (treeMpa []SysMenu) {
 			ParentId:      0,
 			Path:          "defaultDashboard",
 			Name:          "defaultDashboard",
-			Hidden:        false,
+			Hidden:        true,
 			Component:     "view/dashboard/index.vue",
-			Sort:          0,
+			Sort:          1,
 			Meta:          Meta{CloseTab: false, Title: "欢迎", Icon: "sunrise"},
 			SysAuthoritys: nil,
 		}, {
