@@ -104,6 +104,7 @@ func UserGetInfo(ctx *gin.Context) {
 		response.FailWithMessage("获取失败", ctx)
 		return
 	}
+	ReqUser.Authority.DefaultRouter = "defaultDashboard"
 	response.OkWithDetailed(ReqUser, "获取成功", ctx)
 }
 

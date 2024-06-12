@@ -2,6 +2,7 @@ package model
 
 import (
 	"errors"
+
 	"github.com/mangk/goAdmin80/db"
 	"github.com/mangk/goAdmin80/log"
 	"gorm.io/gorm"
@@ -41,12 +42,12 @@ func (s SysMenu) systemMenu() (treeMpa []SysMenu) {
 		{
 			MODEL:         MODEL{ID: -1},
 			ParentId:      0,
-			Path:          "dashboard",
-			Name:          "dashboard",
+			Path:          "defaultDashboard",
+			Name:          "defaultDashboard",
 			Hidden:        false,
 			Component:     "view/dashboard/index.vue",
-			Sort:          1,
-			Meta:          Meta{CloseTab: true, Title: "仪表盘", Icon: "odometer"},
+			Sort:          0,
+			Meta:          Meta{CloseTab: false, Title: "欢迎", Icon: "sunrise"},
 			SysAuthoritys: nil,
 		}, {
 			MODEL:         MODEL{ID: -2},

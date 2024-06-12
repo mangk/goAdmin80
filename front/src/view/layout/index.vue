@@ -100,7 +100,7 @@
             </transition>
           </div>
         </router-view>
-        <BottomInfo/>
+        <!-- <BottomInfo/> -->
         <setting/>
         <CommandMenu ref="command"/>
       </el-main>
