@@ -73,7 +73,11 @@ export const useUserStore = defineStore('user', () => {
                     if (r.length > 0) {
                         var u = r.pop()
                         if (u != "") {
-                            defaultRouter = u
+                            for (const key in routerStore.routeMap) {
+                                if (key == u) {
+                                    defaultRouter = u
+                                }
+                            }
                         }
                     }
                 }

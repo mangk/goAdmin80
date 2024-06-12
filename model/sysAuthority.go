@@ -2,11 +2,12 @@ package model
 
 import (
 	"errors"
+	"strconv"
+	"time"
+
 	"github.com/mangk/goAdmin80/db"
 	"github.com/mangk/goAdmin80/handler/request"
 	"gorm.io/gorm"
-	"strconv"
-	"time"
 )
 
 type SysAuthority struct {
@@ -20,7 +21,7 @@ type SysAuthority struct {
 	Children        []SysAuthority  `json:"children" gorm:"-"`
 	SysMenus        []SysMenu       `json:"menus" gorm:"many2many:sys_authority_menus;"`
 	Users           []SysUser       `json:"-" gorm:"many2many:sys_user_authority;"`
-	DefaultRouter   string          `json:"defaultRouter" gorm:"comment:默认菜单;default:dashboard"` // 默认菜单(默认dashboard)
+	DefaultRouter   string          `json:"defaultRouter" gorm:"comment:默认菜单;default:defaultDashboard"` // 默认菜单(默认defaultDashboard)
 }
 
 func (SysAuthority) TableName() string {

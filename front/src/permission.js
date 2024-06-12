@@ -57,7 +57,14 @@ router.beforeEach(async (to, from) => {
         if (redirect.indexOf("redirect") != -1) {
           var r = redirect.split("/")
           if (r.length > 0) {
-            defaultRouter = r.pop()
+            var u = r.pop()
+            if (u != "") {
+              for (const key in routerStore.routeMap) {
+                if (key == u) {
+                  defaultRouter = u
+                }
+              }
+            }
           }
         }
 
