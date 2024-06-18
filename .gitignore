@@ -28,3 +28,4 @@ uploads/*
 front/node_modules/*
 front/package-lock.json
 front/yarn.lock
+dist.tar
