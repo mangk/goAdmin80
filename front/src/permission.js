@@ -51,24 +51,7 @@ router.beforeEach(async (to, from) => {
       }
       // token 可以解析但是却是不存在的用户 id 或角色 id 会导致无限调用
       if (userStore.userInfo?.authority?.defaultRouter != null) {
-
-        var defaultRouter = userStore.userInfo.authority.defaultRouter
-        var redirect = document.location.hash
-        if (redirect.indexOf("redirect") != -1) {
-          var r = redirect.split("/")
-          if (r.length > 0) {
-            var u = r.pop()
-            if (u != "") {
-              for (const key in routerStore.routeMap) {
-                if (key == u) {
-                  defaultRouter = u
-                }
-              }
-            }
-          }
-        }
-
-        return { name: defaultRouter }
+        return { name: userStore.userInfo.authority.defaultRouter }
       } else {
         // 强制退出账号
         userStore.ClearStorage()
