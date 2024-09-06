@@ -1,0 +1,4 @@
+/*! 
+ Build based on gin-vue-admin 
+ Time : 1725607667000 */
+import{b as o,o as n,d as e,e as s,g as t,w as i,s as r,k as l}from"./80index.827ed1b1.js";import"./80button.4ed993c7.js";import{_ as a}from"./80_plugin-vue_export-helper.1b428a4d.js";const u=""+new URL("notFound-4e921f05.png",import.meta.url).href,d={name:"Error",methods:{logout(){o().LoginOut()},home(){window.location.replace(window.location.origin)}}},c={class:"big"},m={class:"inner"},p=s("img",{src:u},null,-1),g=s("p",null,"页面被神秘力量吸走了",-1),f={class:"inner_btn_box"};const _=a(d,[["render",function(o,a,u,d,_,w){const b=r;return n(),e("div",null,[s("div",c,[s("div",m,[p,g,s("div",f,[t(b,{onClick:a[0]||(a[0]=o=>w.logout())},{default:i((()=>[l("退出登录")])),_:1}),t(b,{onClick:a[1]||(a[1]=o=>w.home())},{default:i((()=>[l("返回首页")])),_:1})])])])])}]]);export{_ as default};

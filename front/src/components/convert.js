@@ -1,15 +1,15 @@
-import {loadModule} from 'vue3-sfc-loader';
+import { loadModule } from 'vue3-sfc-loader';
 import * as Vue from 'vue'
-import {defineAsyncComponent, markRaw} from 'vue'
-import {useUserStore} from '@/pinia/modules/user'
+import { defineAsyncComponent, markRaw } from 'vue'
+import { useUserStore } from '@/pinia/modules/user'
 
 const myConvert = (url, name = "myConvert") => {
     const options = {
-        moduleCache: {vue: Vue},
+        moduleCache: { vue: Vue },
         getFile() {
             const userStore = useUserStore()
             return fetch(url, {
-                method:'GET',
+                method: 'GET',
                 headers: {
                     // 'Content-Type': 'application/json',
                     'Authorization': "Bearer " + userStore.token,
@@ -30,4 +30,4 @@ const myConvert = (url, name = "myConvert") => {
     return markRaw(component)
 }
 
-export {myConvert}
+export { myConvert }

@@ -4,9 +4,10 @@ import config from './config'
 import * as ElIconModules from '@element-plus/icons-vue'
 import http from '@/utils/requestForConvert'
 import axios from 'axios'
-import {dayjs} from "element-plus";
+import { dayjs } from "element-plus";
 import * as xlsx from 'xlsx'
 import * as echarts from 'echarts'
+import { myConvert } from '../components/convert';
 
 // 导入转换图标名称的函数
 
@@ -23,4 +24,5 @@ export const register = (app) => {
     app.config.globalProperties.$echarts = echarts
     app.config.globalProperties.$dayjs = dayjs
     app.config.globalProperties.$xlsx = xlsx
+    app.config.globalProperties.$loadTMPL = myConvert
 }
