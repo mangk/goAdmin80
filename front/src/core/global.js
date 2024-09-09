@@ -25,4 +25,25 @@ export const register = (app) => {
     app.config.globalProperties.$dayjs = dayjs
     app.config.globalProperties.$xlsx = xlsx
     app.config.globalProperties.$loadTMPL = myConvert
+    app.config.globalProperties.$loadJS = (url, callback) => {
+        // 检查是否已经加载过该脚本
+        if (document.querySelector(`script[src="${url}"]`)) {
+            callback();
+            return;
+        }
+
+        const script = document.createElement('script');
+        script.type = 'text/javascript';
+        script.src = url;
+
+        // 当脚本加载完成后执行回调
+        script.onload = () => {
+            if (typeof callback === 'function') {
+                callback();
+            }
+        };
+
+        // 将脚本插入到页面中
+        document.head.appendChild(script);
+    }
 }
